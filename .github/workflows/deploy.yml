@@ -1,0 +1,30 @@
+name: Gerar e publicar dashboard
+
+on:
+  push:
+    paths:
+      - 'orders_database.csv'
+      - 'dashboard_template.html'
+      - 'contacts.json'
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repositorio
+        uses: actions/checkout@v4
+      - name: Instalar Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Instalar dependencias
+        run: pip install pandas
+      - name: Gerar dashboard HTML
+        run: python generate_dashboard.py
+      - name: Publicar no GitHub Pages
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./
+          include_files: index.html
