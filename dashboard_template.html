@@ -431,12 +431,12 @@ function buildAnalysis(cl){
   if(!parados.length) return '<div style="padding:12px;font-size:13px;color:var(--subtle)">Nenhum produto parado nos ultimos 2 meses. \u2713</div>';
   const dot=g=>'<span class="anal-dot" style="background:'+(g>=6?'#E24B4A':'#EF9F27')+'"></span>';
   const gp=g=>'<span class="gap-pill '+(g>=6?'gap-r':'gap-a')+'">'+(g>=18?'+18m':g+'m')+'</span>';
-  let h='<table><thead><tr><th>Produto</th><th style="text-align:center">Qtd med.</th><th style="text-align:right">Val. med.</th><th style="text-align:center">Parado ha</th><th style="text-align:center">Freq.</th></tr></thead><tbody>';
-  h+=parados.map(([p,v])=>'<tr><td>'+dot(v.g)+p+'</td><td style="text-align:center;font-family:var(--mono)">'+v.q+'</td><td style="text-align:right;font-family:var(--mono)">'+fmt(v.v)+'</td><td style="text-align:center">'+gp(v.g)+'</td><td style="text-align:center;color:var(--subtle)">'+v.f+'x</td></tr>').join('');
+  let h='<table><thead><tr><th>Produto</th><th style="text-align:center">Qtd med.</th><th style="text-align:center">Parado ha</th><th style="text-align:center">Freq.</th></tr></thead><tbody>';
+  h+=parados.map(([p,v])=>'<tr><td>'+dot(v.g)+p+'</td><td style="text-align:center;font-family:var(--mono)">'+v.q+'</td><td style="text-align:center">'+gp(v.g)+'</td><td style="text-align:center;color:var(--subtle)">'+v.f+'x</td></tr>').join('');
   h+='</tbody></table>';
   if(ativos.length){
     h+='<div style="font-size:10px;text-transform:uppercase;letter-spacing:.05em;color:var(--subtle);padding:10px 0 4px;font-weight:600">Ativos</div>';
-    h+='<table><tbody>'+ativos.map(([p,v])=>'<tr><td><span class="anal-dot" style="background:#639922"></span>'+p+'</td><td style="text-align:right;font-family:var(--mono)">'+fmt(v.v)+'</td><td style="text-align:center;color:var(--subtle)">'+v.f+'x</td></tr>').join('')+'</tbody></table>';
+    h+='<table><tbody>'+ativos.map(([p,v])=>'<tr><td><span class="anal-dot" style="background:#639922"></span>'+p+'</td><td style="text-align:right;color:var(--subtle)">'+v.f+'x</td></tr>').join('')+'</tbody></table>';
   }
   return h;
 }
