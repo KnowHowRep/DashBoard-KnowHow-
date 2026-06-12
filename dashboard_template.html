@@ -337,6 +337,11 @@ function calcComm(orders){
   },0);
 }
 
+// ── HTML attribute escaper ──────────────────────────────────────────────
+function esc(s){
+  return String(s).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
 // ── Product formatter ───────────────────────────────────────────────────
 function fmtProd(pr){
   const code = pr.c ? '<span class="prod-code">'+pr.c+'</span>' : '';
@@ -563,9 +568,9 @@ function render(){
           orcTab+cotaTab+
         '</div>'+
         '<div class="tab-pane open" id="mes-'+id+'"><table><thead><tr><th>Data</th><th>Produtos</th><th style="text-align:right">Valor</th></tr></thead><tbody>'+pedRows+'</tbody></table></div>'+
-        '<div class="tab-pane" id="hist-'+id+'"></div>'+
-        '<div class="tab-pane" id="anal-'+id+'"></div>'+
-        '<div class="tab-pane" id="ct-'+id+'"></div>'+
+        '<div class="tab-pane" id="hist-'+id+'" data-cl="'+esc(cl)+'"></div>'+
+        '<div class="tab-pane" id="anal-'+id+'" data-cl="'+esc(cl)+'"></div>'+
+        '<div class="tab-pane" id="ct-'+id+'" data-cl="'+esc(cl)+'"></div>'+
         '<div class="tab-pane" id="orc-'+id+'"><table><thead><tr><th>Data</th><th>Produtos</th><th style="text-align:right">Valor</th></tr></thead><tbody>'+orcRows+'</tbody></table></div>'+
         '<div class="tab-pane" id="cota-'+id+'"><table><thead><tr><th>Data</th><th>Produtos / Preco</th><th style="text-align:right">Valor</th></tr></thead><tbody>'+cotaRows+'</tbody></table></div>'+
       '</div>'+
