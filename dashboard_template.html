@@ -113,8 +113,9 @@ tr:last-child td{border-bottom:none}
 .hacc-mo-body{display:none;padding-bottom:4px}
 
 /* CRIT BADGES */
-.crit-r{color:var(--err);font-weight:700;font-size:14px}
-.crit-a{color:var(--warn);font-weight:700;font-size:13px}
+.crit-badge{font-size:10px;font-weight:600;padding:2px 8px;border-radius:20px;white-space:nowrap;display:inline-flex;align-items:center;gap:3px}
+.crit-badge.crit-r{background:var(--err-bg);color:var(--err)}
+.crit-badge.crit-a{background:var(--warn-bg);color:var(--warn)}
 
 /* CONTACT */
 .ct-badge{font-size:10px;font-weight:500;padding:2px 7px;border-radius:20px}
@@ -125,6 +126,15 @@ tr:last-child td{border-bottom:none}
 .ct-btn{padding:5px 12px;border-radius:20px;border:1px solid var(--border);background:var(--surface);cursor:pointer;font:11px var(--font);color:var(--muted);transition:.12s}
 .ct-btn:hover{border-color:#888}
 .ct-btn.done{background:var(--ok-bg);border-color:var(--ok);color:var(--ok);font-weight:500}
+
+/* DEBT / DIVIDA */
+.dv-badge{font-size:10px;font-weight:700;padding:2px 8px;border-radius:20px;background:var(--err-bg);color:var(--err);text-transform:uppercase;letter-spacing:.03em}
+.dv-badge.dv-name{font-size:11px;margin-left:6px;vertical-align:middle}
+.dv-btn{padding:5px 12px;border-radius:20px;border:1px solid var(--border);background:var(--surface);cursor:pointer;font:11px var(--font);color:var(--muted);transition:.12s}
+.dv-btn:hover{border-color:#888}
+.dv-btn.done{background:var(--err-bg);border-color:var(--err);color:var(--err);font-weight:600}
+.card.has-debt{border:1px solid var(--err);box-shadow:0 0 0 1px var(--err) inset}
+.card.has-debt .card-head{background:var(--err-bg)}
 
 /* MODAL */
 .modal-bg{display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:300;align-items:center;justify-content:center}
@@ -167,6 +177,7 @@ tr:last-child td{border-bottom:none}
     <div class="spacer"></div>
     <button class="exp-btn" onclick="exportCSV()">&#8595; Exportar CSV</button>
     <button class="exp-btn" onclick="exportContatos()" title="Salva os registros de contato em um arquivo. Coloque-o na pasta dados para que fiquem disponíveis em todos os dispositivos.">&#8595; Exportar Contatos</button>
+    <button class="exp-btn" onclick="exportDividas()" title="Salva os registros de divida em um arquivo. Coloque-o na pasta dados para que fiquem disponíveis em todos os dispositivos.">&#8595; Exportar Dividas</button>
   </div>
   <div class="nav-row2">
     <span class="nav-lbl">Ano</span>
@@ -188,6 +199,7 @@ tr:last-child td{border-bottom:none}
   <button class="f-btn"    id="f-ped"  onclick="setFilter('ped')">Com pedido</button>
   <button class="f-btn"    id="f-pend" onclick="setFilter('pending')">Sem pedido</button>
   <button class="f-btn"    id="f-orc"  onclick="setFilter('orc')">Com orcamento</button>
+  <button class="f-btn"    id="f-debt" onclick="setFilter('debt')">&#9888; Com divida</button>
 </div>
 
 <!-- KPIs -->
@@ -213,10 +225,27 @@ tr:last-child td{border-bottom:none}
   </div>
 </div>
 
+<!-- DEBT MODAL -->
+<div class="modal-bg" id="dv-modal" onclick="if(event.target===this)closeDv()">
+  <div class="modal">
+    <h3 id="dv-name">Cliente</h3>
+    <div class="msub">&#9888; Divida em aberto</div>
+    <div class="mf"><label><input type="checkbox" id="dv-active" style="width:auto;display:inline-block;margin-right:6px;vertical-align:middle"> Cliente com divida em aberto (pedidos bloqueados)</label></div>
+    <div class="mf"><label>Data</label><input type="date" id="dv-date"></div>
+    <div class="mf"><label>Observacao</label><textarea id="dv-note" rows="3" placeholder="Ex: Boletos vencidos - R$ 5.000,00..."></textarea></div>
+    <div class="mbtns">
+      <button class="mbtn-cancel" onclick="closeDv()">Cancelar</button>
+      <button class="mbtn-clear" onclick="clearDv()">Limpar</button>
+      <button class="mbtn-save" onclick="saveDv()">Salvar</button>
+    </div>
+  </div>
+</div>
+
 <script>
 const DATA = {};
 const ANALYSIS = {};
 const CONTACTS = {};
+const DEBTS = {};
 const MN = {'01':'Jan','02':'Fev','03':'Mar','04':'Abr','05':'Mai','06':'Jun','07':'Jul','08':'Ago','09':'Set','10':'Out','11':'Nov','12':'Dez'};
 const COMP_CLASS = {ibrac:'si', vh:'sv'};
 
@@ -270,7 +299,7 @@ function selectMonth(key){
 // ── Filter ──────────────────────────────────────────────────────────────
 function setFilter(f){
   filter = f;
-  ['all','ped','pend','orc'].forEach(id=>{
+  ['all','ped','pend','orc','debt'].forEach(id=>{
     document.getElementById('f-'+id).className = 'f-btn'+(f===id||(f==='pending'&&id==='pend')?' on':'');
   });
   render();
@@ -313,6 +342,46 @@ function saveCt(){
 }
 function clearCt(){
   if(!ctEdit) return; const d=loadCts(); delete d[ctKey(ctEdit)]; saveCts(d); closeCt(); render();
+}
+
+// ── Debt tracking (divida em aberto) ────────────────────────────────────
+const DV_KEY = 'dash_debts_v1';
+let dvEdit = null;
+function loadDvs(){
+  let local={}; try{local=JSON.parse(localStorage.getItem(DV_KEY)||'{}')}catch(e){}
+  return Object.assign({}, (typeof DEBTS!=='undefined'?DEBTS:{}), local);
+}
+function saveDvs(d){ try{localStorage.setItem(DV_KEY,JSON.stringify(d))}catch(e){} }
+function exportDividas(){
+  const d=loadDvs();
+  const blob=new Blob([JSON.stringify(d,null,2)],{type:'application/json'});
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(blob); a.download='debts.json'; a.click();
+}
+function dvKey(cl){ return comp+'::'+cl; }
+function getDv(cl){ return loadDvs()[dvKey(cl)]||null; }
+function isDebt(cl){ const dv=getDv(cl); return !!(dv&&dv.active); }
+function dvBadgeHtml(cl){
+  return isDebt(cl) ? '<span class="dv-badge dv-name" title="Pedidos bloqueados ate regularizar">&#9888; Divida em aberto</span>' : '';
+}
+function openDv(cl){
+  dvEdit=cl; const dv=getDv(cl);
+  document.getElementById('dv-name').textContent=cl;
+  document.getElementById('dv-active').checked=!!(dv&&dv.active);
+  document.getElementById('dv-date').value=dv?dv.date:new Date().toISOString().slice(0,10);
+  document.getElementById('dv-note').value=dv?dv.note||'':'';
+  document.getElementById('dv-modal').classList.add('open');
+}
+function closeDv(){ document.getElementById('dv-modal').classList.remove('open'); dvEdit=null; }
+function saveDv(){
+  if(!dvEdit) return;
+  const active=document.getElementById('dv-active').checked;
+  const date=document.getElementById('dv-date').value||new Date().toISOString().slice(0,10);
+  const note=document.getElementById('dv-note').value.trim();
+  const d=loadDvs(); d[dvKey(dvEdit)]={active,date,note}; saveDvs(d); closeDv(); render();
+}
+function clearDv(){
+  if(!dvEdit) return; const d=loadDvs(); delete d[dvKey(dvEdit)]; saveDvs(d); closeDv(); render();
 }
 
 // ── Criticality ─────────────────────────────────────────────────────────
@@ -461,6 +530,24 @@ function buildCtPane(cl){
   return h+'</div>';
 }
 
+// ── Debt pane ────────────────────────────────────────────────────────────
+function buildDvPane(cl){
+  const dv=getDv(cl);
+  const dateStr=dv?new Date(dv.date+'T12:00:00').toLocaleDateString('pt-BR'):'';
+  let h='<div style="display:flex;flex-direction:column;gap:10px">';
+  if(dv&&dv.active){
+    h+=dvBadgeHtml(cl)+' <span style="font-size:12px;color:var(--muted)">Sinalizado em <b>'+dateStr+'</b></span>';
+    if(dv.note) h+='<div style="font-size:12px;color:var(--muted);background:var(--bg);padding:8px 10px;border-radius:8px">'+dv.note+'</div>';
+  } else if(dv&&!dv.active){
+    h+='<span style="font-size:12px;color:var(--subtle)">Sem divida em aberto. (Resolvido em '+dateStr+')</span>';
+    if(dv.note) h+='<div style="font-size:12px;color:var(--muted);background:var(--bg);padding:8px 10px;border-radius:8px">'+dv.note+'</div>';
+  } else {
+    h+='<span style="font-size:12px;color:var(--subtle)">Nenhuma divida sinalizada.</span>';
+  }
+  h+='<button class="dv-btn'+(dv&&dv.active?' done':'')+'" onclick="openDv(\''+cl.replace(/'/g,"\\'")+'\')">'+(dv&&dv.active?'\u270e Editar':'\u26a0 Sinalizar divida')+'</button>';
+  return h+'</div>';
+}
+
 // ── Main render ──────────────────────────────────────────────────────────
 function render(){
   const q = document.getElementById('search').value.trim().toLowerCase();
@@ -474,6 +561,7 @@ function render(){
     if(filter==='ped'     && !hasPed) return false;
     if(filter==='pending' && hasPed)  return false;
     if(filter==='orc'     && !hasOrc) return false;
+    if(filter==='debt'    && !isDebt(c)) return false;
     return true;
   });
 
@@ -525,7 +613,11 @@ function render(){
     else if(cotas.length>0){bdg=cotas.length+' cota\u00e7\u00e3o pendente';bcls='b-cota';}
     else{bdg='Sem pedido';bcls='b-none';}
 
-    const critHtml=sc>=4?'<span class="crit-r" title="Critico">!</span>':sc>=2?'<span class="crit-a" title="Atencao">!</span>':'';
+    const critHtml=sc>=4
+      ?'<span class="crit-badge crit-r" title="Produto(s) de peso parado(s) ha 4+ meses sem pedido">&#9888; Cr\u00edtico: retomar contato</span>'
+      :sc>=2
+      ?'<span class="crit-badge crit-a" title="Produto(s) frequente(s) parado(s) ha 2+ meses sem pedido">&#9888; Aten\u00e7\u00e3o: produtos parados</span>'
+      :'';
     const commStr=comp==='ibrac'?' \u00b7 comiss\u00e3o: '+fmt(totalMes*0.10):commMes>0?' \u00b7 comiss\u00e3o: '+fmt(commMes):'';
 
     // Ped rows
@@ -547,13 +639,13 @@ function render(){
     const orcTab=orcs.length||allOrd.some(o=>o.t==='O') ? '<button class="t-btn" data-tab="orc-'+id+'" onclick="switchTab(this,\''+id+'\')">Or\u00e7amentos</button>' : '';
     const cotaTab=cotas.length||allOrd.some(o=>o.t==='C') ? '<button class="t-btn" data-tab="cota-'+id+'" onclick="switchTab(this,\''+id+'\')">Cota\u00e7\u00f5es</button>' : '';
 
-    return '<div class="card" id="card-'+id+'">'+
+    return '<div class="card'+(isDebt(cl)?' has-debt':'')+'" id="card-'+id+'">'+
       '<div class="card-head" onclick="toggleCard(\''+id+'\')">'+
         '<div class="av av-'+(comp==='ibrac'?'i':'v')+'">'+ini(cl)+'</div>'+
         '<div class="cl-info">'+
-          '<div class="cl-name">'+cl+critHtml+'</div>'+
+          '<div class="cl-name">'+cl+dvBadgeHtml(cl)+'</div>'+
           '<div class="cl-sub">'+
-            (totalMes>0?'<span>'+fmt(totalMes)+(commStr)+'</span>':'')+'&nbsp;'+ctBadgeHtml(cl)+
+            (totalMes>0?'<span>'+fmt(totalMes)+(commStr)+'</span>':'')+'&nbsp;'+ctBadgeHtml(cl)+(critHtml?'&nbsp;'+critHtml:'')+
           '</div>'+
         '</div>'+
         '<span class="badge '+bcls+'">'+bdg+'</span>'+
@@ -565,12 +657,14 @@ function render(){
           '<button class="t-btn" data-tab="hist-'+id+'" onclick="switchTab(this,\''+id+'\')">Hist\u00f3rico</button>'+
           '<button class="t-btn" data-tab="anal-'+id+'" onclick="switchTab(this,\''+id+'\')">An\u00e1lise</button>'+
           '<button class="t-btn" data-tab="ct-'+id+'" onclick="switchTab(this,\''+id+'\')">&#9742; Contato</button>'+
+          '<button class="t-btn" data-tab="dv-'+id+'" onclick="switchTab(this,\''+id+'\')">&#9888; Divida</button>'+
           orcTab+cotaTab+
         '</div>'+
         '<div class="tab-pane open" id="mes-'+id+'"><table><thead><tr><th>Data</th><th>Produtos</th><th style="text-align:right">Valor</th></tr></thead><tbody>'+pedRows+'</tbody></table></div>'+
         '<div class="tab-pane" id="hist-'+id+'" data-cl="'+esc(cl)+'"></div>'+
         '<div class="tab-pane" id="anal-'+id+'" data-cl="'+esc(cl)+'"></div>'+
         '<div class="tab-pane" id="ct-'+id+'" data-cl="'+esc(cl)+'"></div>'+
+        '<div class="tab-pane" id="dv-'+id+'" data-cl="'+esc(cl)+'"></div>'+
         '<div class="tab-pane" id="orc-'+id+'"><table><thead><tr><th>Data</th><th>Produtos</th><th style="text-align:right">Valor</th></tr></thead><tbody>'+orcRows+'</tbody></table></div>'+
         '<div class="tab-pane" id="cota-'+id+'"><table><thead><tr><th>Data</th><th>Produtos / Preco</th><th style="text-align:right">Valor</th></tr></thead><tbody>'+cotaRows+'</tbody></table></div>'+
       '</div>'+
@@ -592,6 +686,8 @@ function toggleCard(id){
     if(ap && !ap.dataset.built){ ap.innerHTML=buildAnalysis(ap.dataset.cl||id.replace(/_/g,' ')); ap.dataset.built=1; }
     const cp=document.getElementById('ct-'+id);
     if(cp && !cp.dataset.built){ cp.innerHTML=buildCtPane(cp.dataset.cl||id.replace(/_/g,' ')); cp.dataset.built=1; }
+    const dp=document.getElementById('dv-'+id);
+    if(dp && !dp.dataset.built){ dp.innerHTML=buildDvPane(dp.dataset.cl||id.replace(/_/g,' ')); dp.dataset.built=1; }
   }
 }
 
@@ -630,9 +726,9 @@ buildMonthBtns();
   <div style="font-size:13px;font-weight:600;color:var(--text);margin-bottom:1.2rem">Como usar o dashboard</div>
   <div class="footer-grid">
     <div class="footer-block"><h4>Navegacao</h4><p>Alterne entre <b>Ibrac</b> e <b>VH Devro</b> no topo. Selecione o <b>Ano</b> e clique no <b>Mes</b> desejado.</p></div>
-    <div class="footer-block"><h4>Filtros</h4><p><b>Todos</b> — ordena: com pedido, com orcamento no mes, com contato, sem pedido.<br><b>Sem pedido</b> — clientes sem contato recente aparecem primeiro.</p></div>
-    <div class="footer-block"><h4>Abas do cliente</h4><p><b>Mes atual</b> — pedidos com todos os produtos.<br><b>Historico</b> — por ano e mes, expansivel.<br><b>Analise</b> — produtos parados com media historica.<br><b>Contato</b> — registre quando contatou o cliente.</p></div>
-    <div class="footer-block"><h4>Sinalizacoes</h4><p><b style="color:var(--err)">!</b> Critico: produto parado 4+ meses com volume alto.<br><b style="color:var(--warn)">!</b> Atencao: produto parado 2+ meses.<br>Badge verde: pediu. Laranja: cotacao pendente. Vermelho: sem pedido.</p></div>
+    <div class="footer-block"><h4>Filtros</h4><p><b>Todos</b> — ordena: com pedido, com orcamento no mes, com contato, sem pedido.<br><b>Sem pedido</b> — clientes sem contato recente aparecem primeiro.<br><b>Com divida</b> — mostra apenas clientes sinalizados com divida em aberto.</p></div>
+    <div class="footer-block"><h4>Abas do cliente</h4><p><b>Mes atual</b> — pedidos com todos os produtos.<br><b>Historico</b> — por ano e mes, expansivel.<br><b>Analise</b> — produtos parados com media historica.<br><b>Contato</b> — registre quando contatou o cliente.<br><b>Divida</b> — sinalize clientes com divida em aberto (pedidos bloqueados); o card fica destacado em vermelho.</p></div>
+    <div class="footer-block"><h4>Sinalizacoes</h4><p><span class="crit-badge crit-r" style="display:inline">&#9888; Cr\u00edtico</span> produto(s) de peso parado(s) ha 4+ meses, vale retomar contato.<br><span class="crit-badge crit-a" style="display:inline">&#9888; Aten\u00e7\u00e3o</span> produto(s) frequente(s) parado(s) ha 2+ meses.<br>Badge verde: pediu. Laranja: cotacao pendente. Vermelho: sem pedido.</p></div>
     <div class="footer-block"><h4>Comissao</h4><p><b>Ibrac</b>: 10% do valor total.<br><b>VH Devro</b>: taxa por produto (2%, 5% ou 7%).</p></div>
     <div class="footer-block"><h4>Dados</h4><p><b>Ibrac</b>: PDFs Jan/22 a Jun/26.<br><b>VH Devro</b>: XLSM Jan/25 a Jun/26 + cotacoes Gujao e Avigran.<br>Periodo de referencia: Jun/26.</p></div>
   </div>
