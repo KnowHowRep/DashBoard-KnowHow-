@@ -178,6 +178,7 @@ tr:last-child td{border-bottom:none}
     <button class="exp-btn" onclick="exportCSV()">&#8595; Exportar CSV</button>
     <button class="exp-btn" onclick="exportContatos()" title="Salva os registros de contato em um arquivo. Coloque-o na pasta dados para que fiquem disponíveis em todos os dispositivos.">&#8595; Exportar Contatos</button>
     <button class="exp-btn" onclick="exportDividas()" title="Salva os registros de divida em um arquivo. Coloque-o na pasta dados para que fiquem disponíveis em todos os dispositivos.">&#8595; Exportar Dividas</button>
+    <button class="exp-btn" onclick="exportMsgTimers()" title="Salva os timers de mensagem em um arquivo. Coloque-o na pasta dados para que fiquem disponíveis em todos os dispositivos.">&#8595; Exportar Timers</button>
   </div>
   <div class="nav-row2">
     <span class="nav-lbl">Ano</span>
@@ -246,6 +247,7 @@ const DATA = {};
 const ANALYSIS = {};
 const CONTACTS = {};
 const DEBTS = {};
+const MSG_TIMERS = {};
 const MN = {'01':'Jan','02':'Fev','03':'Mar','04':'Abr','05':'Mai','06':'Jun','07':'Jul','08':'Ago','09':'Set','10':'Out','11':'Nov','12':'Dez'};
 const COMP_CLASS = {ibrac:'si', vh:'sv'};
 
@@ -305,6 +307,23 @@ function setFilter(f){
   render();
 }
 
+// ── Auto-download helper ────────────────────────────────────────────────
+// Whenever debts or message timers are saved, automatically offer a file
+// download so the user has an up-to-date backup without needing to
+// remember to click "Exportar".
+function autoDownload(content, filename){
+  try{
+    const blob=new Blob([content],{type:'application/json'});
+    const a=document.createElement('a');
+    a.href=URL.createObjectURL(blob);
+    a.download=filename;
+    a.style.display='none';
+    document.body.appendChild(a);
+    a.click();
+    setTimeout(()=>{ URL.revokeObjectURL(a.href); a.remove(); }, 1000);
+  }catch(e){}
+}
+
 // ── Contact tracking ────────────────────────────────────────────────────
 const CT_KEY = 'dash_contacts_v1';
 function loadCts(){
@@ -351,13 +370,19 @@ function loadDvs(){
   let local={}; try{local=JSON.parse(localStorage.getItem(DV_KEY)||'{}')}catch(e){}
   return Object.assign({}, (typeof DEBTS!=='undefined'?DEBTS:{}), local);
 }
-function saveDvs(d){ try{localStorage.setItem(DV_KEY,JSON.stringify(d))}catch(e){} }
+function saveDvs(d){
+  try{localStorage.setItem(DV_KEY,JSON.stringify(d))}catch(e){}
+  autoDownload(JSON.stringify(d,null,2),'debts.json');
+}
 
 // ── Message-sent timestamps (15-day reminder) ─────────────────────────────
 const MSG_KEY = 'dash_msg_v1';
 const MSG_DAYS = 15;
-function getMsgs(){ let d={}; try{d=JSON.parse(localStorage.getItem(MSG_KEY)||'{}')}catch(e){} return d; }
-function saveMsgs(d){ try{localStorage.setItem(MSG_KEY,JSON.stringify(d))}catch(e){} }
+function getMsgs(){ let d={}; try{d=JSON.parse(localStorage.getItem(MSG_KEY)||'{}')}catch(e){} return Object.assign({},(typeof MSG_TIMERS!=='undefined'?MSG_TIMERS:{}),d); }
+function saveMsgs(d){
+  try{localStorage.setItem(MSG_KEY,JSON.stringify(d))}catch(e){}
+  autoDownload(JSON.stringify(d,null,2),'msg_timers.json');
+}
 function msgSentKey(cl){ return comp+'||'+cl; }
 function markMsgSent(cl){
   const d=getMsgs(); d[msgSentKey(cl)]=Date.now(); saveMsgs(d);
@@ -373,6 +398,12 @@ function exportDividas(){
   const blob=new Blob([JSON.stringify(d,null,2)],{type:'application/json'});
   const a=document.createElement('a');
   a.href=URL.createObjectURL(blob); a.download='debts.json'; a.click();
+}
+function exportMsgTimers(){
+  const d=getMsgs();
+  const blob=new Blob([JSON.stringify(d,null,2)],{type:'application/json'});
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(blob); a.download='msg_timers.json'; a.click();
 }
 function dvKey(cl){ return comp+'::'+cl; }
 function getDv(cl){ return loadDvs()[dvKey(cl)]||null; }

@@ -6,6 +6,8 @@ on:
       - 'orders_database.csv'
       - 'dashboard_template.html'
       - 'contacts.json'
+      - 'debts.json'
+      - 'msg_timers.json'
   workflow_dispatch:
 
 jobs:

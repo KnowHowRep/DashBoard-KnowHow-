@@ -10,6 +10,8 @@ from pathlib import Path
 
 CSV_PATH      = Path("orders_database.csv")
 CONTACTS_PATH = Path("contacts.json")
+DEBTS_PATH    = Path("debts.json")
+MSG_PATH      = Path("msg_timers.json")
 TEMPLATE_PATH = Path("dashboard_template.html")
 OUTPUT_PATH   = Path("index.html")
 
@@ -106,11 +108,25 @@ def main():
             print(f"  Erro ao ler contacts.json: {e}")
     CONTACTS_JS = json.dumps(contacts, ensure_ascii=False, separators=(",",":"))
 
+    debts = {}
+    if DEBTS_PATH.exists():
+        try: debts = json.loads(DEBTS_PATH.read_text(encoding="utf-8"))
+        except Exception as e: print(f"  Erro ao ler debts.json: {e}")
+    DEBTS_JS = json.dumps(debts, ensure_ascii=False, separators=(",",":"))
+
+    msg_timers = {}
+    if MSG_PATH.exists():
+        try: msg_timers = json.loads(MSG_PATH.read_text(encoding="utf-8"))
+        except Exception as e: print(f"  Erro ao ler msg_timers.json: {e}")
+    MSG_JS = json.dumps(msg_timers, ensure_ascii=False, separators=(",",":"))
+
     print("Carregando template...")
     html = TEMPLATE_PATH.read_text(encoding="utf-8")
-    html = re.sub(r"const DATA\s*=\s*\{.*?\};",     f"const DATA = {DATA_JS};",     html, flags=re.DOTALL)
-    html = re.sub(r"const ANALYSIS\s*=\s*\{.*?\};", f"const ANALYSIS = {ANALYSIS_JS};", html, flags=re.DOTALL)
-    html = re.sub(r"const CONTACTS\s*=\s*\{.*?\};", f"const CONTACTS = {CONTACTS_JS};", html, flags=re.DOTALL)
+    html = re.sub(r"const DATA\s*=\s*\{.*?\};",       f"const DATA = {DATA_JS};",       html, flags=re.DOTALL)
+    html = re.sub(r"const ANALYSIS\s*=\s*\{.*?\};",   f"const ANALYSIS = {ANALYSIS_JS};",   html, flags=re.DOTALL)
+    html = re.sub(r"const CONTACTS\s*=\s*\{.*?\};",   f"const CONTACTS = {CONTACTS_JS};",   html, flags=re.DOTALL)
+    html = re.sub(r"const DEBTS\s*=\s*\{.*?\};",      f"const DEBTS = {DEBTS_JS};",         html, flags=re.DOTALL)
+    html = re.sub(r"const MSG_TIMERS\s*=\s*\{.*?\};", f"const MSG_TIMERS = {MSG_JS};",       html, flags=re.DOTALL)
 
     s0 = html.find("<script>") + 8
     s1 = html.rfind("</script>")
