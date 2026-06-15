@@ -166,7 +166,7 @@ tr:last-child td{border-bottom:none}
 </style>
 </head>
 <body>
-<div id="lub" style="position:fixed;top:0;left:0;right:0;z-index:9999;background:#1a1a18;color:#fff;display:flex;align-items:center;justify-content:space-between;padding:7px 20px;font-family:DM Sans,sans-serif;font-size:12px;box-shadow:0 2px 8px rgba(0,0,0,.3)"><span>&#128338;&nbsp; Última atualização: <b style="color:#E1F5EE">15/06/2026 às 20:12</b></span><button onclick="document.getElementById('lub').remove();document.body.style.paddingTop='0'" style="background:none;border:none;color:#aaa;cursor:pointer;font-size:18px;line-height:1;padding:0">&#x2715;</button></div><style>body{padding-top:38px!important}</style>
+<div id="lub" style="position:fixed;top:0;left:0;right:0;z-index:9999;background:#1a1a18;color:#fff;display:flex;align-items:center;justify-content:space-between;padding:7px 20px;font-family:DM Sans,sans-serif;font-size:12px;box-shadow:0 2px 8px rgba(0,0,0,.3)"><span>&#128338;&nbsp; Última atualização: <b style="color:#E1F5EE">15/06/2026 às 20:25</b></span><button onclick="document.getElementById('lub').remove();document.body.style.paddingTop='0'" style="background:none;border:none;color:#aaa;cursor:pointer;font-size:18px;line-height:1;padding:0">&#x2715;</button></div><style>body{padding-top:38px!important}</style>
 
 <div class="shell">
 
@@ -440,6 +440,7 @@ function critScore(cl){
   Object.values(prods).forEach(v=>{
     if(v.g>=4&&(v.f>=3||v.v>=5000)) s+=2;
     else if(v.g>=2&&(v.f>=2||v.v>=2000)) s+=1;
+    else if(v.g===1&&v.f>=3) s+=0.5;
   });
   return s;
 }
@@ -550,15 +551,25 @@ function buildAnalysis(cl){
   const prods=ANALYSIS[comp]&&ANALYSIS[comp][cl];
   if(!prods) return '<div style="padding:12px;font-size:13px;color:var(--subtle)">Sem dados.</div>';
   const parados=Object.entries(prods).filter(([,v])=>v.g>=2).sort((a,b)=>b[1].g-a[1].g);
-  const ativos =Object.entries(prods).filter(([,v])=>v.g<2);
-  if(!parados.length) return '<div style="padding:12px;font-size:13px;color:var(--subtle)">Nenhum produto parado nos ultimos 2 meses. \u2713</div>';
+  const aviso  =Object.entries(prods).filter(([,v])=>v.g===1).sort((a,b)=>b[1].f-a[1].f);
+  const ativos =Object.entries(prods).filter(([,v])=>v.g<1);
+  if(!parados.length&&!aviso.length) return '<div style="padding:12px;font-size:13px;color:var(--subtle)">Todos os produtos foram pedidos no m\u00eas atual. \u2713</div>';
   const dot=g=>'<span class="anal-dot" style="background:'+(g>=6?'#E24B4A':'#EF9F27')+'"></span>';
   const gp=g=>'<span class="gap-pill '+(g>=6?'gap-r':'gap-a')+'">'+(g>=18?'+18m':g+'m')+'</span>';
   let h='<table><thead><tr><th>Produto</th><th style="text-align:center">Qtd med.</th><th style="text-align:center">Parado ha</th><th style="text-align:center">Freq.</th></tr></thead><tbody>';
   h+=parados.map(([p,v])=>'<tr><td>'+dot(v.g)+p+'</td><td style="text-align:center;font-family:var(--mono)">'+v.q+'</td><td style="text-align:center">'+gp(v.g)+'</td><td style="text-align:center;color:var(--subtle)">'+v.f+'x</td></tr>').join('');
   h+='</tbody></table>';
+  if(aviso.length){
+    h+='<div style="font-size:10px;text-transform:uppercase;letter-spacing:.05em;color:var(--subtle);padding:10px 0 4px;font-weight:600">N\u00e3o pediu esse m\u00eas</div>';
+    h+='<table><tbody>'+aviso.map(([p,v])=>'<tr>'
+      +'<td><span class="anal-dot" style="background:#8a9ba8"></span>'+p+'</td>'
+      +'<td style="text-align:center;font-family:var(--mono);color:var(--subtle)">'+v.q+'</td>'
+      +'<td style="text-align:center"><span class="gap-pill" style="background:#eef1f3;color:#6b7f8d">1m</span></td>'
+      +'<td style="text-align:center;color:var(--subtle)">'+v.f+'x</td>'
+      +'</tr>').join('')+'</tbody></table>';
+  }
   if(ativos.length){
-    h+='<div style="font-size:10px;text-transform:uppercase;letter-spacing:.05em;color:var(--subtle);padding:10px 0 4px;font-weight:600">Ativos</div>';
+    h+='<div style="font-size:10px;text-transform:uppercase;letter-spacing:.05em;color:var(--subtle);padding:10px 0 4px;font-weight:600">Ativos este m\u00eas</div>';
     h+='<table><tbody>'+ativos.map(([p,v])=>'<tr><td><span class="anal-dot" style="background:#639922"></span>'+p+'</td><td style="text-align:right;color:var(--subtle)">'+v.f+'x</td></tr>').join('')+'</tbody></table>';
   }
 
@@ -566,7 +577,8 @@ function buildAnalysis(cl){
   // ── Mensagem automática ────────────────────────────────────────────────
   // Build a personalized message listing stopped products
   const msgId = 'msg-'+cl.replace(/[^a-z0-9]/gi,'_');
-  const linhasProd = parados.map(([p,v])=>{
+  const allParados = [...parados, ...aviso];
+  const linhasProd = allParados.map(([p,v])=>{
     const meses = v.g>=18?'mais de 18 meses':v.g===1?'1 mês':v.g+' meses';
     return '• '+p+' (parado há '+meses+', comprado '+v.f+'x no histórico)';
   }).join('\n');
@@ -841,7 +853,7 @@ buildMonthBtns();
   <div class="footer-grid">
     <div class="footer-block"><h4>Navegacao</h4><p>Alterne entre <b>Ibrac</b> e <b>VH Devro</b> no topo. Selecione o <b>Ano</b> e clique no <b>Mes</b> desejado.</p></div>
     <div class="footer-block"><h4>Filtros</h4><p><b>Todos</b> — ordena: com pedido, com orcamento no mes, com contato, sem pedido.<br><b>Sem pedido</b> — clientes sem contato recente aparecem primeiro.<br><b>Com divida</b> — mostra apenas clientes sinalizados com divida em aberto.</p></div>
-    <div class="footer-block"><h4>Abas do cliente</h4><p><b>Mes atual</b> — pedidos com todos os produtos.<br><b>Historico</b> — por ano e mes, expansivel.<br><b>Analise</b> — produtos parados com media historica.<br><b>Contato</b> — registre quando contatou o cliente.<br><b>Divida</b> — sinalize clientes com divida em aberto (pedidos bloqueados); o card fica destacado em vermelho.</p></div>
+    <div class="footer-block"><h4>Abas do cliente</h4><p><b>Mes atual</b> — pedidos com todos os produtos.<br><b>Historico</b> — por ano e mes, expansivel.<br><b>Analise</b> — produtos parados com m\u00e9dia hist\u00f3rica. Cinza = n\u00e3o pediu esse m\u00eas. Laranja = 2+ meses. Vermelho = 4+ meses.<br><b>Contato</b> — registre quando contatou o cliente.<br><b>Divida</b> — sinalize clientes com divida em aberto (pedidos bloqueados); o card fica destacado em vermelho.</p></div>
     <div class="footer-block"><h4>Sinalizacoes</h4><p><span class="crit-badge crit-r" style="display:inline">&#9888; Cr\u00edtico</span> produto(s) de peso parado(s) ha 4+ meses, vale retomar contato.<br><span class="crit-badge crit-a" style="display:inline">&#9888; Aten\u00e7\u00e3o</span> produto(s) frequente(s) parado(s) ha 2+ meses.<br>Badge verde: pediu. Laranja: cotacao pendente. Vermelho: sem pedido.</p></div>
     <div class="footer-block"><h4>Comissao</h4><p><b>Ibrac</b>: 10% do valor total.<br><b>VH Devro</b>: taxa por produto (2%, 5% ou 7%).</p></div>
     <div class="footer-block"><h4>Dados</h4><p><b>Ibrac</b>: PDFs Jan/22 a Jun/26.<br><b>VH Devro</b>: XLSM Jan/25 a Jun/26 + cotacoes Gujao e Avigran.<br>Periodo de referencia: Jun/26.</p></div>
