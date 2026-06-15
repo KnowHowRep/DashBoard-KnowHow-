@@ -166,7 +166,7 @@ tr:last-child td{border-bottom:none}
 </style>
 </head>
 <body>
-<div id="lub" style="position:fixed;top:0;left:0;right:0;z-index:9999;background:#1a1a18;color:#fff;display:flex;align-items:center;justify-content:space-between;padding:7px 20px;font-family:DM Sans,sans-serif;font-size:12px;box-shadow:0 2px 8px rgba(0,0,0,.3)"><span>&#128338;&nbsp; Última atualização: <b style="color:#E1F5EE">15/06/2026 às 19:27</b></span><button onclick="document.getElementById('lub').remove();document.body.style.paddingTop='0'" style="background:none;border:none;color:#aaa;cursor:pointer;font-size:18px;line-height:1;padding:0">&#x2715;</button></div><style>body{padding-top:38px!important}</style>
+<div id="lub" style="position:fixed;top:0;left:0;right:0;z-index:9999;background:#1a1a18;color:#fff;display:flex;align-items:center;justify-content:space-between;padding:7px 20px;font-family:DM Sans,sans-serif;font-size:12px;box-shadow:0 2px 8px rgba(0,0,0,.3)"><span>&#128338;&nbsp; Última atualização: <b style="color:#E1F5EE">15/06/2026 às 19:52</b></span><button onclick="document.getElementById('lub').remove();document.body.style.paddingTop='0'" style="background:none;border:none;color:#aaa;cursor:pointer;font-size:18px;line-height:1;padding:0">&#x2715;</button></div><style>body{padding-top:38px!important}</style>
 
 <div class="shell">
 
@@ -514,7 +514,45 @@ function buildAnalysis(cl){
     h+='<div style="font-size:10px;text-transform:uppercase;letter-spacing:.05em;color:var(--subtle);padding:10px 0 4px;font-weight:600">Ativos</div>';
     h+='<table><tbody>'+ativos.map(([p,v])=>'<tr><td><span class="anal-dot" style="background:#639922"></span>'+p+'</td><td style="text-align:right;color:var(--subtle)">'+v.f+'x</td></tr>').join('')+'</tbody></table>';
   }
+
+  // ── Mensagem automática ────────────────────────────────────────────────
+  // Build a personalized message listing stopped products
+  const msgId = 'msg-'+cl.replace(/[^a-z0-9]/gi,'_');
+  const linhasProd = parados.map(([p,v])=>{
+    const meses = v.g>=18?'mais de 18 meses':v.g===1?'1 mês':v.g+' meses';
+    return '• '+p+' (parado há '+meses+', comprado '+v.f+'x no histórico)';
+  }).join('\n');
+  const msg =
+    'Bom dia!! Tudo bem por aí?\n\n'+
+    'Estou passando para saber como vocês estão e se estão precisando de alguma coisa. 😊\n\n'+
+    'Aqui na Rinaldo Representações, fiquei olhando o histórico de vocês e vi que faz um tempo que não registramos pedido dos seguintes produtos:\n\n'+
+    linhasProd+'\n\n'+
+    'Vocês ainda estão trabalhando com esses itens? Precisa de alguma ajuda, como cotação de preço atualizada ou informação técnica?\n\n'+
+    'Qualquer coisa é só me chamar! 🤝';
+
+  const btnId = 'copybtn-'+msgId;
+  h += '<div style="margin-top:18px;border-top:1px solid var(--border);padding-top:14px">'+
+    '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">'+
+      '<span style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.05em;color:var(--subtle)">\uD83D\uDCAC Mensagem para o cliente</span>'+
+      '<button id="'+btnId+'" onclick="copyMsg(\'' +msgId+ '\')" style="font-size:11px;font-weight:600;padding:5px 14px;border-radius:8px;border:1px solid var(--ok);background:var(--ok-bg);color:var(--ok);cursor:pointer">Copiar mensagem</button>'+
+    '</div>'+
+    '<textarea id="'+msgId+'" readonly onclick="this.select()" '+
+      'style="width:100%;box-sizing:border-box;height:200px;border:1px solid var(--border);border-radius:8px;padding:10px;font:13px/1.5 var(--font);color:var(--fg);background:var(--surface);resize:vertical;outline:none">'+
+      escTxt(msg)+
+    '</textarea>'+
+  '</div>';
   return h;
+}
+
+function escTxt(s){ return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
+function copyMsg(id){
+  const ta=document.getElementById(id);
+  if(!ta) return;
+  ta.select();
+  try{ navigator.clipboard.writeText(ta.value).catch(()=>document.execCommand('copy')); }catch(e){ document.execCommand('copy'); }
+  const btn=document.getElementById('copybtn-'+id);
+  if(btn){ const orig=btn.textContent; btn.textContent='\u2714 Copiado!'; btn.style.background='var(--ok)'; btn.style.color='#fff'; setTimeout(()=>{btn.textContent=orig;btn.style.background='var(--ok-bg)';btn.style.color='var(--ok)';},2000); }
 }
 
 // ── Contact pane ─────────────────────────────────────────────────────────
