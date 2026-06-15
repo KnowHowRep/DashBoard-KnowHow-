@@ -560,6 +560,7 @@ function buildAnalysis(cl){
     h+='<table><tbody>'+ativos.map(([p,v])=>'<tr><td><span class="anal-dot" style="background:#639922"></span>'+p+'</td><td style="text-align:right;color:var(--subtle)">'+v.f+'x</td></tr>').join('')+'</tbody></table>';
   }
 
+  const empresa = comp==='ibrac'?'Ibrac Condimentos':'VH Devro';
   // ── Mensagem automática ────────────────────────────────────────────────
   // Build a personalized message listing stopped products
   const msgId = 'msg-'+cl.replace(/[^a-z0-9]/gi,'_');
@@ -570,7 +571,7 @@ function buildAnalysis(cl){
   const msg =
     'Bom dia!! Tudo bem por aí?\n\n'+
     'Estou passando para saber como vocês estão e se estão precisando de alguma coisa. 😊\n\n'+
-    'Aqui na Rinaldo Representações, fiquei olhando o histórico de vocês e vi que faz um tempo que não registramos pedido dos seguintes produtos:\n\n'+
+    'Aqui é José Rinaldo da '+empresa+', fiquei olhando o histórico de vocês e vi que faz um tempo que não registramos pedido dos seguintes produtos:\n\n'+
     linhasProd+'\n\n'+
     'Vocês ainda estão trabalhando com esses itens? Precisa de alguma ajuda, como cotação de preço atualizada ou informação técnica?\n\n'+
     'Qualquer coisa é só me chamar! 🤝';
