@@ -166,7 +166,7 @@ tr:last-child td{border-bottom:none}
 </style>
 </head>
 <body>
-<div id="lub" style="position:fixed;top:0;left:0;right:0;z-index:9999;background:#1a1a18;color:#fff;display:flex;align-items:center;justify-content:space-between;padding:7px 20px;font-family:DM Sans,sans-serif;font-size:12px;box-shadow:0 2px 8px rgba(0,0,0,.3)"><span>&#128338;&nbsp; Última atualização: <b style="color:#E1F5EE">15/06/2026 às 19:52</b></span><button onclick="document.getElementById('lub').remove();document.body.style.paddingTop='0'" style="background:none;border:none;color:#aaa;cursor:pointer;font-size:18px;line-height:1;padding:0">&#x2715;</button></div><style>body{padding-top:38px!important}</style>
+<div id="lub" style="position:fixed;top:0;left:0;right:0;z-index:9999;background:#1a1a18;color:#fff;display:flex;align-items:center;justify-content:space-between;padding:7px 20px;font-family:DM Sans,sans-serif;font-size:12px;box-shadow:0 2px 8px rgba(0,0,0,.3)"><span>&#128338;&nbsp; Última atualização: <b style="color:#E1F5EE">15/06/2026 às 20:00</b></span><button onclick="document.getElementById('lub').remove();document.body.style.paddingTop='0'" style="background:none;border:none;color:#aaa;cursor:pointer;font-size:18px;line-height:1;padding:0">&#x2715;</button></div><style>body{padding-top:38px!important}</style>
 
 <div class="shell">
 
@@ -354,6 +354,22 @@ function loadDvs(){
   return Object.assign({}, (typeof DEBTS!=='undefined'?DEBTS:{}), local);
 }
 function saveDvs(d){ try{localStorage.setItem(DV_KEY,JSON.stringify(d))}catch(e){} }
+
+// ── Message-sent timestamps (15-day reminder) ─────────────────────────────
+const MSG_KEY = 'dash_msg_v1';
+const MSG_DAYS = 15;
+function getMsgs(){ let d={}; try{d=JSON.parse(localStorage.getItem(MSG_KEY)||'{}')}catch(e){} return d; }
+function saveMsgs(d){ try{localStorage.setItem(MSG_KEY,JSON.stringify(d))}catch(e){} }
+function msgSentKey(cl){ return comp+'||'+cl; }
+function markMsgSent(cl){
+  const d=getMsgs(); d[msgSentKey(cl)]=Date.now(); saveMsgs(d);
+}
+function msgDaysLeft(cl){
+  const d=getMsgs(), ts=d[msgSentKey(cl)];
+  if(!ts) return null;
+  const elapsed=Math.floor((Date.now()-ts)/(1000*60*60*24));
+  return Math.max(0, MSG_DAYS-elapsed);
+}
 function exportDividas(){
   const d=loadDvs();
   const blob=new Blob([JSON.stringify(d,null,2)],{type:'application/json'});
@@ -534,25 +550,51 @@ function buildAnalysis(cl){
   h += '<div style="margin-top:18px;border-top:1px solid var(--border);padding-top:14px">'+
     '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">'+
       '<span style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.05em;color:var(--subtle)">\uD83D\uDCAC Mensagem para o cliente</span>'+
-      '<button id="'+btnId+'" onclick="copyMsg(\'' +msgId+ '\')" style="font-size:11px;font-weight:600;padding:5px 14px;border-radius:8px;border:1px solid var(--ok);background:var(--ok-bg);color:var(--ok);cursor:pointer">Copiar mensagem</button>'+
+      '<button id="'+btnId+'" data-msgid="'+msgId+'" data-cl="'+esc(cl)+'" onclick="copyMsg(this.dataset.msgid,this.dataset.cl)" style="font-size:11px;font-weight:600;padding:5px 14px;border-radius:8px;border:1px solid var(--ok);background:var(--ok-bg);color:var(--ok);cursor:pointer">Copiar &amp; iniciar timer</button>'+
     '</div>'+
     '<textarea id="'+msgId+'" readonly onclick="this.select()" '+
       'style="width:100%;box-sizing:border-box;height:200px;border:1px solid var(--border);border-radius:8px;padding:10px;font:13px/1.5 var(--font);color:var(--fg);background:var(--surface);resize:vertical;outline:none">'+
       escTxt(msg)+
     '</textarea>'+
+    '<div id="msg-timer-'+msgId+'" style="margin-top:8px"></div>'+
   '</div>';
+  // schedule timer render after DOM is ready
+  setTimeout(()=>renderMsgTimer(msgId, cl), 0);
   return h;
 }
 
 function escTxt(s){ return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
 
-function copyMsg(id){
+function copyMsg(id, cl){
   const ta=document.getElementById(id);
   if(!ta) return;
   ta.select();
   try{ navigator.clipboard.writeText(ta.value).catch(()=>document.execCommand('copy')); }catch(e){ document.execCommand('copy'); }
   const btn=document.getElementById('copybtn-'+id);
-  if(btn){ const orig=btn.textContent; btn.textContent='\u2714 Copiado!'; btn.style.background='var(--ok)'; btn.style.color='#fff'; setTimeout(()=>{btn.textContent=orig;btn.style.background='var(--ok-bg)';btn.style.color='var(--ok)';},2000); }
+  if(btn){ const orig=btn.textContent; btn.textContent='\u2714 Copiado!'; btn.style.background='var(--ok)'; btn.style.color='#fff';
+    setTimeout(()=>{
+      btn.textContent=orig; btn.style.background='var(--ok-bg)'; btn.style.color='var(--ok)';
+      // mark sent & refresh pane so timer appears immediately
+      markMsgSent(cl);
+      const ap=document.getElementById('anal-'+id.split('-').slice(1).join('-'));
+      if(ap){ ap.dataset.built=''; ap.innerHTML=buildAnalysis(cl); }
+      renderMsgTimer(id, cl);
+    },1200);
+  }
+}
+function renderMsgTimer(id, cl){
+  const left=msgDaysLeft(cl);
+  const timerId='msg-timer-'+id;
+  const el=document.getElementById(timerId);
+  if(!el) return;
+  if(left===null){ el.innerHTML=''; return; }
+  if(left===0){
+    el.innerHTML='<span style="background:var(--err-bg);color:var(--err);font-weight:600;padding:3px 10px;border-radius:20px;font-size:11px">\u26A0 Prazo vencido \u2014 considere reenviar a mensagem</span>';
+  } else {
+    const color=left<=5?'var(--err)':left<=10?'var(--warn)':'var(--ok)';
+    const bg=left<=5?'var(--err-bg)':left<=10?'var(--warn-bg)':'var(--ok-bg)';
+    el.innerHTML='<span style="background:'+bg+';color:'+color+';font-weight:600;padding:3px 10px;border-radius:20px;font-size:11px">\uD83D\uDD51 '+left+' dias para reanalisar</span>';
+  }
 }
 
 // ── Contact pane ─────────────────────────────────────────────────────────
