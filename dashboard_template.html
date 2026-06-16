@@ -195,7 +195,7 @@ tr:last-child td{border-bottom:none}
 
 <!-- TOOLBAR -->
 <div class="toolbar">
-  <input class="search" id="search" placeholder="&#128269; Buscar cliente..." oninput="render()">
+  <input class="search" id="search" placeholder="&#128269; Buscar cliente, produto ou código..." oninput="render()">
   <button class="f-btn on" id="f-all"  onclick="setFilter('all')">Todos</button>
   <button class="f-btn"    id="f-ped"  onclick="setFilter('ped')">Com pedido</button>
   <button class="f-btn"    id="f-pend" onclick="setFilter('pending')">Sem pedido</button>
@@ -461,11 +461,12 @@ function esc(s){
 
 // ── Product formatter ───────────────────────────────────────────────────
 function fmtProd(pr){
-  const code = pr.c ? '<span class="prod-code">'+pr.c+'</span>' : '';
-  const price = pr.p ? ' <span class="prod-meta">\u00b7 '+pr.q+' un \u00b7 R '+pr.p.toLocaleString('pt-BR',{minimumFractionDigits:2})+'/un</span>' : '';
-  return code+pr.n+price;
+  const term = ((document.getElementById('search')||{}).value||'').trim().toLowerCase();
+  const code = pr.c ? '<span class="prod-code"'+(term&&pr.c.toLowerCase().includes(term)?' style="background:#fff3b0;color:#7a5c00"':'')+'>'+pr.c+'</span>' : '';
+  const nameHtml = (term&&pr.n.toLowerCase().includes(term)) ? '<mark style="background:#fff3b0;border-radius:3px;padding:0 2px">'+pr.n+'</mark>' : pr.n;
+  const price = pr.p ? ' <span class="prod-meta">· '+pr.q+' un · R '+pr.p.toLocaleString('pt-BR',{minimumFractionDigits:2})+'/un</span>' : '';
+  return code+nameHtml+price;
 }
-
 // ── History accordion ────────────────────────────────────────────────────
 function hOpen(id){ const el=document.getElementById(id); if(el) el.style.display='block'; }
 function hToggle(id){
@@ -678,8 +679,16 @@ function render(){
   const clients = Object.keys(DATA[comp]||{}).filter(c=>!['FEVEREIRO_25','RINALDO1','MAURICEA','FRIGO GOMES','CORDEIRO PATR'].includes(c));
 
   // Filter
+  // Unified search: match client name OR product name/code
   let visible = clients.filter(c=>{
-    if(q && !c.toLowerCase().includes(q)) return false;
+    if(q){
+      const clientMatch = c.toLowerCase().includes(q);
+      const orders = DATA[comp][c]||[];
+      const prodMatch = orders.some(o=>(o.p||[]).some(p=>
+        p.n.toLowerCase().includes(q) || (p.c&&p.c.toLowerCase().includes(q))
+      ));
+      if(!clientMatch && !prodMatch) return false;
+    }
     const hasPed = ordersInMonth(c).length>0;
     const hasOrc = (DATA[comp][c]||[]).some(o=>o.t==='O'&&o.m===month);
     if(filter==='ped'     && !hasPed) return false;
