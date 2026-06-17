@@ -123,6 +123,13 @@ def main():
         except Exception as e: print(f"  Erro ao ler msg_timers.json: {e}")
     MSG_JS = json.dumps(msg_timers, ensure_ascii=False, separators=(",",":"))
 
+    locations = {}
+    LOC_PATH = Path("locations.json")
+    if LOC_PATH.exists():
+        try: locations = json.loads(LOC_PATH.read_text(encoding="utf-8"))
+        except Exception as e: print(f"  Erro ao ler locations.json: {e}")
+    LOC_JS = json.dumps(locations, ensure_ascii=False, separators=(",",":"))
+
     print("Carregando template...")
     html = TEMPLATE_PATH.read_text(encoding="utf-8")
     html = re.sub(r"const DATA\s*=\s*\{.*?\};",       f"const DATA = {DATA_JS};",       html, flags=re.DOTALL)
@@ -130,6 +137,7 @@ def main():
     html = re.sub(r"const CONTACTS\s*=\s*\{.*?\};",   f"const CONTACTS = {CONTACTS_JS};",   html, flags=re.DOTALL)
     html = re.sub(r"const DEBTS\s*=\s*\{.*?\};",      f"const DEBTS = {DEBTS_JS};",         html, flags=re.DOTALL)
     html = re.sub(r"const MSG_TIMERS\s*=\s*\{.*?\};", f"const MSG_TIMERS = {MSG_JS};",       html, flags=re.DOTALL)
+    html = re.sub(r"const LOCATIONS\s*=\s*\{.*?\};", f"const LOCATIONS = {LOC_JS};", html, flags=re.DOTALL)
 
     s0 = html.find("<script>") + 8
     s1 = html.rfind("</script>")
