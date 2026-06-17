@@ -71,18 +71,21 @@ def build_analysis(df):
             q = float(row.get("qtd") or 0)
             v = float(row.get("valor_item") or 0)
             if n and n.lower() != "nan" and len(m) == 7 and q > 0 and v > 0:
-                ph[n].append((m, q, v))
+                c = str(row.get("cod_produto") or "").strip()
+                ph[n].append((m, q, v, c))
         if not ph: continue
         prods = {}
         for prod, es in ph.items():
             es = sorted(es, key=lambda x: mi(x[0]))
             last = es[-1][0]
             gap = cur_idx - mi(last) if mi(last) >= 0 else 18
+            cods = [e[3] for e in es if len(e) > 3 and e[3] and e[3] not in ("nan","None","")]
             prods[prod] = {
                 "g": gap,
                 "q": round(sum(e[1] for e in es) / len(es)),
                 "v": round(sum(e[2] for e in es) / len(es), 2),
-                "f": len(es), "lm": last
+                "f": len(es), "lm": last,
+                "c": cods[-1] if cods else ""
             }
         analysis[emp][str(cliente)] = prods
     return analysis
