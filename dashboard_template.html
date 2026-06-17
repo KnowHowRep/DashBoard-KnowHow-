@@ -164,6 +164,7 @@ tr:last-child td{border-bottom:none}
 .footer-block p,.footer-block li{font-size:12px;color:var(--muted);line-height:1.6;margin-bottom:4px}
 .footer-block b{color:var(--text)}
 </style>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css"/>
 </head>
 <body>
 <div class="shell">
@@ -178,7 +179,9 @@ tr:last-child td{border-bottom:none}
     <button class="exp-btn" onclick="exportCSV()">&#8595; Exportar CSV</button>
     <button class="exp-btn" onclick="exportContatos()" title="Salva os registros de contato em um arquivo. Coloque-o na pasta dados para que fiquem disponíveis em todos os dispositivos.">&#8595; Exportar Contatos</button>
     <button class="exp-btn" onclick="exportDividas()" title="Salva os registros de divida em um arquivo. Coloque-o na pasta dados para que fiquem disponíveis em todos os dispositivos.">&#8595; Exportar Dividas</button>
-    <button class="exp-btn" onclick="exportMsgTimers()" title="Salva os timers de mensagem em um arquivo. Coloque-o na pasta dados para que fiquem disponíveis em todos os dispositivos.">&#8595; Exportar Timers</button>
+    <button class="exp-btn" onclick="showMap()" title="Mapa de clientes por região">&#127759; Mapa</button>
+  <button class="exp-btn" onclick="exportLocs()" title="Salva localizações dos clientes">↓ Exportar Localizações</button>
+  <button class="exp-btn" onclick="exportMsgTimers()" title="Salva os timers de mensagem em um arquivo. Coloque-o na pasta dados para que fiquem disponíveis em todos os dispositivos.">&#8595; Exportar Timers</button>
   </div>
   <div class="nav-row2">
     <span class="nav-lbl">Ano</span>
@@ -248,6 +251,7 @@ const ANALYSIS = {};
 const CONTACTS = {};
 const DEBTS = {};
 const MSG_TIMERS = {};
+const LOCATIONS = {};
 const MN = {'01':'Jan','02':'Fev','03':'Mar','04':'Abr','05':'Mai','06':'Jun','07':'Jul','08':'Ago','09':'Set','10':'Out','11':'Nov','12':'Dez'};
 const COMP_CLASS = {ibrac:'si', vh:'sv'};
 
@@ -674,6 +678,32 @@ function buildDvPane(cl){
   return h+'</div>';
 }
 
+// ── Sparkline (mini bar chart last 6 months) ─────────────────────────────
+function buildSparkline(cl){
+  const orders = (DATA[comp][cl]||[]).filter(o=>o.t==='P'&&o.tot>0);
+  if(!orders.length) return '';
+  // Get last 6 months up to and including selected month
+  const allMonths = [];
+  const [yr,mo] = month.split('-').map(Number);
+  for(let i=5;i>=0;i--){
+    let m=mo-i, y=yr;
+    if(m<=0){m+=12;y--;}
+    allMonths.push(y+'-'+(m<10?'0':'')+m);
+  }
+  const vals = allMonths.map(m=>orders.filter(o=>o.m===m).reduce((s,o)=>s+o.tot,0));
+  const maxV = Math.max(...vals,1);
+  const w=8, gap=2, h=24;
+  const bars = vals.map((v,i)=>{
+    const bh = Math.max(2, Math.round((v/maxV)*h));
+    const active = allMonths[i]===month;
+    const col = active ? 'var(--ok)' : (v>0 ? 'var(--accent)' : 'var(--border)');
+    const x = i*(w+gap);
+    return '<rect x="'+x+'" y="'+(h-bh)+'" width="'+w+'" height="'+bh+'" rx="2" fill="'+col+'"/>';
+  }).join('');
+  const total=(w+gap)*6-gap;
+  return '<svg width="'+total+'" height="'+h+'" viewBox="0 0 '+total+' '+h+'" style="display:block;margin-top:6px;opacity:.85" title="Faturamento últimos 6 meses">'+bars+'</svg>';
+}
+
 // ── Main render ──────────────────────────────────────────────────────────
 function render(){
   const q = document.getElementById('search').value.trim().toLowerCase();
@@ -699,16 +729,26 @@ function render(){
     return true;
   });
 
-  // Sort: com pedido → com orcamento no mes → com contato → sem pedido
+  // Sort: com pedido (mais recente primeiro) → orcamento → contato recente → sem pedido
   visible.sort((a,b)=>{
     const score=c=>{
       if(ordersInMonth(c).length>0) return 0;
       if((DATA[comp][c]||[]).some(o=>o.t==='O'&&o.m===month)) return 1;
       const ct=getCt(c);
       if(ct){ const d=ctDays(ct); return d<=7?2:d<=30?3:4; }
-      return 5; // sem contato = aparece por ultimo
+      return 5;
     };
-    return score(a)-score(b);
+    const sa=score(a), sb=score(b);
+    if(sa!==sb) return sa-sb;
+    // Within "com pedido": sort by most recent order date descending
+    if(sa===0){
+      const lastDate=c=>{
+        const ods=ordersInMonth(c);
+        return ods.length?ods.map(o=>o.d||'').sort().reverse()[0]:'';
+      };
+      return lastDate(b).localeCompare(lastDate(a));
+    }
+    return 0;
   });
 
   // KPIs
@@ -781,6 +821,7 @@ function render(){
           '<div class="cl-sub">'+
             (totalMes>0?'<span>'+fmt(totalMes)+(commStr)+'</span>':'')+'&nbsp;'+ctBadgeHtml(cl)+(critHtml?'&nbsp;'+critHtml:'')+
           '</div>'+
+          buildSparkline(cl)+
         '</div>'+
         '<span class="badge '+bcls+'">'+bdg+'</span>'+
         '<span class="chev" id="chev-'+id+'">&#9660;</span>'+
@@ -852,6 +893,104 @@ function exportCSV(){
   a.download=comp+'_pedidos.csv'; a.click();
 }
 
+// ── Location storage ─────────────────────────────────────────────────────
+const LOC_KEY = 'dash_locations_v1';
+function getLocs(){
+  let manual={}; try{manual=JSON.parse(localStorage.getItem(LOC_KEY)||'{}')}catch(e){}
+  // Base: locations extracted from PDFs/XLSMs (LOCATIONS[comp])
+  const base = (typeof LOCATIONS!=='undefined' && LOCATIONS[comp]) ? LOCATIONS[comp] : {};
+  // Merge: build a key-matching dict from base, then overlay manual overrides
+  const merged={};
+  Object.entries(base).forEach(([cl,loc])=>{ merged[comp+'||'+cl]=loc; });
+  Object.assign(merged, manual);
+  return merged;
+}
+function saveLocs(d){ try{localStorage.setItem(LOC_KEY,JSON.stringify(d))}catch(e){} autoDownload(JSON.stringify(d,null,2),'locations.json'); }
+function exportLocs(){ const d=getLocs(); const blob=new Blob([JSON.stringify(d,null,2)],{type:'application/json'}); const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='locations.json'; a.click(); }
+function locKey(cl){ return comp+'||'+cl; }
+const CITY_COORDS = {
+  'recife pe':[-8.0476,-34.8770],'olinda pe':[-7.9988,-34.8480],'caruaru pe':[-8.2844,-35.9756],
+  'petrolina pe':[-9.3900,-40.5020],'arcoverde pe':[-8.4197,-37.0537],'garanhuns pe':[-8.8889,-36.4967],
+  'palmares pe':[-8.6838,-35.5938],'gravata pe':[-8.2016,-35.5651],'belo jardim pe':[-8.3356,-36.4237],
+  'bezerros pe':[-8.2369,-35.7494],'nazare da mata pe':[-7.7408,-35.2253],'vitoria de santo antao pe':[-8.1199,-35.2924],
+  'goiana pe':[-7.5602,-35.0012],'bonito pe':[-8.4688,-35.7306],'pesqueira pe':[-8.3595,-36.6953],
+  'natal rn':[-5.7945,-35.2110],'mossoro rn':[-5.1877,-37.3442],'parnamirim rn':[-5.9145,-35.2634],
+  'caico rn':[-6.4568,-37.0968],'santa cruz rn':[-6.2258,-36.0208],'currais novos rn':[-6.2594,-36.5154],
+  'jucurutu rn':[-6.0372,-36.9844],'macaiba rn':[-5.8611,-35.3561],'apodi rn':[-5.6569,-37.7881],
+  'fortaleza ce':[-3.7172,-38.5434],'sobral ce':[-3.6887,-40.3519],'juazeiro do norte ce':[-7.2108,-39.3157],
+  'caucaia ce':[-3.7374,-38.6540],'aquiraz ce':[-3.9014,-38.3897],'iguatu ce':[-6.3589,-39.2983],
+  'joao pessoa pb':[-7.1195,-34.8450],'campina grande pb':[-7.2308,-35.8817],'patos pb':[-7.0228,-37.2784],
+  'aracaju se':[-10.9472,-37.0731],'salvador ba':[-12.9714,-38.5014],'feira de santana ba':[-12.2664,-38.9663],
+  'teresina pi':[-5.0892,-42.8019],'sao luis ma':[-2.5297,-44.3028],'maceio al':[-9.6658,-35.7350],
+};
+function cityToCoords(cidade,estado){
+  const k=(cidade+' '+(estado||'')).toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'').trim();
+  if(CITY_COORDS[k]) return CITY_COORDS[k];
+  const found=Object.keys(CITY_COORDS).find(c=>c.split(' ').slice(0,-1).join(' ')===k.split(' ').slice(0,-1).join(' '));
+  return found?CITY_COORDS[found]:null;
+}
+let leafletMap=null,leafletLoaded=false,locEditCl=null;
+function showMap(){
+  document.getElementById('map-modal').style.display='block';
+  document.getElementById('map-comp-label').textContent=comp==='ibrac'?'Ibrac Condimentos':'VH Devro';
+  if(!leafletLoaded){
+    const scr=document.createElement('script');
+    scr.src='https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js';
+    scr.onload=()=>{leafletLoaded=true;initMap();};
+    document.head.appendChild(scr);
+  } else initMap();
+}
+function closeMap(){ document.getElementById('map-modal').style.display='none'; }
+function initMap(){
+  const container=document.getElementById('map-container');
+  if(leafletMap){leafletMap.remove();leafletMap=null;}
+  container.innerHTML='';
+  const div=document.createElement('div');
+  div.style.cssText='width:100%;height:100%';
+  container.appendChild(div);
+  leafletMap=L.map(div).setView([-7.5,-37],6);
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{attribution:'© OpenStreetMap',maxZoom:18}).addTo(leafletMap);
+  const clients=Object.keys(DATA[comp]||{});
+  const locs=getLocs();
+  const unlocated=[];
+  clients.forEach(cl=>{
+    const loc=locs[locKey(cl)];
+    const total=(DATA[comp][cl]||[]).filter(o=>o.t==='P'&&o.tot>0).reduce((s,o)=>s+o.tot,0);
+    if(loc&&loc.lat&&loc.lng){
+      const r=Math.max(8,Math.min(32,8+Math.sqrt(total/10000)));
+      const circle=L.circleMarker([loc.lat,loc.lng],{radius:r,fillColor:'#22a05b',color:'#fff',weight:2,fillOpacity:.8}).addTo(leafletMap);
+      const clEsc=cl.replace(/"/g,'&quot;'); const popup='<b>'+cl+'</b><br>'+loc.cidade+(loc.estado?'/'+loc.estado.toUpperCase():'')+'<br>Total: R$ '+total.toLocaleString('pt-BR',{minimumFractionDigits:0})+'<br><button onclick="openLoc(this.dataset.cl)" data-cl="'+clEsc+'" style="padding:2px 8px;border:1px solid #22a05b;border-radius:4px;background:none;color:#22a05b;cursor:pointer;font-size:11px">Editar</button>';
+      circle.bindPopup(popup);
+    } else {
+      unlocated.push({cl,total});
+    }
+  });
+  const sb=document.getElementById('map-unlocated');
+  sb.innerHTML=unlocated.length?unlocated.sort((a,b)=>b.total-a.total).map(({cl,total})=>'<div style="display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid #e5e7eb">'+'<span style="font-size:12px">'+cl+'</span>'+'<button data-cl="'+cl.replace(/"/g,'&quot;')+'" onclick="openLoc(this.dataset.cl)" style="font-size:11px;padding:3px 8px;border:1px solid #22a05b;border-radius:6px;background:none;color:#22a05b;cursor:pointer">+</button>'+'</div>').join(''):'<div style="color:#9ca3af;font-size:12px"></div>';
+  setTimeout(()=>leafletMap.invalidateSize(),100);
+}
+function openLoc(cl){
+  locEditCl=cl;
+  const loc=getLocs()[locKey(cl)]||{};
+  document.getElementById('loc-modal-title').textContent='Localização — '+cl;
+  document.getElementById('loc-cidade').value=loc.cidade||'';
+  document.getElementById('loc-estado').value=loc.estado||'';
+  document.getElementById('loc-modal').style.display='flex';
+}
+function closeLoc(){ document.getElementById('loc-modal').style.display='none';locEditCl=null; }
+function saveLoc(){
+  if(!locEditCl) return;
+  const cidade=document.getElementById('loc-cidade').value.trim();
+  const estado=document.getElementById('loc-estado').value.trim().toUpperCase();
+  if(!cidade){closeLoc();return;}
+  const coords=cityToCoords(cidade,estado);
+  const d=getLocs();
+  d[locKey(locEditCl)]={cidade,estado,lat:coords?coords[0]:null,lng:coords?coords[1]:null};
+  saveLocs(d);
+  closeLoc();
+  if(leafletLoaded) initMap();
+}
+
 // ── Init ─────────────────────────────────────────────────────────────────
 buildMonthBtns();
 </script>
@@ -868,5 +1007,37 @@ buildMonthBtns();
   </div>
 </div></div>
 
+
+<!-- ── Map Modal ──────────────────────────────────────────────────────── -->
+<div id="map-modal" style="display:none;position:fixed;inset:0;z-index:9000;background:var(--bg)">
+  <div style="display:flex;align-items:center;justify-content:space-between;padding:12px 18px;border-bottom:1px solid var(--border)">
+    <h2 style="margin:0;font-size:18px;font-weight:700">&#127759; Mapa de Clientes — <span id="map-comp-label"></span></h2>
+    <div style="display:flex;gap:8px;align-items:center">
+      <span style="font-size:12px;color:var(--subtle)">Clique num cliente para editar localização</span>
+      <button onclick="closeMap()" style="background:none;border:1px solid var(--border);border-radius:8px;padding:5px 14px;cursor:pointer;font-size:13px">✕ Fechar</button>
+    </div>
+  </div>
+  <div style="display:flex;height:calc(100vh - 56px)">
+    <div id="map-container" style="flex:1"></div>
+    <div id="map-sidebar" style="width:280px;overflow-y:auto;border-left:1px solid var(--border);padding:12px;font-size:13px">
+      <div style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.05em;color:var(--subtle);margin-bottom:8px">Clientes sem localização</div>
+      <div id="map-unlocated"></div>
+    </div>
+  </div>
+</div>
+<!-- ── Location edit modal ─────────────────────────────────────────── -->
+<div id="loc-modal" style="display:none;position:fixed;inset:0;z-index:9100;background:rgba(0,0,0,.4);align-items:center;justify-content:center">
+  <div style="background:var(--bg);border-radius:12px;padding:24px;width:320px;box-shadow:0 8px 32px rgba(0,0,0,.2)">
+    <h3 style="margin:0 0 16px;font-size:15px" id="loc-modal-title"></h3>
+    <label style="font-size:12px;color:var(--subtle);display:block;margin-bottom:4px">Cidade</label>
+    <input id="loc-cidade" style="width:100%;box-sizing:border-box;border:1px solid var(--border);border-radius:8px;padding:7px 10px;font-size:13px;margin-bottom:10px;background:var(--surface)">
+    <label style="font-size:12px;color:var(--subtle);display:block;margin-bottom:4px">Estado (sigla)</label>
+    <input id="loc-estado" style="width:100%;box-sizing:border-box;border:1px solid var(--border);border-radius:8px;padding:7px 10px;font-size:13px;margin-bottom:16px;background:var(--surface)" maxlength="2" placeholder="PE, RN, CE...">
+    <div style="display:flex;gap:8px;justify-content:flex-end">
+      <button onclick="closeLoc()" style="border:1px solid var(--border);background:none;border-radius:8px;padding:6px 14px;cursor:pointer;font-size:13px">Cancelar</button>
+      <button onclick="saveLoc()" style="border:none;background:var(--ok);color:#fff;border-radius:8px;padding:6px 14px;cursor:pointer;font-size:13px;font-weight:600">Salvar</button>
+    </div>
+  </div>
+</div>
 </body>
 </html>
