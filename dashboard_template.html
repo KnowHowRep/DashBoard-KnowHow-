@@ -909,27 +909,118 @@ function saveLocs(d){ try{localStorage.setItem(LOC_KEY,JSON.stringify(d))}catch(
 function exportLocs(){ const d=getLocs(); const blob=new Blob([JSON.stringify(d,null,2)],{type:'application/json'}); const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='locations.json'; a.click(); }
 function locKey(cl){ return comp+'||'+cl; }
 const CITY_COORDS = {
-  'recife pe':[-8.0476,-34.8770],'olinda pe':[-7.9988,-34.8480],'caruaru pe':[-8.2844,-35.9756],
-  'petrolina pe':[-9.3900,-40.5020],'arcoverde pe':[-8.4197,-37.0537],'garanhuns pe':[-8.8889,-36.4967],
-  'palmares pe':[-8.6838,-35.5938],'gravata pe':[-8.2016,-35.5651],'belo jardim pe':[-8.3356,-36.4237],
-  'bezerros pe':[-8.2369,-35.7494],'nazare da mata pe':[-7.7408,-35.2253],'vitoria de santo antao pe':[-8.1199,-35.2924],
-  'goiana pe':[-7.5602,-35.0012],'bonito pe':[-8.4688,-35.7306],'pesqueira pe':[-8.3595,-36.6953],
-  'natal rn':[-5.7945,-35.2110],'mossoro rn':[-5.1877,-37.3442],'parnamirim rn':[-5.9145,-35.2634],
-  'caico rn':[-6.4568,-37.0968],'santa cruz rn':[-6.2258,-36.0208],'currais novos rn':[-6.2594,-36.5154],
-  'jucurutu rn':[-6.0372,-36.9844],'macaiba rn':[-5.8611,-35.3561],'apodi rn':[-5.6569,-37.7881],
-  'fortaleza ce':[-3.7172,-38.5434],'sobral ce':[-3.6887,-40.3519],'juazeiro do norte ce':[-7.2108,-39.3157],
-  'caucaia ce':[-3.7374,-38.6540],'aquiraz ce':[-3.9014,-38.3897],'iguatu ce':[-6.3589,-39.2983],
-  'joao pessoa pb':[-7.1195,-34.8450],'campina grande pb':[-7.2308,-35.8817],'patos pb':[-7.0228,-37.2784],
-  'aracaju se':[-10.9472,-37.0731],'salvador ba':[-12.9714,-38.5014],'feira de santana ba':[-12.2664,-38.9663],
-  'teresina pi':[-5.0892,-42.8019],'sao luis ma':[-2.5297,-44.3028],'maceio al':[-9.6658,-35.7350],
+  // Pernambuco
+  'recife pe':[-8.0476,-34.8770],'recife':[-8.0476,-34.8770],
+  'olinda pe':[-7.9988,-34.8480],'olinda':[-7.9988,-34.8480],
+  'caruaru pe':[-8.2844,-35.9756],'caruaru':[-8.2844,-35.9756],
+  'petrolina pe':[-9.3900,-40.5020],'petrolina':[-9.3900,-40.5020],
+  'arcoverde pe':[-8.4197,-37.0537],'garanhuns pe':[-8.8889,-36.4967],'garanhuns':[-8.8889,-36.4967],
+  'palmares pe':[-8.6838,-35.5938],'gravata pe':[-8.2016,-35.5651],
+  'belo jardim pe':[-8.3356,-36.4237],'bezerros pe':[-8.2369,-35.7494],
+  'vitoria de santo antao pe':[-8.1199,-35.2924],'goiana pe':[-7.5602,-35.0012],
+  'bonito pe':[-8.4688,-35.7306],'pesqueira pe':[-8.3595,-36.6953],
+  'serra talhada pe':[-7.9860,-38.2953],'serra talhada':[-7.9860,-38.2953],
+  'caruaru':[-8.2844,-35.9756],'camaragibe pe':[-8.0228,-34.9764],'camaragibe':[-8.0228,-34.9764],
+  'ribeirao pe':[-8.5189,-35.3691],'ribeirao':[-8.5189,-35.3691],
+  'jaboatao dos guararapes pe':[-8.1128,-35.0146],'paulista pe':[-7.9402,-34.8733],
+  'cabo de santo agostinho pe':[-8.2828,-35.0350],'abreu e lima pe':[-7.9025,-34.8986],
+  'igarassu pe':[-7.8348,-34.9073],'ipojuca pe':[-8.3994,-35.0619],
+  'sirinhaem pe':[-8.5923,-35.1153],'bom jardim pe':[-7.7955,-35.5820],
+  'timbauba pe':[-7.5027,-35.3186],'limoeiro pe':[-7.8698,-35.4480],
+  'surubim pe':[-7.8554,-35.7573],'santa cruz do capibaribe pe':[-7.9567,-36.2034],
+  // Rio Grande do Norte
+  'natal rn':[-5.7945,-35.2110],'natal':[-5.7945,-35.2110],
+  'mossoro rn':[-5.1877,-37.3442],'mossoro':[-5.1877,-37.3442],'mossoró':[-5.1877,-37.3442],'mossoró rn':[-5.1877,-37.3442],
+  'parnamirim rn':[-5.9145,-35.2634],'parnamirim':[-5.9145,-35.2634],
+  'caico rn':[-6.4568,-37.0968],'santa cruz rn':[-6.2258,-36.0208],
+  'currais novos rn':[-6.2594,-36.5154],'jucurutu rn':[-6.0372,-36.9844],'jucurutu':[-6.0372,-36.9844],
+  'macaiba rn':[-5.8611,-35.3561],'macaíba rn':[-5.8611,-35.3561],'macaíba':[-5.8611,-35.3561],
+  'apodi rn':[-5.6569,-37.7881],'pau dos ferros rn':[-6.1101,-38.2039],
+  'canguaretama rn':[-6.3736,-35.1268],'ceara mirim rn':[-5.6333,-35.4167],
+  'sao goncalo do amarante rn':[-5.7918,-35.3284],'extremoz rn':[-5.7062,-35.2518],
+  'nisia floresta rn':[-6.0916,-35.2064],'nova cruz rn':[-6.4713,-35.4490],
+  // Ceará
+  'fortaleza ce':[-3.7172,-38.5434],'fortaleza':[-3.7172,-38.5434],
+  'sobral ce':[-3.6887,-40.3519],'sobral':[-3.6887,-40.3519],
+  'juazeiro do norte ce':[-7.2108,-39.3157],'caucaia ce':[-3.7374,-38.6540],
+  'aquiraz ce':[-3.9014,-38.3897],'aquiraz':[-3.9014,-38.3897],
+  'iguatu ce':[-6.3589,-39.2983],'quixada ce':[-4.9709,-39.0159],
+  'quixeramobim ce':[-5.1945,-39.2877],'quixeramobim':[-5.1945,-39.2877],
+  'crato ce':[-7.2345,-39.4094],'maracanau ce':[-3.7777,-38.6253],
+  'horizonte ce':[-4.1012,-38.5108],'pacajus ce':[-4.1727,-38.4579],
+  'jaguaribara ce':[-5.3583,-38.3292],'jaguaribara':[-5.3583,-38.3292],
+  'iguatu':[-6.3589,-39.2983],'ico ce':[-6.4014,-38.8614],
+  'russas ce':[-4.9428,-37.9761],'tiangua ce':[-3.7314,-40.9899],
+  // Paraíba
+  'joao pessoa pb':[-7.1195,-34.8450],'joao pessoa':[-7.1195,-34.8450],
+  'campina grande pb':[-7.2308,-35.8817],'campina grande':[-7.2308,-35.8817],
+  'patos pb':[-7.0228,-37.2784],'guarabira pb':[-6.8541,-35.4895],
+  'sousa pb':[-6.7547,-38.2306],'cajazeiras pb':[-6.8919,-38.5530],
+  'santa rita pb':[-7.1175,-34.9770],'bayeux pb':[-7.1287,-34.9406],
+  // Bahia
+  'salvador ba':[-12.9714,-38.5014],'feira de santana ba':[-12.2664,-38.9663],
+  'vitoria da conquista ba':[-14.8661,-40.8444],'juazeiro ba':[-9.4278,-40.5020],
+  'ilheus ba':[-14.7895,-39.0376],'conceicao de feira ba':[-12.5088,-38.9752],
+  'conceicao de feira':[-12.5088,-38.9752],'conceição de feira':[-12.5088,-38.9752],
+  'serrinha ba':[-11.6620,-39.0064],'jequie ba':[-13.8553,-40.0828],
+  // Sergipe
+  'aracaju se':[-10.9472,-37.0731],'lagarto se':[-10.9147,-37.6541],
+  'itabaiana se':[-10.6845,-37.4244],'estancia se':[-11.2734,-37.4395],
+  // Alagoas
+  'maceio al':[-9.6658,-35.7350],'arapiraca al':[-9.7527,-36.6611],
+  // Piauí
+  'teresina pi':[-5.0892,-42.8019],'parnaiba pi':[-2.9050,-41.7761],
+  'picos pi':[-7.0779,-41.4672],'floriano pi':[-6.7667,-43.0283],
+  // Maranhão
+  'sao luis ma':[-2.5297,-44.3028],'imperatriz ma':[-5.5258,-47.4916],
+  // SP/outros
+  'sao paulo sp':[-23.5505,-46.6333],'rio claro sp':[-22.4149,-47.5600],'rio claro':[-22.4149,-47.5600],
+  'belo horizonte mg':[-19.9167,-43.9345],
 };
+function norm(s){ return (s||'').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').trim(); }
 function cityToCoords(cidade,estado){
-  const k=(cidade+' '+(estado||'')).toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'').trim();
-  if(CITY_COORDS[k]) return CITY_COORDS[k];
-  const found=Object.keys(CITY_COORDS).find(c=>c.split(' ').slice(0,-1).join(' ')===k.split(' ').slice(0,-1).join(' '));
+  const cn=norm(cidade), en=norm(estado||'');
+  const k1=cn+(en?' '+en:'');
+  if(CITY_COORDS[k1]) return CITY_COORDS[k1];
+  if(CITY_COORDS[cn]) return CITY_COORDS[cn];
+  const found=Object.keys(CITY_COORDS).find(k=>norm(k).split(' ').slice(0,-1).join(' ')===cn||norm(k)===cn||norm(k).startsWith(cn+' '));
   return found?CITY_COORDS[found]:null;
 }
 let leafletMap=null,leafletLoaded=false,locEditCl=null;
+
+// ── Prospects (potential clients not yet attended) ────────────────────────
+const PROSPECTS = [
+  // Pernambuco
+  {n:'Frigosertão',city:'Serra Talhada',uf:'PE',lat:-7.986,lng:-38.295,note:'Frigorífico bovino/suíno - grande porte'},
+  {n:'Bom Frango',city:'Petrolina',uf:'PE',lat:-9.390,lng:-40.502,note:'Abatedouro de frango - médio porte'},
+  {n:'Frigorífico Caruaru',city:'Caruaru',uf:'PE',lat:-8.284,lng:-35.976,note:'Embutidos e charque'},
+  {n:'Fribrasa',city:'Paulista',uf:'PE',lat:-7.940,lng:-34.873,note:'Frigorífico bovino'},
+  {n:'Incofrig',city:'Caruaru',uf:'PE',lat:-8.270,lng:-35.995,note:'Indústria de carnes Caruaru'},
+  // RN
+  {n:'Frigonatal',city:'Natal',uf:'RN',lat:-5.811,lng:-35.208,note:'Embutidos e frios - Natal'},
+  {n:'Frigorífico Mossoro',city:'Mossoró',uf:'RN',lat:-5.188,lng:-37.344,note:'Abatedouro RN oeste'},
+  {n:'Frimor',city:'Parnamirim',uf:'RN',lat:-5.914,lng:-35.263,note:'Indústria de carnes RGN'},
+  {n:'Nordfrigo',city:'Natal',uf:'RN',lat:-5.820,lng:-35.220,note:'Charque e jerked beef'},
+  // CE
+  {n:'Frangobom',city:'Fortaleza',uf:'CE',lat:-3.760,lng:-38.570,note:'Abatedouro de frango CE'},
+  {n:'Cearnes',city:'Fortaleza',uf:'CE',lat:-3.748,lng:-38.583,note:'Embutidos e frios CE'},
+  {n:'Mercadinhos São Luiz (proc.)',city:'Fortaleza',uf:'CE',lat:-3.730,lng:-38.520,note:'Processamento próprio'},
+  {n:'Frigorífico Sobral',city:'Sobral',uf:'CE',lat:-3.689,lng:-40.352,note:'Bovino/suíno interior CE'},
+  {n:'Frango Ouro',city:'Caucaia',uf:'CE',lat:-3.737,lng:-38.654,note:'Abatedouro frango CE'},
+  // PB
+  {n:'Frigorífico CG',city:'Campina Grande',uf:'PB',lat:-7.231,lng:-35.882,note:'Embutidos PB'},
+  {n:'Norfrigo PB',city:'João Pessoa',uf:'PB',lat:-7.120,lng:-34.845,note:'Indústria de carnes JP'},
+  // BA
+  {n:'Frigorífico Conceição',city:'Conceição de Feira',uf:'BA',lat:-12.509,lng:-38.975,note:'Local de entrega VH já detectado'},
+  {n:'Boi Premium BA',city:'Feira de Santana',uf:'BA',lat:-12.266,lng:-38.966,note:'Bovino BA'},
+  // AL
+  {n:'Frialgo',city:'Maceió',uf:'AL',lat:-9.666,lng:-35.735,note:'Embutidos AL'},
+  // SE
+  {n:'Frigorífico Sergipe',city:'Aracaju',uf:'SE',lat:-10.947,lng:-37.073,note:'Bovino/suíno SE'},
+  // PI
+  {n:'Friboi Teresina',city:'Teresina',uf:'PI',lat:-5.089,lng:-42.802,note:'JBS - grande porte'},
+];
+
 function showMap(){
   document.getElementById('map-modal').style.display='block';
   document.getElementById('map-comp-label').textContent=comp==='ibrac'?'Ibrac Condimentos':'VH Devro';
@@ -940,7 +1031,31 @@ function showMap(){
     document.head.appendChild(scr);
   } else initMap();
 }
-function closeMap(){ document.getElementById('map-modal').style.display='none'; }
+function closeMap(){ document.getElementById('map-modal').style.display='none'; clearRoute(); }
+function startRoute(){
+  clearRoute();
+  document.getElementById('map-hint').textContent='Clique nos pontos em ordem de visita. Clique "Limpar rota" para cancelar.';
+  document.getElementById('btn-clear-route').style.display='inline-block';
+  document.getElementById('btn-route').style.display='none';
+}
+function clearRoute(){
+  (window._routeMarkers||[]).forEach(m=>{try{leafletMap&&leafletMap.removeLayer(m);}catch(e){}});
+  window._routePoints=[]; window._routeMarkers=[];
+  const bc=document.getElementById('btn-clear-route'); if(bc) bc.style.display='none';
+  const br=document.getElementById('btn-route'); if(br) br.style.display='inline-block';
+  const mh=document.getElementById('map-hint'); if(mh) mh.textContent='Clique num cliente para editar';
+}
+function addToRoute(lat,lng,name){
+  if(!window._routePoints||document.getElementById('btn-clear-route').style.display==='none') return;
+  window._routePoints.push([lat,lng]);
+  const m=L.circleMarker([lat,lng],{radius:8,fillColor:'#3b82f6',color:'#fff',weight:2,fillOpacity:.9}).addTo(leafletMap);
+  m.bindTooltip(window._routePoints.length+'. '+name,{permanent:true,direction:'top',offset:[0,-8]});
+  window._routeMarkers.push(m);
+  if(window._routePoints.length>1){
+    const poly=L.polyline(window._routePoints,{color:'#3b82f6',weight:3,dashArray:'6,4'}).addTo(leafletMap);
+    window._routeMarkers.push(poly);
+  }
+}
 function initMap(){
   const container=document.getElementById('map-container');
   if(leafletMap){leafletMap.remove();leafletMap=null;}
@@ -956,10 +1071,11 @@ function initMap(){
   clients.forEach(cl=>{
     const loc=locs[locKey(cl)];
     const total=(DATA[comp][cl]||[]).filter(o=>o.t==='P'&&o.tot>0).reduce((s,o)=>s+o.tot,0);
+    if(loc&&!loc.lat&&loc.cidade){ const c=cityToCoords(loc.cidade,loc.estado); if(c){loc.lat=c[0];loc.lng=c[1];} }
     if(loc&&loc.lat&&loc.lng){
       const r=Math.max(8,Math.min(32,8+Math.sqrt(total/10000)));
       const circle=L.circleMarker([loc.lat,loc.lng],{radius:r,fillColor:'#22a05b',color:'#fff',weight:2,fillOpacity:.8}).addTo(leafletMap);
-      const clEsc=cl.replace(/"/g,'&quot;'); const popup='<b>'+cl+'</b><br>'+loc.cidade+(loc.estado?'/'+loc.estado.toUpperCase():'')+'<br>Total: R$ '+total.toLocaleString('pt-BR',{minimumFractionDigits:0})+'<br><button onclick="openLoc(this.dataset.cl)" data-cl="'+clEsc+'" style="padding:2px 8px;border:1px solid #22a05b;border-radius:4px;background:none;color:#22a05b;cursor:pointer;font-size:11px">Editar</button>';
+      const clEsc=cl.replace(/"/g,'&quot;'); const routeBtn='<button onclick="addToRoute('+loc.lat+','+loc.lng+',&quot;'+clEsc+'&quot;)" style="padding:2px 8px;border:1px solid #3b82f6;border-radius:4px;background:none;color:#3b82f6;cursor:pointer;font-size:11px">+ Rota</button> '; const popup='<b>'+cl+'</b><br>'+loc.cidade+(loc.estado?'/'+loc.estado.toUpperCase():'')+'<br>Total: R$ '+total.toLocaleString('pt-BR',{minimumFractionDigits:0})+'<br>'+routeBtn+'<button onclick="openLoc(this.dataset.cl)" data-cl="'+clEsc+'" style="padding:2px 8px;border:1px solid #22a05b;border-radius:4px;background:none;color:#22a05b;cursor:pointer;font-size:11px">Editar</button>';
       circle.bindPopup(popup);
     } else {
       unlocated.push({cl,total});
@@ -968,6 +1084,20 @@ function initMap(){
   const sb=document.getElementById('map-unlocated');
   sb.innerHTML=unlocated.length?unlocated.sort((a,b)=>b.total-a.total).map(({cl,total})=>'<div style="display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid #e5e7eb">'+'<span style="font-size:12px">'+cl+'</span>'+'<button data-cl="'+cl.replace(/"/g,'&quot;')+'" onclick="openLoc(this.dataset.cl)" style="font-size:11px;padding:3px 8px;border:1px solid #22a05b;border-radius:6px;background:none;color:#22a05b;cursor:pointer">+</button>'+'</div>').join(''):'<div style="color:#9ca3af;font-size:12px"></div>';
   setTimeout(()=>leafletMap.invalidateSize(),100);
+  // ── Prospects (potential clients) ──────────────────────────────────────
+  const showProsp = document.getElementById('map-show-prospects');
+  if(!showProsp || showProsp.checked){
+    PROSPECTS.forEach(p=>{
+      const icon = L.divIcon({className:'',html:'<div style="width:14px;height:14px;border-radius:50%;background:#f59e0b;border:2px solid #fff;box-shadow:0 1px 4px rgba(0,0,0,.4)" title="'+p.n+'"></div>',iconSize:[14,14],iconAnchor:[7,7]});
+      const m=L.marker([p.lat,p.lng],{icon}).addTo(leafletMap);
+      m.bindPopup('<b style="color:#b45309">🎯 Prospect: '+p.n+'</b><br>'+p.city+'/'+p.uf+'<br><i style="color:#9ca3af">'+p.note+'</i><br><small>Não atendido ainda</small>');
+    });
+  }
+
+  // ── Route planning ──────────────────────────────────────────────────────
+  window._routePoints=[];
+  window._routeMarkers=[];
+
 }
 function openLoc(cl){
   locEditCl=cl;
@@ -1013,7 +1143,7 @@ buildMonthBtns();
   <div style="display:flex;align-items:center;justify-content:space-between;padding:12px 18px;border-bottom:1px solid var(--border)">
     <h2 style="margin:0;font-size:18px;font-weight:700">&#127759; Mapa de Clientes — <span id="map-comp-label"></span></h2>
     <div style="display:flex;gap:8px;align-items:center">
-      <span style="font-size:12px;color:var(--subtle)">Clique num cliente para editar localização</span>
+      <label style="font-size:12px;display:flex;align-items:center;gap:5px;cursor:pointer"><input type="checkbox" id="map-show-prospects" checked onchange="initMap()">&nbsp;<span style="color:#b45309;font-weight:600">🎯 Mostrar prospects</span></label><span style="color:#9ca3af;font-size:11px">|</span><button onclick="startRoute()" id="btn-route" style="font-size:11px;padding:4px 10px;border:1px solid #22a05b;border-radius:6px;background:none;color:#22a05b;cursor:pointer">🗺 Planejar rota</button><button onclick="clearRoute()" style="font-size:11px;padding:4px 10px;border:1px solid #ef4444;border-radius:6px;background:none;color:#ef4444;cursor:pointer;display:none" id="btn-clear-route">✕ Limpar rota</button><span style="font-size:12px;color:var(--subtle)" id="map-hint">Clique num cliente para editar</span>
       <button onclick="closeMap()" style="background:none;border:1px solid var(--border);border-radius:8px;padding:5px 14px;cursor:pointer;font-size:13px">✕ Fechar</button>
     </div>
   </div>
