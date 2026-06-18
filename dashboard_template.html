@@ -636,7 +636,7 @@ function buildAnalysis(cl){
   '</div>';
   // schedule timer render after DOM is ready
   setTimeout(()=>renderMsgTimer(msgId, cl), 0);
-  return sparkSection+h;
+  return h;
 }
 
 function escTxt(s){ return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
