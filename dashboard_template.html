@@ -163,6 +163,30 @@ tr:last-child td{border-bottom:none}
 .footer-block h4{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--subtle);margin-bottom:.6rem}
 .footer-block p,.footer-block li{font-size:12px;color:var(--muted);line-height:1.6;margin-bottom:4px}
 .footer-block b{color:var(--text)}
+
+  /* ── Mobile ──────────────────────────────────────────────────────────── */
+  @media (max-width:640px){
+    body{ font-size:14px }
+    .top-bar{ flex-wrap:wrap; gap:6px; padding:10px 12px }
+    .exp-btn{ display:none }
+    .card{ border-radius:10px }
+    .cl-hd{ padding:12px 12px 10px; gap:8px; align-items:flex-start }
+    .cl-av{ width:36px; height:36px; font-size:14px; flex-shrink:0 }
+    .cl-name{ font-size:14px }
+    .cl-sub{ font-size:12px; flex-wrap:wrap; gap:4px }
+    .crit-badge{ font-size:10px; padding:2px 6px }
+    .tab-bar{ overflow-x:auto; -webkit-overflow-scrolling:touch; flex-wrap:nowrap;
+              scrollbar-width:none; gap:4px }
+    .tab-bar::-webkit-scrollbar{ display:none }
+    .tab-bar button{ white-space:nowrap; flex-shrink:0; font-size:12px; padding:6px 10px }
+    .tab-pane{ padding:10px 12px }
+    table{ font-size:12px }
+    td,th{ padding:5px 5px }
+    .prod-code{ font-size:10px }
+    .prod-meta{ font-size:11px }
+    #month-btns .mo-btn{ font-size:11px; padding:3px 7px }
+    .gap-pill{ font-size:10px; padding:1px 5px }
+  }
 </style>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css"/>
 </head>
@@ -484,6 +508,10 @@ function hToggle(id){
 function buildHistory(cl){
   const all=(DATA[comp][cl]||[]).filter(o=>o.t==='P'&&o.tot>0).sort((a,b)=>(b.d||'').localeCompare(a.d||''));
   if(!all.length) return '<div style="padding:12px;font-size:13px;color:var(--subtle)">Sem historico.</div>';
+  const spark=buildSparkline(cl);
+  const sparkSection=spark?'<div style="padding:8px 0 4px">'
+    +'<div style="font-size:10px;text-transform:uppercase;letter-spacing:.05em;color:var(--subtle);margin-bottom:6px;font-weight:600">Faturamento — últimos 6 meses</div>'
+    +spark+'</div>':'';
 
   // Group by year -> month
   const tree={};
@@ -608,7 +636,7 @@ function buildAnalysis(cl){
   '</div>';
   // schedule timer render after DOM is ready
   setTimeout(()=>renderMsgTimer(msgId, cl), 0);
-  return h;
+  return sparkSection+h;
 }
 
 function escTxt(s){ return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
@@ -787,10 +815,11 @@ function render(){
     else if(cotas.length>0){bdg=cotas.length+' cota\u00e7\u00e3o pendente';bcls='b-cota';}
     else{bdg='Sem pedido';bcls='b-none';}
 
+    const isMob=window.innerWidth<640;
     const critHtml=sc>=4
-      ?'<span class="crit-badge crit-r" title="Produto(s) de peso parado(s) ha 4+ meses sem pedido">&#9888; Cr\u00edtico: retomar contato</span>'
+      ?'<span class="crit-badge crit-r" title="Produto(s) de peso parado(s) ha 4+ meses sem pedido">&#9888; '+(isMob?'Cr\u00edtico':'Cr\u00edtico: retomar contato')+'</span>'
       :sc>=2
-      ?'<span class="crit-badge crit-a" title="Produto(s) frequente(s) parado(s) ha 2+ meses sem pedido">&#9888; Aten\u00e7\u00e3o: produtos parados</span>'
+      ?'<span class="crit-badge crit-a" title="Produto(s) frequente(s) parado(s) ha 2+ meses sem pedido">&#9888; '+(isMob?'Aten\u00e7\u00e3o':'Aten\u00e7\u00e3o: produtos parados')+'</span>'
       :'';
     const commStr=comp==='ibrac'?' \u00b7 comiss\u00e3o: '+fmt(totalMes*0.10):commMes>0?' \u00b7 comiss\u00e3o: '+fmt(commMes):'';
 
@@ -821,7 +850,6 @@ function render(){
           '<div class="cl-sub">'+
             (totalMes>0?'<span>'+fmt(totalMes)+(commStr)+'</span>':'')+'&nbsp;'+ctBadgeHtml(cl)+(critHtml?'&nbsp;'+critHtml:'')+
           '</div>'+
-          buildSparkline(cl)+
         '</div>'+
         '<span class="badge '+bcls+'">'+bdg+'</span>'+
         '<span class="chev" id="chev-'+id+'">&#9660;</span>'+
