@@ -1318,150 +1318,140 @@ function saveLoc(){
 
 // ── Evolução Geral ────────────────────────────────────────────────────────
 function showEvoGeral(){
+  const empLabel = comp==='ibrac'?'Ibrac Condimentos':'VH Devro';
   document.getElementById('evo-geral-modal').style.display='block';
+  document.getElementById('evo-geral-title').textContent='📈 Evolução Geral — '+empLabel;
   renderEvoGeral();
 }
 function closeEvoGeral(){ document.getElementById('evo-geral-modal').style.display='none'; }
 
 function renderEvoGeral(){
-  const empKeys = ['ibrac','vh'];
-  const empLabels = {ibrac:'Ibrac Condimentos', vh:'VH Devro'};
-  const empColors = {ibrac:'#0F6E56', vh:'#185FA5'};
+  const empLabel = comp==='ibrac'?'Ibrac Condimentos':'VH Devro';
+  const clr      = comp==='ibrac'?'#0F6E56':'#185FA5';
+  const clrLight = comp==='ibrac'?'var(--ibrac-bg)':'var(--vh-bg)';
 
-  // Collect all months across both companies
-  const globalMonths = new Set();
-  empKeys.forEach(emp=>{
-    Object.values(DATA[emp]||{}).forEach(orders=>{
-      orders.forEach(o=>{ if(o.t==='P'&&o.m&&o.tot>0) globalMonths.add(o.m); });
+  // Build monthly stats for current company only
+  const moStats = {}; // 'YYYY-MM' -> {fat, qtd, cls}
+  Object.entries(DATA[comp]||{}).forEach(([cl,orders])=>{
+    orders.forEach(o=>{
+      if(o.t!=='P'||!o.m||o.tot<=0) return;
+      if(!moStats[o.m]) moStats[o.m]={fat:0,qtd:0,cls:new Set()};
+      moStats[o.m].fat+=o.tot;
+      moStats[o.m].qtd+=1;
+      moStats[o.m].cls.add(cl);
     });
   });
-  if(!globalMonths.size){ document.getElementById('evo-geral-body').innerHTML='<p style="padding:20px;color:var(--subtle)">Sem dados.</p>'; return; }
 
-  const allMos = Array.from(globalMonths).sort();
-  const [y0,m0] = allMos[0].split('-').map(Number);
-  const [y1,m1] = allMos[allMos.length-1].split('-').map(Number);
-  const expanded=[];
-  let cy=y0,cm=m0;
-  while(cy<y1||(cy===y1&&cm<=m1)){
-    expanded.push(cy+'-'+(cm<10?'0':'')+cm);
-    cm++; if(cm>12){cm=1;cy++;}
+  if(!Object.keys(moStats).length){
+    document.getElementById('evo-geral-body').innerHTML='<p style="padding:20px;color:var(--subtle)">Sem dados para '+empLabel+'.</p>';
+    return;
   }
 
-  // Build per-company monthly stats
-  const stats = {};
-  empKeys.forEach(emp=>{
-    stats[emp] = {};
-    expanded.forEach(m=>{ stats[emp][m]={fat:0,qtd:0,cls:new Set()}; });
-    Object.entries(DATA[emp]||{}).forEach(([cl,orders])=>{
-      orders.forEach(o=>{
-        if(o.t==='P'&&o.m&&o.tot>0&&stats[emp][o.m]){
-          stats[emp][o.m].fat+=o.tot;
-          stats[emp][o.m].qtd+=1;
-          stats[emp][o.m].cls.add(cl);
-        }
-      });
-    });
+  const curYear = new Date().getFullYear();
+  const anoLabels = [curYear-2, curYear-1, curYear]; // ex: 2024, 2025, 2026
+
+  // ── Gráfico mensal do ano atual ────────────────────────────────────────
+  const mosMesAtual = [];
+  for(let m=1;m<=12;m++) mosMesAtual.push(curYear+'-'+(m<10?'0':'')+m);
+  const fatMes = mosMesAtual.map(m=>(moStats[m]||{fat:0}).fat);
+  const qtdMes = mosMesAtual.map(m=>(moStats[m]||{qtd:0}).qtd);
+  const clsMes = mosMesAtual.map(m=>(moStats[m]?moStats[m].cls.size:0));
+
+  // ── Gráfico anual ──────────────────────────────────────────────────────
+  const anoFat = anoLabels.map(yr=>{
+    let s=0; for(let m=1;m<=12;m++){ const k=yr+'-'+(m<10?'0':'')+m; s+=(moStats[k]||{fat:0}).fat; } return s;
+  });
+  const anoQtd = anoLabels.map(yr=>{
+    let s=0; for(let m=1;m<=12;m++){ const k=yr+'-'+(m<10?'0':'')+m; s+=(moStats[k]||{qtd:0}).qtd; } return s;
+  });
+  const anoCls = anoLabels.map(yr=>{
+    const s=new Set(); for(let m=1;m<=12;m++){ const k=yr+'-'+(m<10?'0':'')+m; if(moStats[k]) moStats[k].cls.forEach(c=>s.add(c)); } return s.size;
   });
 
-  // Combined (both companies)
-  const combined = {};
-  expanded.forEach(m=>{
-    combined[m]={fat:0,qtd:0,cls:new Set()};
-    empKeys.forEach(emp=>{
-      combined[m].fat+=stats[emp][m].fat;
-      combined[m].qtd+=stats[emp][m].qtd;
-      stats[emp][m].cls.forEach(c=>combined[m].cls.add(emp+'|'+c));
-    });
-  });
+  // ── KPIs ───────────────────────────────────────────────────────────────
+  const lastMos = Object.keys(moStats).filter(m=>moStats[m].fat>0).sort();
+  const lastMo  = lastMos.length?lastMos[lastMos.length-1]:null;
+  const prevMo  = lastMos.length>=2?lastMos[lastMos.length-2]:null;
+  const lFat    = lastMo?moStats[lastMo].fat:0;
+  const pFat    = prevMo?moStats[prevMo].fat:0;
+  const lCls    = lastMo?moStats[lastMo].cls.size:0;
+  const totFat  = Object.values(moStats).reduce((s,v)=>s+v.fat,0);
+  const actMos  = Object.values(moStats).filter(v=>v.fat>0).length;
+  const avgFat  = actMos?totFat/actMos:0;
+  function kpiDelta(cur,prev){
+    if(!prev) return '';
+    const d=((cur-prev)/prev*100).toFixed(1), n=parseFloat(d);
+    if(n>0) return '<div class="evo-delta up">▲ '+d+'%</div>';
+    if(n<0) return '<div class="evo-delta dn">▼ '+Math.abs(d)+'%</div>';
+    return '<div class="evo-delta eq">= 0%</div>';
+  }
+  const kpisHtml =
+    '<div class="evo-kpis" style="margin-bottom:20px">'
+    +'<div class="evo-kpi"><div class="evo-kpi-l">Últ. faturamento</div><div class="evo-kpi-v">'+fmt(lFat)+'</div>'+kpiDelta(lFat,pFat)+'</div>'
+    +'<div class="evo-kpi"><div class="evo-kpi-l">Clientes ativos (últ. mês)</div><div class="evo-kpi-v">'+lCls+'</div></div>'
+    +'<div class="evo-kpi"><div class="evo-kpi-l">Média mensal</div><div class="evo-kpi-v">'+fmt(avgFat)+'</div></div>'
+    +'<div class="evo-kpi"><div class="evo-kpi-l">Total histórico</div><div class="evo-kpi-v">'+fmt(totFat)+'</div></div>'
+    +'</div>';
 
-  function svgBarDual(mos, dataA, dataB, colorA, colorB, labelA, labelB, formatFn){
-    const n=mos.length;
-    const barW=Math.max(10,Math.min(28,Math.floor(900/n)-3));
-    const gap=Math.max(2,Math.floor(barW*0.3));
-    const maxV=Math.max(...dataA,...dataB,1);
-    const svgH=100, padL=4, padR=4;
-    const totalW=n*(barW*2+gap+2)-gap+padL+padR;
-    const bars=mos.map((mo,i)=>{
-      const vA=dataA[i], vB=dataB[i];
-      const bhA=Math.max(vA>0?3:0,Math.round((vA/maxV)*svgH));
-      const bhB=Math.max(vB>0?3:0,Math.round((vB/maxV)*svgH));
-      const x=padL+i*(barW*2+gap+2);
-      const [ym,mm]=mo.split('-');
-      const lbl=(MN[mm]||mm)+(i===0||mm==='01'?'\n'+ym:'');
-      const lblP=lbl.split('\n');
+  // ── SVG bar helper ─────────────────────────────────────────────────────
+  function svgBar(labels, data, formatFn, color, tipPrefix){
+    const n=labels.length;
+    const barW=Math.max(20,Math.min(60,Math.floor(800/n)-6));
+    const gap=Math.max(4,Math.floor(barW*0.35));
+    const maxV=Math.max(...data,1);
+    const svgH=110, padL=4, padR=4;
+    const totalW=n*(barW+gap)-gap+padL+padR;
+    const bars=labels.map((lbl,i)=>{
+      const v=data[i];
+      const bh=Math.max(v>0?4:0,Math.round((v/maxV)*svgH));
+      const x=padL+i*(barW+gap);
+      const fill=v>0?color:'var(--border)';
       return '<g>'
-        +'<rect x="'+x+'" y="'+(svgH-bhA)+'" width="'+barW+'" height="'+bhA+'" rx="2" fill="'+colorA+'" opacity="'+(vA>0?.85:.2)+'"'
+        +'<rect x="'+x+'" y="'+(svgH-bh)+'" width="'+barW+'" height="'+bh+'" rx="3" fill="'+fill+'" opacity="'+(v>0?.85:.3)+'"'
         +' onmouseover="showEvoTip(event,this)" onmouseout="hideEvoTip()"'
-        +' data-tip="'+(MN[mm]||mm)+'/'+ym+' '+labelA+': '+formatFn(vA)+'"'
+        +' data-tip="'+tipPrefix+lbl+': '+formatFn(v)+'"'
         +' style="cursor:pointer"/>'
-        +'<rect x="'+(x+barW+1)+'" y="'+(svgH-bhB)+'" width="'+barW+'" height="'+bhB+'" rx="2" fill="'+colorB+'" opacity="'+(vB>0?.85:.2)+'"'
-        +' onmouseover="showEvoTip(event,this)" onmouseout="hideEvoTip()"'
-        +' data-tip="'+(MN[mm]||mm)+'/'+ym+' '+labelB+': '+formatFn(vB)+'"'
-        +' style="cursor:pointer"/>'
-        +'<text class="evo-bar-label" x="'+(x+barW)+'" y="'+(svgH+10)+'" text-anchor="middle">'+lblP[0]+'</text>'
-        +(lblP[1]?'<text class="evo-bar-label" x="'+(x+barW)+'" y="'+(svgH+19)+'" text-anchor="middle" style="opacity:.6">'+lblP[1]+'</text>':'')
+        +(v>0?'<text x="'+(x+barW/2)+'" y="'+(svgH-bh-4)+'" text-anchor="middle" style="font-size:9px;fill:'+color+';font-family:var(--mono);font-weight:600">'+formatFn(v)+'</text>':'')
+        +'<text class="evo-bar-label" x="'+(x+barW/2)+'" y="'+(svgH+12)+'" text-anchor="middle">'+lbl+'</text>'
         +'</g>';
     }).join('');
     return '<div class="evo-chart-wrap" style="position:relative">'
-      +'<div class="evo-tooltip" id="evo-tip-geral"></div>'
-      +'<svg width="'+totalW+'" height="'+(svgH+26)+'" viewBox="0 0 '+totalW+' '+(svgH+26)+'" style="display:block;min-width:'+totalW+'px">'
-      +bars+'</svg>'
-      +'<div style="display:flex;gap:16px;margin-top:6px;font-size:11px">'
-        +'<span style="display:flex;align-items:center;gap:5px"><span style="display:inline-block;width:10px;height:10px;border-radius:2px;background:'+colorA+'"></span>'+labelA+'</span>'
-        +'<span style="display:flex;align-items:center;gap:5px"><span style="display:inline-block;width:10px;height:10px;border-radius:2px;background:'+colorB+'"></span>'+labelB+'</span>'
-      +'</div>'
-      +'</div>';
+      +'<div class="evo-tooltip" id="evo-tip-geral-'+tipPrefix.replace(/\W/g,'')+'"></div>'
+      +'<svg width="'+totalW+'" height="'+(svgH+20)+'" viewBox="0 0 '+totalW+' '+(svgH+20)+'" style="display:block;min-width:'+Math.min(totalW,600)+'px;width:100%">'
+      +bars+'</svg></div>';
   }
 
-  // Summary KPIs (last month with any data)
-  const lastMoAll = expanded.filter(m=>combined[m].fat>0);
-  const lastMo  = lastMoAll.length?lastMoAll[lastMoAll.length-1]:null;
-  const prevMoAll= lastMoAll.slice(0,-1).filter(m=>combined[m].fat>0);
-  const prevMo  = prevMoAll.length?prevMoAll[prevMoAll.length-1]:null;
+  // Month labels for current year
+  const moLabels = mosMesAtual.map(m=>{ const [,mm]=m.split('-'); return MN[mm]||mm; });
+  // Short format for values on bars
+  function fmtShort(v){ if(v>=1000000) return 'R$'+(v/1000000).toFixed(1)+'M'; if(v>=1000) return 'R$'+(v/1000).toFixed(0)+'k'; return v>0?'R$'+v.toFixed(0):''; }
 
-  function kpiDelta(cur,prev){
-    if(!prev||!prev) return '';
-    const d=((cur-prev)/prev*100).toFixed(1);
-    const n=parseFloat(d);
-    if(n>0) return '<div class="evo-delta up">▲ '+d+'%</div>';
-    if(n<0) return '<div class="evo-delta dn">▼ '+Math.abs(d)+'%</div>';
-    return '<div class="evo-delta eq">= '+d+'%</div>';
-  }
-
-  const kpis = empKeys.map(emp=>{
-    const lFat = lastMo?stats[emp][lastMo].fat:0;
-    const pFat = prevMo?stats[emp][prevMo].fat:0;
-    const lCls = lastMo?stats[emp][lastMo].cls.size:0;
-    const totFat = expanded.reduce((s,m)=>s+stats[emp][m].fat,0);
-    const activeMonths = expanded.filter(m=>stats[emp][m].fat>0).length;
-    const avgFat = activeMonths?totFat/activeMonths:0;
-    return '<div style="flex:1;min-width:200px;background:var(--bg);border:1px solid var(--border);border-radius:12px;padding:14px 16px">'
-      +'<div style="font-size:11px;font-weight:700;color:'+(emp==='ibrac'?'var(--ibrac)':'var(--vh)')+';margin-bottom:10px;text-transform:uppercase;letter-spacing:.05em">'+empLabels[emp]+'</div>'
-      +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">'
-        +'<div><div class="evo-kpi-l">Últ. faturamento</div><div class="evo-kpi-v" style="font-size:14px">'+fmt(lFat)+'</div>'+kpiDelta(lFat,pFat)+'</div>'
-        +'<div><div class="evo-kpi-l">Clientes ativos (últ. mês)</div><div class="evo-kpi-v" style="font-size:14px">'+lCls+'</div></div>'
-        +'<div><div class="evo-kpi-l">Média mensal</div><div class="evo-kpi-v" style="font-size:14px">'+fmt(avgFat)+'</div></div>'
-        +'<div><div class="evo-kpi-l">Total histórico</div><div class="evo-kpi-v" style="font-size:14px">'+fmt(totFat)+'</div></div>'
-      +'</div>'
+  const html =
+    kpisHtml
+    // Mensal
+    +'<div style="font-size:13px;font-weight:700;color:var(--text);margin:0 0 16px;padding-bottom:8px;border-bottom:1px solid var(--border)">📅 Evolução Mensal — '+curYear+'</div>'
+    +'<div class="evo-section"><div class="evo-title">Faturamento por mês (R$)</div>'
+      +svgBar(moLabels,fatMes,fmtShort,clr,'Fat ')
+    +'</div>'
+    +'<div class="evo-section"><div class="evo-title">Pedidos por mês</div>'
+      +svgBar(moLabels,qtdMes,v=>v?v+'':'',clr,'Ped ')
+    +'</div>'
+    +'<div class="evo-section"><div class="evo-title">Clientes ativos por mês</div>'
+      +svgBar(moLabels,clsMes,v=>v?v+'':'',clr,'Cli ')
+    +'</div>'
+    // Anual
+    +'<div style="font-size:13px;font-weight:700;color:var(--text);margin:24px 0 16px;padding-bottom:8px;border-bottom:1px solid var(--border)">📆 Evolução Anual</div>'
+    +'<div class="evo-section"><div class="evo-title">Faturamento total por ano (R$)</div>'
+      +svgBar(anoLabels.map(String),anoFat,fmtShort,clr,'Ano ')
+    +'</div>'
+    +'<div class="evo-section"><div class="evo-title">Pedidos por ano</div>'
+      +svgBar(anoLabels.map(String),anoQtd,v=>v?v+'':'',clr,'Ano ')
+    +'</div>'
+    +'<div class="evo-section"><div class="evo-title">Clientes únicos por ano</div>'
+      +svgBar(anoLabels.map(String),anoCls,v=>v?v+'':'',clr,'Ano ')
     +'</div>';
-  }).join('');
 
-  const fatsI = expanded.map(m=>stats.ibrac[m].fat);
-  const fatsV = expanded.map(m=>stats.vh[m].fat);
-  const qtdsI = expanded.map(m=>stats.ibrac[m].qtd);
-  const qtdsV = expanded.map(m=>stats.vh[m].qtd);
-  const clsI  = expanded.map(m=>stats.ibrac[m].cls.size);
-  const clsV  = expanded.map(m=>stats.vh[m].cls.size);
-
-  const fatChart = svgBarDual(expanded,fatsI,fatsV,'#0F6E56','#185FA5','Ibrac','VH Devro',v=>fmt(v));
-  const qtdChart = svgBarDual(expanded,qtdsI,qtdsV,'#0F6E56','#185FA5','Ibrac','VH Devro',v=>v+' ped.');
-  const clsChart = svgBarDual(expanded,clsI,clsV,'#0F6E56','#185FA5','Ibrac','VH Devro',v=>v+' clientes');
-
-  document.getElementById('evo-geral-body').innerHTML =
-    '<div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:20px">'+kpis+'</div>'
-    +'<div class="evo-section"><div class="evo-title">Faturamento mensal — Ibrac vs VH Devro (R$)</div>'+fatChart+'</div>'
-    +'<div class="evo-section"><div class="evo-title">Pedidos por mês — Ibrac vs VH Devro</div>'+qtdChart+'</div>'
-    +'<div class="evo-section"><div class="evo-title">Clientes ativos por mês — Ibrac vs VH Devro</div>'+clsChart+'</div>';
+  document.getElementById('evo-geral-body').innerHTML=html;
 }
 
 // ── Init ─────────────────────────────────────────────────────────────────
@@ -1515,7 +1505,7 @@ buildMonthBtns();
 <!-- ── Evolução Geral Modal ────────────────────────────────────────────── -->
 <div id="evo-geral-modal" style="display:none;position:fixed;inset:0;z-index:9000;background:var(--bg);overflow-y:auto">
   <div style="display:flex;align-items:center;justify-content:space-between;padding:12px 18px;border-bottom:1px solid var(--border);position:sticky;top:0;background:var(--bg);z-index:10">
-    <h2 style="margin:0;font-size:18px;font-weight:700">&#128200; Evolução Geral da Carteira</h2>
+    <h2 id="evo-geral-title" style="margin:0;font-size:18px;font-weight:700">&#128200; Evolução Geral da Carteira</h2>
     <button onclick="closeEvoGeral()" style="background:none;border:1px solid var(--border);border-radius:8px;padding:5px 14px;cursor:pointer;font-size:13px;font-family:var(--font)">✕ Fechar</button>
   </div>
   <div id="evo-geral-body" style="padding:20px;max-width:1100px;margin:0 auto">
