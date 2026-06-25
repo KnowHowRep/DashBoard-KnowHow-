@@ -209,7 +209,7 @@ tr:last-child td{border-bottom:none}
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css"/>
 </head>
 <body>
-<div id="lub" style="position:fixed;top:0;left:0;right:0;z-index:9999;background:#1a1a18;color:#fff;display:flex;align-items:center;justify-content:space-between;padding:7px 20px;font-family:DM Sans,sans-serif;font-size:12px;box-shadow:0 2px 8px rgba(0,0,0,.3)"><span>&#128338;&nbsp; Última atualização: <b style="color:#E1F5EE">25/06/2026 às 11:03</b></span><button onclick="document.getElementById('lub').remove();document.body.style.paddingTop='0'" style="background:none;border:none;color:#aaa;cursor:pointer;font-size:18px;line-height:1;padding:0">&#x2715;</button></div><style>body{padding-top:38px!important}</style>
+<div id="lub" style="position:fixed;top:0;left:0;right:0;z-index:9999;background:#1a1a18;color:#fff;display:flex;align-items:center;justify-content:space-between;padding:7px 20px;font-family:DM Sans,sans-serif;font-size:12px;box-shadow:0 2px 8px rgba(0,0,0,.3)"><span>&#128338;&nbsp; Última atualização: <b style="color:#E1F5EE">25/06/2026 às 11:09</b></span><button onclick="document.getElementById('lub').remove();document.body.style.paddingTop='0'" style="background:none;border:none;color:#aaa;cursor:pointer;font-size:18px;line-height:1;padding:0">&#x2715;</button></div><style>body{padding-top:38px!important}</style>
 
 <div class="shell">
 
@@ -792,14 +792,16 @@ function buildEvolucao(cl){
     const barW=Math.max(14,Math.min(32,Math.floor(580/n)-2));
     const gap=Math.max(2,Math.floor(barW*0.25));
     const maxV=Math.max(...data,1);
-    const svgH=90, padL=4, padR=4;
+    const svgH=90, padTop=18, padBot=26, padL=4, padR=4;
+    const totalH=svgH+padTop+padBot;
     const totalW=n*(barW+gap)-gap+padL+padR;
 
     const bars=data.map((v,i)=>{
       const bh=Math.max(v>0?3:0, Math.round((v/maxV)*svgH));
       const x=padL+i*(barW+gap);
+      const barY=padTop+svgH-bh;
       const isLast = expanded[i]===curMo;
-      const isCur  = expanded[i]===month; // selected month in nav
+      const isCur  = expanded[i]===month;
       const fill   = isCur ? clrCur : (isLast&&v>0 ? color : (v>0?color+'99':'var(--border)'));
       const mo     = expanded[i]||'';
       const [ym,mm]= mo.split('-');
@@ -808,18 +810,19 @@ function buildEvolucao(cl){
       const tipVal = formatFn(v);
       const tipLabel= (MN[mm]||mm)+'/'+ym;
       return '<g>'
-        +'<rect class="evo-bar" x="'+x+'" y="'+(svgH-bh)+'" width="'+barW+'" height="'+bh+'" rx="3" fill="'+fill+'"'
+        +'<rect class="evo-bar" x="'+x+'" y="'+barY+'" width="'+barW+'" height="'+bh+'" rx="3" fill="'+fill+'"'
         +' data-tip="'+tipLabel+': '+tipVal+'"'
         +' onmouseover="showEvoTip(event,this)" onmouseout="hideEvoTip()"'
         +' style="cursor:pointer"/>'
-        +'<text class="evo-bar-label" x="'+(x+barW/2)+'" y="'+(svgH+10)+'" text-anchor="middle">'+lblParts[0]+'</text>'
-        +(lblParts[1]?'<text class="evo-bar-label" x="'+(x+barW/2)+'" y="'+(svgH+19)+'" text-anchor="middle" style="opacity:.6">'+lblParts[1]+'</text>':'')
+        +(v>0?'<text x="'+(x+barW/2)+'" y="'+(barY-3)+'" text-anchor="middle" style="font-size:8px;fill:'+fill+';font-family:var(--mono);font-weight:600">'+tipVal+'</text>':'')
+        +'<text class="evo-bar-label" x="'+(x+barW/2)+'" y="'+(padTop+svgH+10)+'" text-anchor="middle">'+lblParts[0]+'</text>'
+        +(lblParts[1]?'<text class="evo-bar-label" x="'+(x+barW/2)+'" y="'+(padTop+svgH+19)+'" text-anchor="middle" style="opacity:.6">'+lblParts[1]+'</text>':'')
         +'</g>';
     }).join('');
 
     return '<div class="evo-chart-wrap" style="position:relative">'
       +'<div class="evo-tooltip" id="evo-tip-'+cl.replace(/[^a-z0-9]/gi,'_')+'"></div>'
-      +'<svg width="'+totalW+'" height="'+(svgH+26)+'" viewBox="0 0 '+totalW+' '+(svgH+26)+'" style="display:block;min-width:'+totalW+'px">'
+      +'<svg width="'+totalW+'" height="'+totalH+'" viewBox="0 0 '+totalW+' '+totalH+'" style="display:block;min-width:'+totalW+'px;overflow:visible">'
       +bars+'</svg></div>';
   }
 
@@ -1318,6 +1321,19 @@ function saveLoc(){
   if(leafletLoaded) initMap();
 }
 
+function showEvoTipG(e,el,chartId){
+  const tip=document.getElementById('evo-tip-'+chartId);
+  if(!tip) return;
+  tip.textContent=el.dataset.tip;
+  tip.style.display='block';
+  tip.style.left=(e.offsetX+10)+'px';
+  tip.style.top=(e.offsetY-32)+'px';
+}
+function hideEvoTipG(chartId){
+  const tip=document.getElementById('evo-tip-'+chartId);
+  if(tip) tip.style.display='none';
+}
+
 // ── Evolução Geral ────────────────────────────────────────────────────────
 function showEvoGeral(){
   const empLabel = comp==='ibrac'?'Ibrac Condimentos':'VH Devro';
@@ -1396,30 +1412,32 @@ function renderEvoGeral(){
     +'</div>';
 
   // ── SVG bar helper ─────────────────────────────────────────────────────
-  function svgBar(labels, data, formatFn, color, tipPrefix){
+  function svgBar(labels, data, formatFn, color, chartId){
     const n=labels.length;
     const barW=Math.max(20,Math.min(60,Math.floor(800/n)-6));
     const gap=Math.max(4,Math.floor(barW*0.35));
     const maxV=Math.max(...data,1);
-    const svgH=110, padL=4, padR=4;
+    const svgH=110, padTop=22, padBot=20, padL=4, padR=4;
+    const totalH=svgH+padTop+padBot;
     const totalW=n*(barW+gap)-gap+padL+padR;
     const bars=labels.map((lbl,i)=>{
       const v=data[i];
       const bh=Math.max(v>0?4:0,Math.round((v/maxV)*svgH));
       const x=padL+i*(barW+gap);
+      const barY=padTop+svgH-bh;
       const fill=v>0?color:'var(--border)';
       return '<g>'
-        +'<rect x="'+x+'" y="'+(svgH-bh)+'" width="'+barW+'" height="'+bh+'" rx="3" fill="'+fill+'" opacity="'+(v>0?.85:.3)+'"'
-        +' onmouseover="showEvoTip(event,this)" onmouseout="hideEvoTip()"'
-        +' data-tip="'+tipPrefix+lbl+': '+formatFn(v)+'"'
+        +'<rect x="'+x+'" y="'+barY+'" width="'+barW+'" height="'+bh+'" rx="3" fill="'+fill+'" opacity="'+(v>0?.85:.3)+'"'
+        +' onmouseover="showEvoTipG(event,this,\''+chartId+'\')" onmouseout="hideEvoTipG(\''+chartId+'\')"'
+        +' data-tip="'+lbl+': '+formatFn(v)+'"'
         +' style="cursor:pointer"/>'
-        +(v>0?'<text x="'+(x+barW/2)+'" y="'+(svgH-bh-4)+'" text-anchor="middle" style="font-size:9px;fill:'+color+';font-family:var(--mono);font-weight:600">'+formatFn(v)+'</text>':'')
-        +'<text class="evo-bar-label" x="'+(x+barW/2)+'" y="'+(svgH+12)+'" text-anchor="middle">'+lbl+'</text>'
+        +(v>0?'<text x="'+(x+barW/2)+'" y="'+(barY-5)+'" text-anchor="middle" style="font-size:9px;fill:'+color+';font-family:var(--mono);font-weight:600">'+formatFn(v)+'</text>':'')
+        +'<text class="evo-bar-label" x="'+(x+barW/2)+'" y="'+(padTop+svgH+13)+'" text-anchor="middle">'+lbl+'</text>'
         +'</g>';
     }).join('');
     return '<div class="evo-chart-wrap" style="position:relative">'
-      +'<div class="evo-tooltip" id="evo-tip-geral-'+tipPrefix.replace(/\W/g,'')+'"></div>'
-      +'<svg width="'+totalW+'" height="'+(svgH+20)+'" viewBox="0 0 '+totalW+' '+(svgH+20)+'" style="display:block;min-width:'+Math.min(totalW,600)+'px;width:100%">'
+      +'<div class="evo-tooltip" id="evo-tip-'+chartId+'"></div>'
+      +'<svg width="'+totalW+'" height="'+totalH+'" viewBox="0 0 '+totalW+' '+totalH+'" style="display:block;min-width:'+Math.min(totalW,600)+'px;width:100%;overflow:visible">'
       +bars+'</svg></div>';
   }
 
@@ -1433,24 +1451,24 @@ function renderEvoGeral(){
     // Mensal
     +'<div style="font-size:13px;font-weight:700;color:var(--text);margin:0 0 16px;padding-bottom:8px;border-bottom:1px solid var(--border)">📅 Evolução Mensal — '+curYear+'</div>'
     +'<div class="evo-section"><div class="evo-title">Faturamento por mês (R$)</div>'
-      +svgBar(moLabels,fatMes,fmtShort,clr,'Fat ')
+      +svgBar(moLabels,fatMes,fmtShort,clr,'g-fat-mes')
     +'</div>'
     +'<div class="evo-section"><div class="evo-title">Pedidos por mês</div>'
-      +svgBar(moLabels,qtdMes,v=>v?v+'':'',clr,'Ped ')
+      +svgBar(moLabels,qtdMes,v=>v?v+'':'',clr,'g-ped-mes')
     +'</div>'
     +'<div class="evo-section"><div class="evo-title">Clientes ativos por mês</div>'
-      +svgBar(moLabels,clsMes,v=>v?v+'':'',clr,'Cli ')
+      +svgBar(moLabels,clsMes,v=>v?v+'':'',clr,'g-cls-mes')
     +'</div>'
     // Anual
     +'<div style="font-size:13px;font-weight:700;color:var(--text);margin:24px 0 16px;padding-bottom:8px;border-bottom:1px solid var(--border)">📆 Evolução Anual</div>'
     +'<div class="evo-section"><div class="evo-title">Faturamento total por ano (R$)</div>'
-      +svgBar(anoLabels.map(String),anoFat,fmtShort,clr,'Ano ')
+      +svgBar(anoLabels.map(String),anoFat,fmtShort,clr,'g-fat-ano')
     +'</div>'
     +'<div class="evo-section"><div class="evo-title">Pedidos por ano</div>'
-      +svgBar(anoLabels.map(String),anoQtd,v=>v?v+'':'',clr,'Ano ')
+      +svgBar(anoLabels.map(String),anoQtd,v=>v?v+'':'',clr,'g-ped-ano')
     +'</div>'
     +'<div class="evo-section"><div class="evo-title">Clientes únicos por ano</div>'
-      +svgBar(anoLabels.map(String),anoCls,v=>v?v+'':'',clr,'Ano ')
+      +svgBar(anoLabels.map(String),anoCls,v=>v?v+'':'',clr,'g-cls-ano')
     +'</div>';
 
   document.getElementById('evo-geral-body').innerHTML=html;
