@@ -209,7 +209,7 @@ tr:last-child td{border-bottom:none}
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css"/>
 </head>
 <body>
-<div id="lub" style="position:fixed;top:0;left:0;right:0;z-index:9999;background:#1a1a18;color:#fff;display:flex;align-items:center;justify-content:space-between;padding:7px 20px;font-family:DM Sans,sans-serif;font-size:12px;box-shadow:0 2px 8px rgba(0,0,0,.3)"><span>&#128338;&nbsp;Última atualização: <b style="color:#E1F5EE">25/06/2026 às 14:09 UTC</b></span><button onclick="document.getElementById('lub').remove();document.body.style.paddingTop='0'" style="background:none;border:none;color:#aaa;cursor:pointer;font-size:18px;line-height:1;padding:0">&#x2715;</button></div><style>body{padding-top:38px!important}</style>
+<div id="lub" style="position:fixed;top:0;left:0;right:0;z-index:9999;background:#1a1a18;color:#fff;display:flex;align-items:center;justify-content:space-between;padding:7px 20px;font-family:DM Sans,sans-serif;font-size:12px;box-shadow:0 2px 8px rgba(0,0,0,.3)"><span>&#128338;&nbsp;Última atualização: <b style="color:#E1F5EE">25/06/2026 às 14:16 UTC</b></span><button onclick="document.getElementById('lub').remove();document.body.style.paddingTop='0'" style="background:none;border:none;color:#aaa;cursor:pointer;font-size:18px;line-height:1;padding:0">&#x2715;</button></div><style>body{padding-top:38px!important}</style>
 
 <div class="shell">
 
@@ -1388,14 +1388,20 @@ function renderEvoGeral(){
 
   // ── KPIs ───────────────────────────────────────────────────────────────
   const lastMos = Object.keys(moStats).filter(m=>moStats[m].fat>0).sort();
-  const lastMo  = lastMos.length?lastMos[lastMos.length-1]:null;
-  const prevMo  = lastMos.length>=2?lastMos[lastMos.length-2]:null;
+  // Último mês relevante = dentre os últimos 3 meses com dados, o de maior faturamento
+  const last3   = lastMos.slice(-3);
+  const lastMo  = last3.length ? last3.reduce((a,b)=>moStats[a].fat>=moStats[b].fat?a:b) : null;
+  // Mês anterior ao lastMo com dados
+  const prevCandidates = lastMos.filter(m=>m<lastMo);
+  const prevMo  = prevCandidates.length ? prevCandidates[prevCandidates.length-1] : null;
   const lFat    = lastMo?moStats[lastMo].fat:0;
   const pFat    = prevMo?moStats[prevMo].fat:0;
   const lCls    = lastMo?moStats[lastMo].cls.size:0;
   const totFat  = Object.values(moStats).reduce((s,v)=>s+v.fat,0);
   const actMos  = Object.values(moStats).filter(v=>v.fat>0).length;
   const avgFat  = actMos?totFat/actMos:0;
+  const lastMoLabel = lastMo ? (()=>{ const [y,m]=lastMo.split('-'); return (MN[m]||m)+'/'+y; })() : '';
+  const prevMoLabel = prevMo ? (()=>{ const [y,m]=prevMo.split('-'); return (MN[m]||m)+'/'+y; })() : '';
   function kpiDelta(cur,prev){
     if(!prev) return '';
     const d=((cur-prev)/prev*100).toFixed(1), n=parseFloat(d);
@@ -1405,8 +1411,8 @@ function renderEvoGeral(){
   }
   const kpisHtml =
     '<div class="evo-kpis" style="margin-bottom:20px">'
-    +'<div class="evo-kpi"><div class="evo-kpi-l">Últ. faturamento</div><div class="evo-kpi-v">'+fmt(lFat)+'</div>'+kpiDelta(lFat,pFat)+'</div>'
-    +'<div class="evo-kpi"><div class="evo-kpi-l">Clientes ativos (últ. mês)</div><div class="evo-kpi-v">'+lCls+'</div></div>'
+    +'<div class="evo-kpi"><div class="evo-kpi-l">Faturamento — '+(lastMoLabel||'últ. mês')+'</div><div class="evo-kpi-v">'+fmt(lFat)+'</div>'+kpiDelta(lFat,pFat)+(prevMoLabel?'<div style="font-size:10px;color:var(--subtle)">vs '+prevMoLabel+'</div>':'')+'</div>'
+    +'<div class="evo-kpi"><div class="evo-kpi-l">Clientes ativos — '+(lastMoLabel||'últ. mês')+'</div><div class="evo-kpi-v">'+lCls+'</div></div>'
     +'<div class="evo-kpi"><div class="evo-kpi-l">Média mensal</div><div class="evo-kpi-v">'+fmt(avgFat)+'</div></div>'
     +'<div class="evo-kpi"><div class="evo-kpi-l">Total histórico</div><div class="evo-kpi-v">'+fmt(totFat)+'</div></div>'
     +'</div>';
