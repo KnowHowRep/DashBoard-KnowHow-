@@ -637,11 +637,11 @@ function buildAnalysis(cl){
   const minGap = Math.min(...gaps);
   const tempoTexto = minGap===1 ? 'um mês' : minGap+' meses';
   const msg =
-    'Bom dia!! Tudo bem por aí?\n'+
-    'Estou passando para saber como vocês estão e se estão precisando de alguma coisa.\n'+
-    'fiquei olhando o histórico de vocês e vi que faz '+tempoTexto+' que não registramos pedido dos seguintes produtos:\n'+
-    linhasProd+'\n'+
-    'Vocês ainda tem esses itens em estoque? Precisa de alguma ajuda, como cotação de preço atualizada ou informação técnica?\n'+
+    'Bom dia!! Tudo bem por aí?\n\n'+
+    'Estou passando para saber como vocês estão e se estão precisando de alguma coisa.\n\n'+
+    'fiquei olhando o histórico de vocês e vi que faz '+tempoTexto+' que não registramos pedido dos seguintes produtos:\n\n'+
+    linhasProd+'\n\n'+
+    'Vocês ainda tem esses itens em estoque? Precisa de alguma ajuda, como cotação de preço atualizada ou informação técnica?\n\n'+
     'Qualquer coisa é só me chamar! 🤝';
 
   const btnId = 'copybtn-'+msgId;
