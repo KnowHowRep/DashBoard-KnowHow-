@@ -631,14 +631,17 @@ function buildAnalysis(cl){
   const allParados = [...parados, ...aviso];
   const linhasProd = allParados.map(([p,v])=>{
     const meses = v.g>=18?'mais de 18 meses':v.g===1?'1 mês':v.g+' meses';
-    return '• '+p+' (parado há '+meses+', comprado '+v.f+'x no histórico)';
+    return '* '+p+' (parado há '+meses+', comprado '+v.f+'x no histórico)';
   }).join('\n');
+  const gaps = allParados.map(([,v])=>v.g);
+  const minGap = Math.min(...gaps);
+  const tempoTexto = minGap===1 ? 'um mês' : minGap+' meses';
   const msg =
-    'Bom dia!! Tudo bem por aí?\n\n'+
-    'Estou passando para saber como vocês estão e se estão precisando de alguma coisa. 😊\n\n'+
-    'Aqui é José Rinaldo da '+empresa+', fiquei olhando o histórico de vocês e vi que faz um tempo que não registramos pedido dos seguintes produtos:\n\n'+
-    linhasProd+'\n\n'+
-    'Vocês ainda estão trabalhando com esses itens? Precisa de alguma ajuda, como cotação de preço atualizada ou informação técnica?\n\n'+
+    'Bom dia!! Tudo bem por aí?\n'+
+    'Estou passando para saber como vocês estão e se estão precisando de alguma coisa.\n'+
+    'fiquei olhando o histórico de vocês e vi que faz '+tempoTexto+' que não registramos pedido dos seguintes produtos:\n'+
+    linhasProd+'\n'+
+    'Vocês ainda tem esses itens em estoque? Precisa de alguma ajuda, como cotação de preço atualizada ou informação técnica?\n'+
     'Qualquer coisa é só me chamar! 🤝';
 
   const btnId = 'copybtn-'+msgId;
