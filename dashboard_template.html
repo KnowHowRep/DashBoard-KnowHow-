@@ -631,7 +631,7 @@ function buildAnalysis(cl){
   const allParados = [...parados, ...aviso];
   const linhasProd = allParados.map(([p,v])=>{
     const meses = v.g>=18?'mais de 18 meses':v.g===1?'1 mês':v.g+' meses';
-    return '* '+p+' (parado há '+meses+', comprado '+v.f+'x no histórico)';
+    return '• '+p+' (parado há '+meses+', comprado '+v.f+'x no histórico)';
   }).join('\n');
   const gaps = allParados.map(([,v])=>v.g);
   const minGap = Math.min(...gaps);
