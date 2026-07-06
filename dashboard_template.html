@@ -735,13 +735,14 @@ function buildHistory(cl){
 function buildAnalysis(cl){
   const prods=ANALYSIS[comp]&&ANALYSIS[comp][cl];
   if(!prods) return '<div style="padding:12px;font-size:13px;color:var(--subtle)">Sem dados.</div>';
+  const xlsBtn='<div style="display:flex;justify-content:flex-end;margin:2px 0 6px"><button class="exp-btn" onclick="exportAnaliseCliente(this)" title="Baixa esta an\u00e1lise em Excel, no mesmo formato da tela">&#8595; Excel</button></div>';
   const parados=Object.entries(prods).filter(([,v])=>v.g>=2).sort((a,b)=>b[1].g-a[1].g);
   const aviso  =Object.entries(prods).filter(([,v])=>v.g===1).sort((a,b)=>b[1].f-a[1].f);
   const ativos =Object.entries(prods).filter(([,v])=>v.g<1);
-  if(!parados.length&&!aviso.length) return '<div style="padding:12px;font-size:13px;color:var(--subtle)">Todos os produtos foram pedidos no m\u00eas atual. \u2713</div>';
+  if(!parados.length&&!aviso.length) return xlsBtn+'<div style="padding:12px;font-size:13px;color:var(--subtle)">Todos os produtos foram pedidos no m\u00eas atual. \u2713</div>';
   const dot=g=>'<span class="anal-dot" style="background:'+(g>=6?'#E24B4A':'#EF9F27')+'"></span>';
   const gp=g=>'<span class="gap-pill '+(g>=6?'gap-r':'gap-a')+'">'+(g>=18?'+18m':g+'m')+'</span>';
-  let h='<table><thead><tr><th style="color:var(--subtle);font-size:10px">Cód.</th><th>Produto</th><th style="text-align:center">Qtd med.</th><th style="text-align:center">Parado ha</th><th style="text-align:center">Freq.</th></tr></thead><tbody>';
+  let h=xlsBtn+'<table><thead><tr><th style="color:var(--subtle);font-size:10px">Cód.</th><th>Produto</th><th style="text-align:center">Qtd med.</th><th style="text-align:center">Parado ha</th><th style="text-align:center">Freq.</th></tr></thead><tbody>';
   h+=parados.map(([p,v])=>'<tr>'+'<td style="white-space:nowrap;color:var(--subtle);font-size:11px;font-family:var(--mono);padding-right:6px">'+(v.c||'')+'</td>'+'<td>'+dot(v.g)+p+'</td>'+'<td style="text-align:center;font-family:var(--mono)">'+v.q+'</td>'+'<td style="text-align:center">'+gp(v.g)+'</td>'+'<td style="text-align:center;color:var(--subtle)">'+v.f+'x</td></tr>').join('');
   h+='</tbody></table>';
   if(aviso.length){
@@ -1683,6 +1684,52 @@ let _cartOrdem = { col: 'faturamento_12m', asc: false };
 function _cartAtual(){ return (typeof CARTEIRA !== 'undefined' && CARTEIRA[comp]) || null; }
 function _cardId(cl){ return cl.replace(/[^a-z0-9]/gi,'_'); }
 function _fmtData(iso){ return iso ? iso.split('-').reverse().join('/') : '\u2014'; }
+
+function _analiseLinhas(cl){
+  // Mesmos grupos e mesma ordem da tela: parados (2m+), n\u00e3o pediu esse m\u00eas (1m), ativos
+  const prods=(ANALYSIS[comp]||{})[cl]||{};
+  const sit=g=> g>=6?'Cr\u00edtico ('+(g>=18?'+18':g)+'m parado)' : g>=2?'Parado h\u00e1 '+g+' meses' : g===1?'N\u00e3o pediu esse m\u00eas' : 'Ativo este m\u00eas';
+  const ent=Object.entries(prods);
+  const parados=ent.filter(([,v])=>v.g>=2).sort((a,b)=>b[1].g-a[1].g);
+  const aviso=ent.filter(([,v])=>v.g===1).sort((a,b)=>b[1].f-a[1].f);
+  const ativos=ent.filter(([,v])=>v.g<1);
+  return [...parados,...aviso,...ativos].map(([p,v])=>[v.c||'',p,sit(v.g),v.q,v.v,v.g,v.f,v.lm||'']);
+}
+function exportAnaliseCliente(btn){
+  const cl=btn.closest('.tab-pane').dataset.cl;
+  const linhas=_analiseLinhas(cl);
+  if(!linhas.length){alert('Sem an\u00e1lise para este cliente.');return;}
+  const empresa=comp==='ibrac'?'Ibrac Condimentos':'VH Devro';
+  const cab=['C\u00f3digo','Produto','Situa\u00e7\u00e3o','Qtd m\u00e9dia','Valor m\u00e9dio (R$)','Parado h\u00e1 (meses)','Frequ\u00eancia (n\u00ba pedidos)','\u00daltimo pedido (m\u00eas)'];
+  const aoa=[['An\u00e1lise de produtos \u2014 '+cl],
+             ['Empresa: '+empresa+'    Gerado em: '+new Date().toLocaleDateString('pt-BR')],
+             [], cab, ...linhas];
+  const nomeArq='analise_'+cl.replace(/[^a-z0-9]/gi,'_');
+  _comXLSX(function(ok){
+    if(ok){
+      const ws=XLSX.utils.aoa_to_sheet(aoa);
+      ws['!cols']=[{wch:10},{wch:48},{wch:22},{wch:10},{wch:15},{wch:16},{wch:20},{wch:17}];
+      ws['!merges']=[{s:{r:0,c:0},e:{r:0,c:7}},{s:{r:1,c:0},e:{r:1,c:7}}];
+      const wb=XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb,ws,'An\u00e1lise');
+      XLSX.writeFile(wb,nomeArq+'.xlsx');
+    }else{
+      // Sem internet para a biblioteca: gera CSV que abre direto no Excel
+      const csv='\uFEFF'+aoa.map(r=>r.map(c=>'"'+String(c).replace(/"/g,'""')+'"').join(';')).join('\n');
+      const a=document.createElement('a');
+      a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8'}));
+      a.download=nomeArq+'.csv'; a.click();
+    }
+  });
+}
+function _comXLSX(cb){
+  if(typeof XLSX!=='undefined'){cb(true);return;}
+  const s=document.createElement('script');
+  s.src='https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js';
+  s.onload=function(){cb(typeof XLSX!=='undefined')};
+  s.onerror=function(){cb(false)};
+  document.head.appendChild(s);
+}
 
 function trocarAbaSemRender(aba){
   document.getElementById('tab-pedidos').style.display  = aba === 'pedidos'  ? '' : 'none';
