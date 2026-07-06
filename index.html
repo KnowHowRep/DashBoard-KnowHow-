@@ -257,11 +257,18 @@ table.cart-tabela{width:100%;border-collapse:collapse;font-size:13px}
 .pi-cliente{font-weight:600;font-size:13px;margin:10px 0 4px}
 .pi-prod{font-size:12.5px;color:var(--muted);padding:3px 0 3px 14px;border-left:2px solid var(--border)}
 .pi-gap{font-family:var(--mono);color:var(--warn);font-weight:600}
+
+.perfil-linha{font-size:13px;display:flex;align-items:center;gap:6px;margin-bottom:3px}
+.perfil-sub{color:var(--subtle);font-size:11px}
+.guia-body p{margin:8px 0;font-size:13px;line-height:1.55;color:var(--text)}
+.pa-linha{font-size:13px;color:var(--muted);margin-top:3px;display:flex;gap:6px;align-items:baseline}
+.pa-linha b{color:var(--text)}
+.pa-ico{flex-shrink:0}
 </style>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css"/>
 </head>
 <body>
-<div id="lub" style="position:fixed;top:0;left:0;right:0;z-index:9999;background:#1a1a18;color:#fff;display:flex;align-items:center;justify-content:space-between;padding:7px 20px;font-family:DM Sans,sans-serif;font-size:12px;box-shadow:0 2px 8px rgba(0,0,0,.3)"><span>&#128338;&nbsp; Última atualização: <b style="color:#E1F5EE">06/07/2026 às 14:46</b></span><button onclick="document.getElementById('lub').remove();document.body.style.paddingTop='0'" style="background:none;border:none;color:#aaa;cursor:pointer;font-size:18px;line-height:1;padding:0">&#x2715;</button></div><style>body{padding-top:38px!important}</style>
+<div id="lub" style="position:fixed;top:0;left:0;right:0;z-index:9999;background:#1a1a18;color:#fff;display:flex;align-items:center;justify-content:space-between;padding:7px 20px;font-family:DM Sans,sans-serif;font-size:12px;box-shadow:0 2px 8px rgba(0,0,0,.3)"><span>&#128338;&nbsp; Última atualização: <b style="color:#E1F5EE">06/07/2026 às 14:59</b></span><button onclick="document.getElementById('lub').remove();document.body.style.paddingTop='0'" style="background:none;border:none;color:#aaa;cursor:pointer;font-size:18px;line-height:1;padding:0">&#x2715;</button></div><style>body{padding-top:38px!important}</style>
 
 <div class="shell">
 
@@ -320,12 +327,30 @@ table.cart-tabela{width:100%;border-collapse:collapse;font-size:13px}
 
 <!-- ABA ANALISES -->
 <section id="tab-analises">
+  <details class="det-oculto" id="det-guia" style="margin:0 0 14px">
+    <summary>&#128218; Como ler esta análise (guia rápido)</summary>
+    <div class="det-body guia-body">
+      <p><b>A ideia:</b> esta aba responde uma pergunta só &#8212; <b>quem eu preciso procurar primeiro?</b></p>
+      <p><span class="selo-status ativo">Ativo</span> Cliente comprando no ritmo normal dele. Tudo certo.</p>
+      <p><span class="selo-status risco">Em risco</span> Já passou da data em que costumava fazer novo pedido. Vale um contato preventivo antes que esfrie.</p>
+      <p><span class="selo-status inativo">Inativo</span> Passou muito tempo sem comprar. Precisa de visita ou ligação de reativação.</p>
+      <p><span class="selo-abc a">A</span> <span class="selo-abc b">B</span> <span class="selo-abc c">C</span> Tamanho do cliente pelo faturamento dos últimos 12 meses: <b>A</b> = os grandes que somam 80% das vendas, <b>B</b> = os médios, <b>C</b> = os pequenos. <b>Um cliente A parado é sempre a maior urgência.</b></p>
+      <p><b>Positivação:</b> de cada 100 clientes da carteira, quantos estão ativos. Quanto maior, melhor.</p>
+      <p><b>Ciclo:</b> de quanto em quanto tempo aquele cliente costuma comprar, calculado do histórico dele. É isso que define se ele está "atrasado" ou não.</p>
+    </div>
+  </details>
+
   <div class="cart-kpis">
     <div class="cart-kpi k-ativos" onclick="filtrarTabela('ativo')"><div class="num" id="ck-ativos">&#8211;</div><div class="rotulo">Ativos</div></div>
     <div class="cart-kpi k-risco" onclick="filtrarTabela('risco')"><div class="num" id="ck-risco">&#8211;</div><div class="rotulo">Em risco</div></div>
     <div class="cart-kpi k-inativos" onclick="filtrarTabela('inativo')"><div class="num" id="ck-inativos">&#8211;</div><div class="rotulo">Inativos</div></div>
     <div class="cart-kpi k-posit"><div class="num" id="ck-posit">&#8211;%</div><div class="rotulo">Positivação</div></div>
-    <div class="cart-kpi k-posit"><div class="num" id="ck-curva">&#8211;</div><div class="rotulo">Curva A &#183; B &#183; C</div></div>
+    <div class="cart-kpi k-posit" style="min-width:190px">
+      <div class="perfil-linha"><span class="selo-abc a">A</span> <b id="ck-curva-a">&#8211;</b> grandes <span class="perfil-sub">(80% das vendas)</span></div>
+      <div class="perfil-linha"><span class="selo-abc b">B</span> <b id="ck-curva-b">&#8211;</b> médios <span class="perfil-sub">(15%)</span></div>
+      <div class="perfil-linha"><span class="selo-abc c">C</span> <b id="ck-curva-c">&#8211;</b> pequenos <span class="perfil-sub">(5%)</span></div>
+      <div class="rotulo" style="margin-top:5px">Perfil da carteira</div>
+    </div>
   </div>
   <div class="pa-bloco">
     <h3>O que fazer agora</h3>
@@ -1698,7 +1723,9 @@ function renderAnalises(){
   document.getElementById('ck-risco').textContent = r.risco;
   document.getElementById('ck-inativos').textContent = r.inativos;
   document.getElementById('ck-posit').textContent = r.positivacao_pct + '%';
-  document.getElementById('ck-curva').textContent = r.curva.A + ' \u00b7 ' + r.curva.B + ' \u00b7 ' + r.curva.C;
+  document.getElementById('ck-curva-a').textContent = r.curva.A;
+  document.getElementById('ck-curva-b').textContent = r.curva.B;
+  document.getElementById('ck-curva-c').textContent = r.curva.C;
 
   const itens = (cart.painel_acao || []).concat(_followupsVencidos(cart))
     .sort((a, b) => b.score - a.score);
@@ -1712,13 +1739,29 @@ function renderAnalises(){
   document.getElementById('pa-lista').innerHTML = itens.length === 0
     ? '<div class="pa-vazio">\u2714 Carteira em dia \u2014 nenhum item pendente.</div>'
     : itens.map((it, i) => {
-        const criticos = (it.produtos_criticos || []).map(p => p.produto).slice(0, 3).join(', ');
+        const linhas = [];
+        if (it.tipo === 'followup') {
+          linhas.push('<div class="pa-linha"><span class="pa-ico">\u23F0</span><span>' + it.motivo + '</span></div>');
+        } else if (it.status === 'inativo') {
+          linhas.push('<div class="pa-linha"><span class="pa-ico">\uD83D\uDED2</span><span>Sem comprar h\u00e1 <b>' + it.dias_sem_comprar + ' dias</b> \u2014 o normal dele \u00e9 pedir a cada ~' + Math.round(it.ciclo_dias) + ' dias</span></div>');
+        } else if (it.status === 'risco') {
+          linhas.push('<div class="pa-linha"><span class="pa-ico">\u26A0\uFE0F</span><span>J\u00e1 passou da data de recompra: <b>' + it.dias_sem_comprar + ' dias</b> parado (costuma pedir a cada ~' + Math.round(it.ciclo_dias) + ' dias)</span></div>');
+        } else {
+          linhas.push('<div class="pa-linha"><span class="pa-ico">\u2705</span><span>Comprando normalmente \u2014 mas alguns produtos sumiram dos pedidos</span></div>');
+        }
+        if (it.curva === 'A') {
+          linhas.push('<div class="pa-linha"><span class="pa-ico">\u2B50</span><span>Um dos <b>maiores clientes</b> da carteira \u2014 prioridade m\u00e1xima</span></div>');
+        }
+        const prods = (it.produtos_criticos || []).slice(0, 3);
+        if (prods.length) {
+          linhas.push('<div class="pa-linha"><span class="pa-ico">\uD83D\uDCE6</span><span>Deixou de pedir: <b>' + prods.map(p => p.produto).join('</b>, <b>') + '</b></span></div>');
+        }
         return '<div class="pa-item ' + (it.tipo === 'followup' ? 'pa-followup' : '') + '" onclick="irParaCliente(\'' + it.cliente.replace(/'/g, "\\'") + '\')">' +
           '<div class="pa-rank">' + (i + 1) + '</div><div>' +
           '<div class="pa-nome">' + it.cliente +
-            ' <span class="selo-abc ' + it.curva.toLowerCase() + '">' + it.curva + '</span>' +
-            ' <span class="selo-status ' + it.status + '">' + it.status + '</span></div>' +
-          '<div class="pa-motivo">' + it.motivo + (criticos ? ' \u2014 ' + criticos : '') + '</div>' +
+            ' <span class="selo-abc ' + it.curva.toLowerCase() + '" title="' + (it.curva === 'A' ? 'Cliente grande (top 80% das vendas)' : it.curva === 'B' ? 'Cliente m\u00e9dio' : 'Cliente pequeno') + '">' + it.curva + '</span>' +
+            ' <span class="selo-status ' + it.status + '">' + (it.status === 'risco' ? 'em risco' : it.status) + '</span></div>' +
+          linhas.join('') +
           '<div class="pa-acao">\u2192 ' + it.acao_sugerida + '</div>' +
           '</div></div>';
       }).join('');
@@ -1741,8 +1784,8 @@ function renderTabela(){
   document.getElementById('cart-tbody').innerHTML = rows.map(c =>
     '<tr style="cursor:pointer" onclick="irParaCliente(\'' + c.cliente.replace(/'/g, "\\'") + '\')">' +
     '<td><b>' + c.cliente + '</b></td>' +
-    '<td><span class="selo-abc ' + c.curva.toLowerCase() + '">' + c.curva + '</span></td>' +
-    '<td><span class="selo-status ' + c.status + '">' + c.status + '</span></td>' +
+    '<td><span class="selo-abc ' + c.curva.toLowerCase() + '" title="' + (c.curva === 'A' ? 'Cliente grande (top 80% das vendas)' : c.curva === 'B' ? 'Cliente m\u00e9dio' : 'Cliente pequeno') + '">' + c.curva + '</span></td>' +
+    '<td><span class="selo-status ' + c.status + '">' + (c.status === 'risco' ? 'em risco' : c.status) + '</span></td>' +
     '<td class="num-r">' + c.dias_sem_comprar + 'd</td>' +
     '<td class="num-r" title="' + (c.ciclo_proprio ? 'ciclo calculado do hist\u00f3rico do cliente' : 'ciclo padr\u00e3o (poucos pedidos)') + '">' +
       (c.ciclo_proprio ? '' : '~') + Math.round(c.ciclo_dias) + 'd</td>' +
