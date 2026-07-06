@@ -4,6 +4,12 @@ Lê orders_database.csv + contacts.json + dashboard_template.html
 e gera index.html com os dados injetados.
 """
 import re, json, pandas as pd
+
+try:
+    from analise_carteira import gerar_analise_carteira, ALIAS_CLIENTES   # ### NOVO
+except ImportError:
+    gerar_analise_carteira = None
+    ALIAS_CLIENTES = {}
 from datetime import datetime
 from collections import defaultdict
 from pathlib import Path
@@ -97,10 +103,24 @@ def main():
         return
     df = pd.read_csv(CSV_PATH, dtype={"cod_produto": str, "mes": str, "ano": str},
                      parse_dates=["data_pedido"])
+
+    # ### NOVO: mesma unificação de nomes usada no dashboard local
+    if "cliente" in df.columns and ALIAS_CLIENTES:
+        df["cliente"] = df["cliente"].astype(str).str.strip().replace(ALIAS_CLIENTES)
     print(f"  {len(df)} linhas, {df['cliente'].nunique()} clientes")
 
-    DATA_JS     = json.dumps(build_data(df),     ensure_ascii=False, separators=(",",":"))
-    ANALYSIS_JS = json.dumps(build_analysis(df), ensure_ascii=False, separators=(",",":"))
+    analysis    = build_analysis(df)
+    DATA_JS     = json.dumps(build_data(df), ensure_ascii=False, separators=(",",":"))
+    ANALYSIS_JS = json.dumps(analysis,        ensure_ascii=False, separators=(",",":"))
+
+    # ### NOVO: aba Análises (positivação, curva ABC, painel de ação)
+    carteira = {}
+    if gerar_analise_carteira is not None and not df.empty:
+        try:
+            carteira = gerar_analise_carteira(df, analysis)
+        except Exception as e:
+            print(f"  Erro na análise de carteira: {e}")
+    CARTEIRA_JS = json.dumps(carteira, ensure_ascii=False, separators=(",",":"))
 
     contacts = {}
     if CONTACTS_PATH.exists():
@@ -138,6 +158,7 @@ def main():
     html = re.sub(r"const DEBTS\s*=\s*\{.*?\};",      f"const DEBTS = {DEBTS_JS};",         html, flags=re.DOTALL)
     html = re.sub(r"const MSG_TIMERS\s*=\s*\{.*?\};", f"const MSG_TIMERS = {MSG_JS};",       html, flags=re.DOTALL)
     html = re.sub(r"const LOCATIONS\s*=\s*\{.*?\};", f"const LOCATIONS = {LOC_JS};", html, flags=re.DOTALL)
+    html = re.sub(r"const CARTEIRA\s*=\s*\{.*?\};",  f"const CARTEIRA = {CARTEIRA_JS};", html, flags=re.DOTALL)  # ### NOVO
 
     s0 = html.find("<script>") + 8
     s1 = html.rfind("</script>")
