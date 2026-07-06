@@ -205,6 +205,47 @@ tr:last-child td{border-bottom:none}
     #month-btns .mo-btn{ font-size:11px; padding:3px 7px }
     .gap-pill{ font-size:10px; padding:1px 5px }
   }
+
+/* ===== ABA ANALISES (positivacao + ABC + painel de acao) ===== */
+.abas-nav{display:flex;gap:6px;margin-bottom:16px;border-bottom:2px solid var(--border)}
+.abas-nav button{border:none;background:none;cursor:pointer;font:600 14px var(--font);color:var(--subtle);padding:11px 20px;border-bottom:3px solid transparent;margin-bottom:-2px;transition:color .15s}
+.abas-nav button.ativa{color:var(--cor-primaria,var(--ibrac));border-bottom-color:var(--cor-primaria,var(--ibrac))}
+.abas-nav .badge-acoes{display:inline-block;min-width:20px;padding:2px 6px;margin-left:6px;border-radius:10px;background:var(--err);color:#fff;font-size:11px;font-weight:700}
+#tab-analises{display:none}
+.cart-kpis{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:20px}
+.cart-kpi{flex:1;min-width:126px;padding:13px 15px;border-radius:var(--radius);background:var(--surface);border:1px solid var(--border);cursor:pointer;border-left:5px solid var(--subtle);transition:transform .12s,box-shadow .12s}
+.cart-kpi:hover{transform:translateY(-2px);box-shadow:0 3px 10px rgba(0,0,0,.10)}
+.cart-kpi.selecionado{outline:2px solid var(--cor-primaria,var(--ibrac))}
+.cart-kpi .num{font-size:24px;font-weight:600;font-family:var(--mono)}
+.cart-kpi .rotulo{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;margin-top:2px}
+.cart-kpi.k-ativos{border-left-color:var(--ok)}
+.cart-kpi.k-risco{border-left-color:var(--warn)}
+.cart-kpi.k-inativos{border-left-color:var(--err)}
+.cart-kpi.k-posit{border-left-color:var(--cor-primaria,var(--ibrac));cursor:default}
+.selo-abc,.selo-status{display:inline-block;font-size:11px;font-weight:700;padding:2px 8px;border-radius:10px;vertical-align:middle}
+.selo-abc.a{background:#14532d;color:#fff}.selo-abc.b{background:#6b7f2a;color:#fff}.selo-abc.c{background:#9aa0a6;color:#fff}
+.selo-status.ativo{background:var(--ok-bg);color:var(--ok)}
+.selo-status.risco{background:var(--warn-bg);color:var(--warn)}
+.selo-status.inativo{background:var(--err-bg);color:var(--err)}
+.pa-bloco{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:16px 18px;margin-bottom:20px}
+.pa-bloco h3{margin:0 0 2px;font-size:16px;color:var(--cor-primaria,var(--ibrac))}
+.pa-sub{font-size:12.5px;color:var(--muted);margin-bottom:8px}
+.pa-item{display:flex;gap:12px;align-items:flex-start;padding:11px 8px;border-bottom:1px solid var(--border);cursor:pointer}
+.pa-item:hover{background:var(--bg)}
+.pa-item:last-child{border-bottom:none}
+.pa-rank{min-width:27px;height:27px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;background:var(--cor-primaria,var(--ibrac));color:#fff;font-size:12.5px}
+.pa-nome{font-weight:600;font-size:14px;display:flex;gap:6px;align-items:center;flex-wrap:wrap}
+.pa-motivo{font-size:12.5px;color:var(--muted);margin-top:2px}
+.pa-acao{font-size:12px;font-weight:600;margin-top:4px;color:var(--cor-primaria,var(--ibrac))}
+.pa-followup{background:var(--warn-bg);border-left:4px solid var(--warn);border-radius:4px}
+.pa-vazio{text-align:center;color:var(--ok);padding:18px}
+.cart-tabela-wrap{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:12px 15px;overflow-x:auto}
+.cart-tabela-wrap h3{margin:4px 0 10px;font-size:16px;color:var(--cor-primaria,var(--ibrac))}
+table.cart-tabela{width:100%;border-collapse:collapse;font-size:13px}
+.cart-tabela th{text-align:left;padding:8px 10px;border-bottom:2px solid var(--border);font-size:11px;text-transform:uppercase;letter-spacing:.03em;color:var(--muted);cursor:pointer;white-space:nowrap;user-select:none}
+.cart-tabela td{padding:7px 10px;border-bottom:1px solid var(--border);white-space:nowrap}
+.cart-tabela tr:hover td{background:var(--bg)}
+.cart-tabela .num-r{text-align:right;font-family:var(--mono)}
 </style>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css"/>
 </head>
@@ -239,6 +280,14 @@ tr:last-child td{border-bottom:none}
   </div>
 </div>
 
+
+<!-- ABAS PEDIDOS / ANALISES -->
+<nav class="abas-nav">
+  <button id="btn-tab-pedidos" class="ativa" onclick="trocarAba('pedidos')">Pedidos</button>
+  <button id="btn-tab-analises" onclick="trocarAba('analises')">Análises <span class="badge-acoes" id="badge-acoes" style="display:none">0</span></button>
+</nav>
+
+<div id="tab-pedidos">
 <!-- TOOLBAR -->
 <div class="toolbar">
   <input class="search" id="search" placeholder="&#128269; Buscar cliente, produto ou código..." oninput="render()">
@@ -254,6 +303,39 @@ tr:last-child td{border-bottom:none}
 
 <!-- CARDS -->
 <div class="cards" id="cards"></div>
+</div><!-- /tab-pedidos -->
+
+<!-- ABA ANALISES -->
+<section id="tab-analises">
+  <div class="cart-kpis">
+    <div class="cart-kpi k-ativos" onclick="filtrarTabela('ativo')"><div class="num" id="ck-ativos">&#8211;</div><div class="rotulo">Ativos</div></div>
+    <div class="cart-kpi k-risco" onclick="filtrarTabela('risco')"><div class="num" id="ck-risco">&#8211;</div><div class="rotulo">Em risco</div></div>
+    <div class="cart-kpi k-inativos" onclick="filtrarTabela('inativo')"><div class="num" id="ck-inativos">&#8211;</div><div class="rotulo">Inativos</div></div>
+    <div class="cart-kpi k-posit"><div class="num" id="ck-posit">&#8211;%</div><div class="rotulo">Positivação</div></div>
+    <div class="cart-kpi k-posit"><div class="num" id="ck-curva">&#8211;</div><div class="rotulo">Curva A &#183; B &#183; C</div></div>
+  </div>
+  <div class="pa-bloco">
+    <h3>O que fazer agora</h3>
+    <div class="pa-sub" id="pa-sub"></div>
+    <div id="pa-lista"></div>
+  </div>
+  <div class="cart-tabela-wrap">
+    <h3>Carteira de clientes</h3>
+    <table class="cart-tabela">
+      <thead><tr>
+        <th onclick="ordenarTabela('cliente')">Cliente</th>
+        <th onclick="ordenarTabela('curva')">Curva</th>
+        <th onclick="ordenarTabela('status')">Status</th>
+        <th class="num-r" onclick="ordenarTabela('dias_sem_comprar')">Dias parado</th>
+        <th class="num-r" onclick="ordenarTabela('ciclo_dias')">Ciclo</th>
+        <th onclick="ordenarTabela('ultima_compra')">Últ. compra</th>
+        <th class="num-r" onclick="ordenarTabela('faturamento_12m')">Fat. 12m</th>
+      </tr></thead>
+      <tbody id="cart-tbody"></tbody>
+    </table>
+  </div>
+</section>
+
 
 </div>
 
@@ -295,6 +377,7 @@ const CONTACTS = {};
 const DEBTS = {};
 const MSG_TIMERS = {};
 const LOCATIONS = {};
+const CARTEIRA = {};
 const MN = {'01':'Jan','02':'Fev','03':'Mar','04':'Abr','05':'Mai','06':'Jun','07':'Jul','08':'Ago','09':'Set','10':'Out','11':'Nov','12':'Dez'};
 const COMP_CLASS = {ibrac:'si', vh:'sv'};
 
@@ -313,6 +396,7 @@ function setComp(c){
   document.getElementById('btn-i').className = 'co-btn'+(c==='ibrac'?' si':'');
   document.getElementById('btn-v').className = 'co-btn'+(c==='vh'?' sv':'');
   buildMonthBtns();
+  if (typeof renderAnalises === 'function') renderAnalises();
 }
 
 function buildMonthBtns(){
@@ -1539,5 +1623,133 @@ buildMonthBtns();
     <div style="padding:20px;color:var(--subtle);font-size:13px">Carregando...</div>
   </div>
 </div>
+
+<script>
+/* ===== ABA ANALISES: positivacao + curva ABC + painel de acao ===== */
+let _cartFiltro = null;
+let _cartOrdem = { col: 'faturamento_12m', asc: false };
+
+function _cartAtual(){ return (typeof CARTEIRA !== 'undefined' && CARTEIRA[comp]) || null; }
+function _cardId(cl){ return cl.replace(/[^a-z0-9]/gi,'_'); }
+function _fmtData(iso){ return iso ? iso.split('-').reverse().join('/') : '\u2014'; }
+
+function trocarAba(aba){
+  document.getElementById('tab-pedidos').style.display  = aba === 'pedidos'  ? '' : 'none';
+  document.getElementById('tab-analises').style.display = aba === 'analises' ? 'block' : 'none';
+  document.getElementById('btn-tab-pedidos').classList.toggle('ativa', aba === 'pedidos');
+  document.getElementById('btn-tab-analises').classList.toggle('ativa', aba === 'analises');
+  if (aba === 'analises') renderAnalises();
+}
+
+function _followupsVencidos(cart){
+  // Reusa o timer de 15 dias que ja existe (dash_msg_v1, chave comp+'||'+cliente)
+  const out = [], msgs = getMsgs();
+  (cart.clientes || []).forEach(c => {
+    const ts = msgs[comp + '||' + c.cliente];
+    if (!ts) return;
+    const dias = Math.floor((Date.now() - ts) / 86400000);
+    if (dias >= MSG_DAYS) out.push(Object.assign({}, c, {
+      tipo: 'followup',
+      score: 2.0 + (c.curva === 'A' ? 2 : c.curva === 'B' ? 1 : 0),
+      motivo: 'follow-up vencido: mensagem enviada h\u00e1 ' + dias + ' dias',
+      acao_sugerida: 'Enviar nova mensagem de acompanhamento'
+    }));
+  });
+  return out;
+}
+
+function renderAnalises(){
+  const cart = _cartAtual();
+  const cor = comp === 'ibrac' ? 'var(--ibrac)' : 'var(--vh)';
+  document.querySelectorAll('.abas-nav, #tab-analises').forEach(el =>
+    el.style.setProperty('--cor-primaria', cor));
+  if (!cart || !cart.resumo || !cart.resumo.total) return;
+
+  const r = cart.resumo;
+  document.getElementById('ck-ativos').textContent = r.ativos;
+  document.getElementById('ck-risco').textContent = r.risco;
+  document.getElementById('ck-inativos').textContent = r.inativos;
+  document.getElementById('ck-posit').textContent = r.positivacao_pct + '%';
+  document.getElementById('ck-curva').textContent = r.curva.A + ' \u00b7 ' + r.curva.B + ' \u00b7 ' + r.curva.C;
+
+  const itens = (cart.painel_acao || []).concat(_followupsVencidos(cart))
+    .sort((a, b) => b.score - a.score);
+
+  const badge = document.getElementById('badge-acoes');
+  badge.textContent = itens.length;
+  badge.style.display = itens.length ? '' : 'none';
+
+  document.getElementById('pa-sub').textContent =
+    itens.length + ' item(ns) priorizados por curva ABC, positiva\u00e7\u00e3o e follow-ups';
+  document.getElementById('pa-lista').innerHTML = itens.length === 0
+    ? '<div class="pa-vazio">\u2714 Carteira em dia \u2014 nenhum item pendente.</div>'
+    : itens.map((it, i) => {
+        const criticos = (it.produtos_criticos || []).map(p => p.produto).slice(0, 3).join(', ');
+        return '<div class="pa-item ' + (it.tipo === 'followup' ? 'pa-followup' : '') + '" onclick="irParaCliente(\'' + it.cliente.replace(/'/g, "\\'") + '\')">' +
+          '<div class="pa-rank">' + (i + 1) + '</div><div>' +
+          '<div class="pa-nome">' + it.cliente +
+            ' <span class="selo-abc ' + it.curva.toLowerCase() + '">' + it.curva + '</span>' +
+            ' <span class="selo-status ' + it.status + '">' + it.status + '</span></div>' +
+          '<div class="pa-motivo">' + it.motivo + (criticos ? ' \u2014 ' + criticos : '') + '</div>' +
+          '<div class="pa-acao">\u2192 ' + it.acao_sugerida + '</div>' +
+          '</div></div>';
+      }).join('');
+
+  renderTabela();
+}
+
+function renderTabela(){
+  const cart = _cartAtual();
+  if (!cart) return;
+  let rows = (cart.clientes || []).slice();
+  if (_cartFiltro) rows = rows.filter(c => c.status === _cartFiltro);
+  const col = _cartOrdem.col, asc = _cartOrdem.asc;
+  rows.sort((a, b) => {
+    const va = a[col], vb = b[col];
+    const cmp = typeof va === 'number' ? va - vb : String(va).localeCompare(String(vb));
+    return asc ? cmp : -cmp;
+  });
+  document.getElementById('cart-tbody').innerHTML = rows.map(c =>
+    '<tr style="cursor:pointer" onclick="irParaCliente(\'' + c.cliente.replace(/'/g, "\\'") + '\')">' +
+    '<td><b>' + c.cliente + '</b></td>' +
+    '<td><span class="selo-abc ' + c.curva.toLowerCase() + '">' + c.curva + '</span></td>' +
+    '<td><span class="selo-status ' + c.status + '">' + c.status + '</span></td>' +
+    '<td class="num-r">' + c.dias_sem_comprar + 'd</td>' +
+    '<td class="num-r" title="' + (c.ciclo_proprio ? 'ciclo calculado do hist\u00f3rico do cliente' : 'ciclo padr\u00e3o (poucos pedidos)') + '">' +
+      (c.ciclo_proprio ? '' : '~') + Math.round(c.ciclo_dias) + 'd</td>' +
+    '<td>' + _fmtData(c.ultima_compra) + '</td>' +
+    '<td class="num-r">' + fmt(c.faturamento_12m) + '</td></tr>').join('');
+}
+
+function filtrarTabela(status){
+  _cartFiltro = (_cartFiltro === status) ? null : status;
+  document.querySelectorAll('.cart-kpi').forEach(k => k.classList.remove('selecionado'));
+  if (_cartFiltro){
+    const cls = { ativo: 'k-ativos', risco: 'k-risco', inativo: 'k-inativos' }[_cartFiltro];
+    document.querySelector('.cart-kpi.' + cls).classList.add('selecionado');
+  }
+  renderTabela();
+}
+
+function ordenarTabela(col){
+  _cartOrdem = { col: col, asc: _cartOrdem.col === col ? !_cartOrdem.asc : false };
+  renderTabela();
+}
+
+function irParaCliente(cliente){
+  trocarAba('pedidos');
+  // Garante que o card esteja visivel: busca pelo nome e mostra todos os status
+  const s = document.getElementById('search');
+  s.value = cliente; setFilter('all');
+  const card = document.getElementById('card-' + _cardId(cliente));
+  if (card){
+    card.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    card.style.boxShadow = '0 0 0 3px ' + (comp === 'ibrac' ? 'var(--ibrac)' : 'var(--vh)');
+    setTimeout(() => { card.style.boxShadow = ''; }, 2500);
+  }
+}
+
+document.addEventListener('DOMContentLoaded', renderAnalises);
+</script>
 </body>
 </html>
