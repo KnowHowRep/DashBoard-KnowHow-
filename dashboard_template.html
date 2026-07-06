@@ -1028,7 +1028,7 @@ function buildSparkline(cl){
 // ── Main render ──────────────────────────────────────────────────────────
 function render(){
   const q = document.getElementById('search').value.trim().toLowerCase();
-  const clients = Object.keys(DATA[comp]||{}).filter(c=>!['FEVEREIRO_25','RINALDO1','MAURICEA','FRIGO GOMES','CORDEIRO PATR'].includes(c));
+  const clients = Object.keys(DATA[comp]||{}).filter(c=>!['FEVEREIRO_25','RINALDO1','MAURICEA','FRIGO GOMES','CORDEIRO PATR','MM CASINGS'].includes(c));
 
   // Filter
   // Unified search: match client name OR product name/code
@@ -1684,6 +1684,10 @@ function _cartAtual(){ return (typeof CARTEIRA !== 'undefined' && CARTEIRA[comp]
 function _cardId(cl){ return cl.replace(/[^a-z0-9]/gi,'_'); }
 function _fmtData(iso){ return iso ? iso.split('-').reverse().join('/') : '\u2014'; }
 
+function trocarAbaSemRender(aba){
+  document.getElementById('tab-pedidos').style.display  = aba === 'pedidos'  ? '' : 'none';
+  document.getElementById('tab-analises').style.display = aba === 'analises' ? 'block' : 'none';
+}
 function trocarAba(aba){
   document.getElementById('tab-pedidos').style.display  = aba === 'pedidos'  ? '' : 'none';
   document.getElementById('tab-analises').style.display = aba === 'analises' ? 'block' : 'none';
@@ -1711,6 +1715,10 @@ function _followupsVencidos(cart){
 
 function renderAnalises(){
   const cart = _cartAtual();
+  // Sem dados de carteira (ex.: gerador antigo): esconde a navegação de abas
+  const temDados = cart && cart.resumo && cart.resumo.total;
+  document.querySelector('.abas-nav').style.display = temDados ? '' : 'none';
+  if (!temDados) { trocarAbaSemRender('pedidos'); }
   const cor = comp === 'ibrac' ? 'var(--ibrac)' : 'var(--vh)';
   document.querySelectorAll('.abas-nav, #tab-analises').forEach(el =>
     el.style.setProperty('--cor-primaria', cor));

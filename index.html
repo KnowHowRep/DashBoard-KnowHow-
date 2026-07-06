@@ -268,7 +268,7 @@ table.cart-tabela{width:100%;border-collapse:collapse;font-size:13px}
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css"/>
 </head>
 <body>
-<div id="lub" style="position:fixed;top:0;left:0;right:0;z-index:9999;background:#1a1a18;color:#fff;display:flex;align-items:center;justify-content:space-between;padding:7px 20px;font-family:DM Sans,sans-serif;font-size:12px;box-shadow:0 2px 8px rgba(0,0,0,.3)"><span>&#128338;&nbsp;Última atualização: <b style="color:#E1F5EE">06/07/2026 às 17:59 UTC</b></span><button onclick="document.getElementById('lub').remove();document.body.style.paddingTop='0'" style="background:none;border:none;color:#aaa;cursor:pointer;font-size:18px;line-height:1;padding:0">&#x2715;</button></div><style>body{padding-top:38px!important}</style>
+<div id="lub" style="position:fixed;top:0;left:0;right:0;z-index:9999;background:#1a1a18;color:#fff;display:flex;align-items:center;justify-content:space-between;padding:7px 20px;font-family:DM Sans,sans-serif;font-size:12px;box-shadow:0 2px 8px rgba(0,0,0,.3)"><span>&#128338;&nbsp;Última atualização: <b style="color:#E1F5EE">06/07/2026 às 18:33 UTC</b></span><button onclick="document.getElementById('lub').remove();document.body.style.paddingTop='0'" style="background:none;border:none;color:#aaa;cursor:pointer;font-size:18px;line-height:1;padding:0">&#x2715;</button></div><style>body{padding-top:38px!important}</style>
 
 <div class="shell">
 
@@ -1030,7 +1030,7 @@ function buildSparkline(cl){
 // ── Main render ──────────────────────────────────────────────────────────
 function render(){
   const q = document.getElementById('search').value.trim().toLowerCase();
-  const clients = Object.keys(DATA[comp]||{}).filter(c=>!['FEVEREIRO_25','RINALDO1','MAURICEA','FRIGO GOMES','CORDEIRO PATR'].includes(c));
+  const clients = Object.keys(DATA[comp]||{}).filter(c=>!['FEVEREIRO_25','RINALDO1','MAURICEA','FRIGO GOMES','CORDEIRO PATR','MM CASINGS'].includes(c));
 
   // Filter
   // Unified search: match client name OR product name/code
@@ -1686,6 +1686,10 @@ function _cartAtual(){ return (typeof CARTEIRA !== 'undefined' && CARTEIRA[comp]
 function _cardId(cl){ return cl.replace(/[^a-z0-9]/gi,'_'); }
 function _fmtData(iso){ return iso ? iso.split('-').reverse().join('/') : '\u2014'; }
 
+function trocarAbaSemRender(aba){
+  document.getElementById('tab-pedidos').style.display  = aba === 'pedidos'  ? '' : 'none';
+  document.getElementById('tab-analises').style.display = aba === 'analises' ? 'block' : 'none';
+}
 function trocarAba(aba){
   document.getElementById('tab-pedidos').style.display  = aba === 'pedidos'  ? '' : 'none';
   document.getElementById('tab-analises').style.display = aba === 'analises' ? 'block' : 'none';
@@ -1713,6 +1717,10 @@ function _followupsVencidos(cart){
 
 function renderAnalises(){
   const cart = _cartAtual();
+  // Sem dados de carteira (ex.: gerador antigo): esconde a navegação de abas
+  const temDados = cart && cart.resumo && cart.resumo.total;
+  document.querySelector('.abas-nav').style.display = temDados ? '' : 'none';
+  if (!temDados) { trocarAbaSemRender('pedidos'); }
   const cor = comp === 'ibrac' ? 'var(--ibrac)' : 'var(--vh)';
   document.querySelectorAll('.abas-nav, #tab-analises').forEach(el =>
     el.style.setProperty('--cor-primaria', cor));
