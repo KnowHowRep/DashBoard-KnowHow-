@@ -246,6 +246,17 @@ table.cart-tabela{width:100%;border-collapse:collapse;font-size:13px}
 .cart-tabela td{padding:7px 10px;border-bottom:1px solid var(--border);white-space:nowrap}
 .cart-tabela tr:hover td{background:var(--bg)}
 .cart-tabela .num-r{text-align:right;font-family:var(--mono)}
+
+.det-oculto{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);margin-top:14px;overflow:hidden}
+.det-oculto summary{cursor:pointer;padding:12px 16px;font:600 13px var(--font);color:var(--muted);list-style:none;display:flex;align-items:center;gap:8px;user-select:none}
+.det-oculto summary::before{content:'\25B8';font-size:11px;transition:transform .15s;color:var(--subtle)}
+.det-oculto[open] summary::before{transform:rotate(90deg)}
+.det-oculto summary:hover{background:var(--bg)}
+.det-oculto .det-body{padding:0 16px 14px;overflow-x:auto}
+.det-count{display:inline-block;min-width:20px;padding:2px 7px;border-radius:10px;background:var(--bg);border:1px solid var(--border);color:var(--muted);font-size:11px;font-weight:700}
+.pi-cliente{font-weight:600;font-size:13px;margin:10px 0 4px}
+.pi-prod{font-size:12.5px;color:var(--muted);padding:3px 0 3px 14px;border-left:2px solid var(--border)}
+.pi-gap{font-family:var(--mono);color:var(--warn);font-weight:600}
 </style>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css"/>
 </head>
@@ -334,6 +345,21 @@ table.cart-tabela{width:100%;border-collapse:collapse;font-size:13px}
       <tbody id="cart-tbody"></tbody>
     </table>
   </div>
+
+  <details class="det-oculto" id="det-prod-inativos">
+    <summary>Produtos inativos há 5+ meses <span class="det-count" id="cnt-prod-inativos">0</span></summary>
+    <div class="det-body" id="prod-inativos-lista"></div>
+  </details>
+
+  <details class="det-oculto" id="det-arquivados">
+    <summary>Inativos há mais de 12 meses <span class="det-count" id="cnt-arquivados">0</span></summary>
+    <div class="det-body">
+      <table class="cart-tabela">
+        <thead><tr><th>Cliente</th><th>Curva</th><th class="num-r">Dias parado</th><th>Últ. compra</th><th class="num-r">Fat. 12m</th></tr></thead>
+        <tbody id="arq-tbody"></tbody>
+      </table>
+    </div>
+  </details>
 </section>
 
 
@@ -1696,12 +1722,13 @@ function renderAnalises(){
       }).join('');
 
   renderTabela();
+  renderOcultos(cart);
 }
 
 function renderTabela(){
   const cart = _cartAtual();
   if (!cart) return;
-  let rows = (cart.clientes || []).slice();
+  let rows = (cart.clientes || []).filter(c => !c.arquivado);
   if (_cartFiltro) rows = rows.filter(c => c.status === _cartFiltro);
   const col = _cartOrdem.col, asc = _cartOrdem.asc;
   rows.sort((a, b) => {
@@ -1719,6 +1746,37 @@ function renderTabela(){
       (c.ciclo_proprio ? '' : '~') + Math.round(c.ciclo_dias) + 'd</td>' +
     '<td>' + _fmtData(c.ultima_compra) + '</td>' +
     '<td class="num-r">' + fmt(c.faturamento_12m) + '</td></tr>').join('');
+}
+
+function renderOcultos(cart){
+  // Inativos ha 12+ meses (clientes arquivados)
+  const arq = (cart.clientes || []).filter(c => c.arquivado)
+    .sort((a, b) => a.dias_sem_comprar - b.dias_sem_comprar);
+  document.getElementById('cnt-arquivados').textContent = arq.length;
+  document.getElementById('arq-tbody').innerHTML = arq.length === 0
+    ? '<tr><td colspan="5" style="color:var(--subtle)">Nenhum cliente arquivado.</td></tr>'
+    : arq.map(c =>
+      '<tr style="cursor:pointer" onclick="irParaCliente(\'' + c.cliente.replace(/'/g, "\\'") + '\')">' +
+      '<td><b>' + c.cliente + '</b></td>' +
+      '<td><span class="selo-abc ' + c.curva.toLowerCase() + '">' + c.curva + '</span></td>' +
+      '<td class="num-r">' + c.dias_sem_comprar + 'd</td>' +
+      '<td>' + _fmtData(c.ultima_compra) + '</td>' +
+      '<td class="num-r">' + fmt(c.faturamento_12m) + '</td></tr>').join('');
+
+  // Produtos inativos ha 5+ meses (apenas de clientes nao arquivados)
+  const comProd = (cart.clientes || []).filter(c => !c.arquivado &&
+    (c.produtos_inativos || []).length > 0);
+  const totalProd = comProd.reduce((s, c) => s + c.produtos_inativos.length, 0);
+  document.getElementById('cnt-prod-inativos').textContent = totalProd;
+  document.getElementById('prod-inativos-lista').innerHTML = totalProd === 0
+    ? '<div style="color:var(--subtle);padding:8px 0">Nenhum produto inativo.</div>'
+    : comProd.map(c =>
+      '<div class="pi-cliente" style="cursor:pointer" onclick="irParaCliente(\'' + c.cliente.replace(/'/g, "\\'") + '\')">' + c.cliente +
+      ' <span class="selo-abc ' + c.curva.toLowerCase() + '">' + c.curva + '</span></div>' +
+      c.produtos_inativos.map(p =>
+        '<div class="pi-prod">' + (p.cod ? '<b>' + p.cod + '</b> \u00b7 ' : '') + p.produto +
+        ' \u2014 <span class="pi-gap">' + p.gap_meses + ' meses parado</span></div>').join('')
+    ).join('');
 }
 
 function filtrarTabela(status){
