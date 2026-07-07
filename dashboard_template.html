@@ -760,12 +760,12 @@ function buildHistory(cl){
 // ── Analysis pane ────────────────────────────────────────────────────────
 function buildAnalysis(cl){
   const prods=ANALYSIS[comp]&&ANALYSIS[comp][cl];
-  if(!prods) return '<div style="padding:12px;font-size:13px;color:var(--subtle)">Sem dados.</div>';
+  if(!prods) return '<div style="padding:12px;font-size:13px;color:var(--subtle)">Sem dados.</div>'+buildMensagemMes(cl);
   const xlsBtn='<div style="display:flex;justify-content:flex-end;margin:2px 0 6px"><button class="exp-btn" onclick="exportAnaliseCliente(this)" title="Baixa esta an\u00e1lise em Excel, no mesmo formato da tela">&#8595; Excel</button></div>';
   const parados=Object.entries(prods).filter(([,v])=>v.g>=2).sort((a,b)=>b[1].g-a[1].g);
   const aviso  =Object.entries(prods).filter(([,v])=>v.g===1).sort((a,b)=>b[1].f-a[1].f);
   const ativos =Object.entries(prods).filter(([,v])=>v.g<1);
-  if(!parados.length&&!aviso.length) return xlsBtn+'<div style="padding:12px;font-size:13px;color:var(--subtle)">Todos os produtos foram pedidos no m\u00eas atual. \u2713</div>';
+  if(!parados.length&&!aviso.length) return xlsBtn+'<div style="padding:12px;font-size:13px;color:var(--subtle)">Todos os produtos foram pedidos no m\u00eas atual. \u2713</div>'+buildMensagemMes(cl);
   const dot=g=>'<span class="anal-dot" style="background:'+(g>=6?'#E24B4A':'#EF9F27')+'"></span>';
   const gp=g=>'<span class="gap-pill '+(g>=6?'gap-r':'gap-a')+'">'+(g>=18?'+18m':g+'m')+'</span>';
   let h=xlsBtn+'<table><thead><tr><th style="color:var(--subtle);font-size:10px">Cód.</th><th>Produto</th><th style="text-align:center">Qtd med.</th><th style="text-align:center">Parado ha</th><th style="text-align:center">Freq.</th></tr></thead><tbody>';
@@ -818,6 +818,7 @@ function buildAnalysis(cl){
     '</textarea>'+
     '<div id="msg-timer-'+msgId+'" style="margin-top:8px"></div>'+
   '</div>';
+  h += buildMensagemMes(cl);
   // schedule timer render after DOM is ready
   setTimeout(()=>renderMsgTimer(msgId, cl), 0);
   return h;
@@ -869,7 +870,6 @@ function buildCtPane(cl){
     h+='<span style="font-size:12px;color:var(--subtle)">Nenhum contato registrado.</span>';
   }
   h+='<button class="ct-btn'+(ct?' done':'')+'" onclick="openCt(\''+cl.replace(/'/g,"\\'")+'\')">'+(ct?'\u270e Editar':'\u2706 Registrar')+'</button>';
-  h+=buildMensagemMes(cl);
   return h+'</div>';
 }
 

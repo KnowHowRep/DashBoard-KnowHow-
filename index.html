@@ -280,7 +280,7 @@ table.cart-tabela{width:100%;border-collapse:collapse;font-size:13px}
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css"/>
 </head>
 <body>
-<div id="lub" style="position:fixed;top:0;left:0;right:0;z-index:9999;background:#1a1a18;color:#fff;display:flex;align-items:center;justify-content:space-between;padding:7px 20px;font-family:DM Sans,sans-serif;font-size:12px;box-shadow:0 2px 8px rgba(0,0,0,.3)"><span>&#128338;&nbsp;Última atualização: <b style="color:#E1F5EE">07/07/2026 às 08:49</b></span><button onclick="document.getElementById('lub').remove();document.body.style.paddingTop='0'" style="background:none;border:none;color:#aaa;cursor:pointer;font-size:18px;line-height:1;padding:0">&#x2715;</button></div><style>body{padding-top:38px!important}</style>
+<div id="lub" style="position:fixed;top:0;left:0;right:0;z-index:9999;background:#1a1a18;color:#fff;display:flex;align-items:center;justify-content:space-between;padding:7px 20px;font-family:DM Sans,sans-serif;font-size:12px;box-shadow:0 2px 8px rgba(0,0,0,.3)"><span>&#128338;&nbsp;Última atualização: <b style="color:#E1F5EE">07/07/2026 às 09:05</b></span><button onclick="document.getElementById('lub').remove();document.body.style.paddingTop='0'" style="background:none;border:none;color:#aaa;cursor:pointer;font-size:18px;line-height:1;padding:0">&#x2715;</button></div><style>body{padding-top:38px!important}</style>
 
 <div class="shell">
 
@@ -762,12 +762,12 @@ function buildHistory(cl){
 // ── Analysis pane ────────────────────────────────────────────────────────
 function buildAnalysis(cl){
   const prods=ANALYSIS[comp]&&ANALYSIS[comp][cl];
-  if(!prods) return '<div style="padding:12px;font-size:13px;color:var(--subtle)">Sem dados.</div>';
+  if(!prods) return '<div style="padding:12px;font-size:13px;color:var(--subtle)">Sem dados.</div>'+buildMensagemMes(cl);
   const xlsBtn='<div style="display:flex;justify-content:flex-end;margin:2px 0 6px"><button class="exp-btn" onclick="exportAnaliseCliente(this)" title="Baixa esta an\u00e1lise em Excel, no mesmo formato da tela">&#8595; Excel</button></div>';
   const parados=Object.entries(prods).filter(([,v])=>v.g>=2).sort((a,b)=>b[1].g-a[1].g);
   const aviso  =Object.entries(prods).filter(([,v])=>v.g===1).sort((a,b)=>b[1].f-a[1].f);
   const ativos =Object.entries(prods).filter(([,v])=>v.g<1);
-  if(!parados.length&&!aviso.length) return xlsBtn+'<div style="padding:12px;font-size:13px;color:var(--subtle)">Todos os produtos foram pedidos no m\u00eas atual. \u2713</div>';
+  if(!parados.length&&!aviso.length) return xlsBtn+'<div style="padding:12px;font-size:13px;color:var(--subtle)">Todos os produtos foram pedidos no m\u00eas atual. \u2713</div>'+buildMensagemMes(cl);
   const dot=g=>'<span class="anal-dot" style="background:'+(g>=6?'#E24B4A':'#EF9F27')+'"></span>';
   const gp=g=>'<span class="gap-pill '+(g>=6?'gap-r':'gap-a')+'">'+(g>=18?'+18m':g+'m')+'</span>';
   let h=xlsBtn+'<table><thead><tr><th style="color:var(--subtle);font-size:10px">Cód.</th><th>Produto</th><th style="text-align:center">Qtd med.</th><th style="text-align:center">Parado ha</th><th style="text-align:center">Freq.</th></tr></thead><tbody>';
@@ -820,6 +820,7 @@ function buildAnalysis(cl){
     '</textarea>'+
     '<div id="msg-timer-'+msgId+'" style="margin-top:8px"></div>'+
   '</div>';
+  h += buildMensagemMes(cl);
   // schedule timer render after DOM is ready
   setTimeout(()=>renderMsgTimer(msgId, cl), 0);
   return h;
@@ -871,7 +872,6 @@ function buildCtPane(cl){
     h+='<span style="font-size:12px;color:var(--subtle)">Nenhum contato registrado.</span>';
   }
   h+='<button class="ct-btn'+(ct?' done':'')+'" onclick="openCt(\''+cl.replace(/'/g,"\\'")+'\')">'+(ct?'\u270e Editar':'\u2706 Registrar')+'</button>';
-  h+=buildMensagemMes(cl);
   return h+'</div>';
 }
 
