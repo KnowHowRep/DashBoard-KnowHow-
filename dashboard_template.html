@@ -869,7 +869,64 @@ function buildCtPane(cl){
     h+='<span style="font-size:12px;color:var(--subtle)">Nenhum contato registrado.</span>';
   }
   h+='<button class="ct-btn'+(ct?' done':'')+'" onclick="openCt(\''+cl.replace(/'/g,"\\'")+'\')">'+(ct?'\u270e Editar':'\u2706 Registrar')+'</button>';
+  h+=buildMensagemMes(cl);
   return h+'</div>';
+}
+
+// ── Mensagem de início de mês (saudação + histórico de pedidos) ─────────
+function buildMensagemMes(cl){
+  const empresa = comp==='ibrac' ? 'Ibrac Condimentos' : 'VH Devro';
+  const prods = ANALYSIS[comp] && ANALYSIS[comp][cl];
+  const temItens = prods && Object.keys(prods).length > 0;
+
+  let corpo;
+  if (temItens){
+    const linhas = Object.entries(prods)
+      .sort((a,b)=>a[1].g-b[1].g)
+      .slice(0,10)
+      .map(([nome,info])=>{
+        if (info.g<=0) return '• '+nome+' (comprado esse mês, '+info.f+'x no histórico)';
+        const meses = info.g>=18 ? 'mais de 18 meses' : info.g===1 ? '1 mês' : info.g+' meses';
+        return '• '+nome+' (parado há '+meses+', comprado '+info.f+'x no histórico)';
+      })
+      .join('\n');
+    corpo =
+      'Passando aqui pra saber se esse mês vocês já vão fechar pedido com a gente.\n\n'+
+      'Segue abaixo os últimos pedidos feitos, só pra ajudar a lembrar:\n\n'+
+      linhas+'\n\n'+
+      'Qualquer orçamento que precisarem, é só chamar por aqui mesmo!';
+  } else {
+    corpo =
+      'Passando aqui pra saber se esse mês vocês vão precisar de algo da '+empresa+'.\n\n'+
+      'Qualquer coisa, é só me chamar por aqui mesmo que já te atendo!';
+  }
+
+  const msg =
+    'Bom dia! \uD83D\uDE4F Que esse mês seja abençoado pra vocês!\n\n'+
+    corpo+'\n\n'+
+    'Um ótimo mês pra todos aí! \uD83D\uDE4C';
+  const mid = 'mesmsg-'+cl.replace(/[^a-z0-9]/gi,'_');
+  return '<div style="margin-top:6px;border-top:1px solid var(--border);padding-top:14px">'+
+    '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">'+
+      '<span style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.05em;color:var(--subtle)">\u2600\uFE0F Mensagem de início de mês</span>'+
+      '<button id="copybtn-'+mid+'" data-msgid="'+mid+'" onclick="copyMesMsg(this.dataset.msgid)" '+
+        'style="font-size:11px;font-weight:600;padding:5px 14px;border-radius:8px;border:1px solid var(--ok);background:var(--ok-bg);color:var(--ok);cursor:pointer">Copiar mensagem</button>'+
+    '</div>'+
+    '<textarea id="'+mid+'" readonly onclick="this.select()" '+
+      'style="width:100%;box-sizing:border-box;height:130px;border:1px solid var(--border);border-radius:8px;padding:10px;font:13px/1.5 var(--font);color:var(--fg);background:var(--surface);resize:vertical;outline:none">'+
+      escTxt(msg)+
+    '</textarea>'+
+  '</div>';
+}
+function copyMesMsg(id){
+  const ta=document.getElementById(id);
+  if(!ta) return;
+  ta.select();
+  try{ navigator.clipboard.writeText(ta.value).catch(()=>document.execCommand('copy')); }catch(e){ document.execCommand('copy'); }
+  const btn=document.getElementById('copybtn-'+id);
+  if(btn){ const orig=btn.textContent; btn.textContent='\u2714 Copiado!'; btn.style.background='var(--ok)'; btn.style.color='#fff';
+    setTimeout(()=>{ btn.textContent=orig; btn.style.background='var(--ok-bg)'; btn.style.color='var(--ok)'; },1200);
+  }
 }
 
 // ── Debt pane ────────────────────────────────────────────────────────────
