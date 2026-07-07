@@ -74,6 +74,7 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);font-size:14
 .b-ok{background:var(--ok-bg);color:var(--ok)}
 .b-none{background:var(--err-bg);color:var(--err)}
 .b-cota{background:var(--vh-bg);color:var(--vh-t)}
+.b-orc{background:var(--warn-bg);color:#9a7208}
 .b-warn{background:var(--warn-bg);color:var(--warn)}
 .chev{font-size:12px;color:var(--subtle);transition:transform .2s;flex-shrink:0}
 .chev.open{transform:rotate(180deg)}
@@ -308,7 +309,7 @@ table.cart-tabela{width:100%;border-collapse:collapse;font-size:13px}
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css"/>
 </head>
 <body>
-<div id="lub" style="position:fixed;top:0;left:0;right:0;z-index:9999;background:#1a1a18;color:#fff;display:flex;align-items:center;justify-content:space-between;padding:7px 20px;font-family:DM Sans,sans-serif;font-size:12px;box-shadow:0 2px 8px rgba(0,0,0,.3)"><span>&#128338;&nbsp;Última atualização: <b style="color:#E1F5EE">07/07/2026 às 11:55</b></span><button onclick="document.getElementById('lub').remove();document.body.style.paddingTop='0'" style="background:none;border:none;color:#aaa;cursor:pointer;font-size:18px;line-height:1;padding:0">&#x2715;</button></div><style>body{padding-top:38px!important}</style>
+<div id="lub" style="position:fixed;top:0;left:0;right:0;z-index:9999;background:#1a1a18;color:#fff;display:flex;align-items:center;justify-content:space-between;padding:7px 20px;font-family:DM Sans,sans-serif;font-size:12px;box-shadow:0 2px 8px rgba(0,0,0,.3)"><span>&#128338;&nbsp;Última atualização: <b style="color:#E1F5EE">07/07/2026 às 14:04</b></span><button onclick="document.getElementById('lub').remove();document.body.style.paddingTop='0'" style="background:none;border:none;color:#aaa;cursor:pointer;font-size:18px;line-height:1;padding:0">&#x2715;</button></div><style>body{padding-top:38px!important}</style>
 
 <div class="shell">
 
@@ -1248,6 +1249,7 @@ function render(){
     // Badge
     let bdg,bcls;
     if(peds.length>0){bdg=peds.length+' pedido'+(peds.length>1?'s':'')+' \u2713';bcls='b-ok';}
+    else if(orcs.length>0){bdg=orcs.length+' or\u00e7amento'+(orcs.length>1?'s':'')+' aberto'+(orcs.length>1?'s':'');bcls='b-orc';}
     else if(cotas.length>0){bdg=cotas.length+' cota\u00e7\u00e3o pendente';bcls='b-cota';}
     else{bdg='Sem pedido';bcls='b-none';}
 
