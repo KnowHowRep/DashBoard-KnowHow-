@@ -211,6 +211,34 @@ tr:last-child td{border-bottom:none}
 .abas-nav button{border:none;background:none;cursor:pointer;font:600 14px var(--font);color:var(--subtle);padding:11px 20px;border-bottom:3px solid transparent;margin-bottom:-2px;transition:color .15s}
 .abas-nav button.ativa{color:var(--cor-primaria,var(--ibrac));border-bottom-color:var(--cor-primaria,var(--ibrac))}
 .abas-nav .badge-acoes{display:inline-block;min-width:20px;padding:2px 6px;margin-left:6px;border-radius:10px;background:var(--err);color:#fff;font-size:11px;font-weight:700}
+#tab-tarefas{display:none}
+.tarefas-add{display:flex;gap:8px;margin-bottom:16px}
+.tarefas-add input[type=text]{flex:1;padding:11px 14px;border:1px solid var(--border);border-radius:10px;font:14px var(--font);background:var(--surface);color:var(--fg)}
+.tarefas-add input[type=date]{padding:10px 12px;border:1px solid var(--border);border-radius:10px;font:13px var(--font);background:var(--surface);color:var(--fg)}
+.tf-add-btn{padding:11px 20px;border:none;border-radius:10px;background:var(--cor-primaria,var(--ibrac));color:#fff;font:600 14px var(--font);cursor:pointer;white-space:nowrap}
+.tf-add-btn:hover{filter:brightness(1.08)}
+.tarefas-resumo{display:flex;gap:10px;margin-bottom:16px;flex-wrap:wrap}
+.tf-kpi{flex:1;min-width:110px;padding:12px 14px;border-radius:10px;background:var(--bg);border:1px solid var(--border);border-left:4px solid var(--subtle)}
+.tf-kpi.k-atrasada{border-left-color:var(--err)}
+.tf-kpi.k-hoje{border-left-color:var(--warn)}
+.tf-kpi.k-semana{border-left-color:var(--cor-primaria,var(--ibrac))}
+.tf-kpi .num{font-size:20px;font-weight:700;font-family:var(--mono)}
+.tf-kpi .rotulo{font-size:10.5px;color:var(--muted);text-transform:uppercase;letter-spacing:.03em}
+.tf-item{display:flex;align-items:flex-start;gap:12px;padding:12px 14px;border:1px solid var(--border);border-radius:10px;margin-bottom:8px;background:var(--surface)}
+.tf-item.atrasada{border-left:4px solid var(--err);background:var(--err-bg)}
+.tf-item.hoje{border-left:4px solid var(--warn);background:var(--warn-bg)}
+.tf-check{width:22px;height:22px;border-radius:50%;border:2px solid var(--border);background:none;cursor:pointer;flex-shrink:0;margin-top:1px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:13px}
+.tf-check:hover{border-color:var(--cor-primaria,var(--ibrac))}
+.tf-item.concluida .tf-check{background:var(--ok);border-color:var(--ok)}
+.tf-corpo{flex:1;min-width:0}
+.tf-texto{font-size:14px;color:var(--fg)}
+.tf-item.concluida .tf-texto{text-decoration:line-through;color:var(--subtle)}
+.tf-prazo{font-size:11.5px;margin-top:3px;color:var(--muted)}
+.tf-prazo.atrasada{color:var(--err);font-weight:600}
+.tf-prazo.hoje{color:var(--warn);font-weight:600}
+.tf-del{border:none;background:none;color:var(--subtle);cursor:pointer;font-size:15px;padding:2px 6px;flex-shrink:0}
+.tf-del:hover{color:var(--err)}
+.tf-vazio{text-align:center;color:var(--ok);padding:28px;font-size:13px}
 #tab-analises{display:none}
 .cart-kpis{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:20px}
 .cart-kpi{flex:1;min-width:126px;padding:13px 15px;border-radius:var(--radius);background:var(--surface);border:1px solid var(--border);cursor:pointer;border-left:5px solid var(--subtle);transition:transform .12s,box-shadow .12s}
@@ -317,6 +345,7 @@ table.cart-tabela{width:100%;border-collapse:collapse;font-size:13px}
 <nav class="abas-nav">
   <button id="btn-tab-pedidos" class="ativa" onclick="trocarAba('pedidos')">Pedidos</button>
   <button id="btn-tab-analises" onclick="trocarAba('analises')">Análises <span class="badge-acoes" id="badge-acoes" style="display:none">0</span></button>
+  <button id="btn-tab-tarefas" onclick="trocarAba('tarefas')">Tarefas <span class="badge-acoes" id="badge-tarefas" style="display:none">0</span></button>
 </nav>
 
 <div id="tab-pedidos">
@@ -400,6 +429,24 @@ table.cart-tabela{width:100%;border-collapse:collapse;font-size:13px}
         <tbody id="arq-tbody"></tbody>
       </table>
     </div>
+  </details>
+</section>
+
+<!-- ABA TAREFAS -->
+<section id="tab-tarefas">
+  <div class="tarefas-add">
+    <input type="text" id="tf-novo-texto" placeholder="Nova tarefa ou demanda…" onkeydown="if(event.key==='Enter')adicionarTarefa()">
+    <input type="date" id="tf-novo-prazo" title="Prazo / data de follow-up">
+    <button class="tf-add-btn" onclick="adicionarTarefa()">+ Adicionar</button>
+  </div>
+
+  <div class="tarefas-resumo" id="tarefas-resumo"></div>
+
+  <div id="tarefas-lista"></div>
+
+  <details class="det-oculto" id="det-tarefas-concluidas" style="margin-top:14px">
+    <summary>Concluídas <span class="det-count" id="cnt-tarefas-concluidas">0</span></summary>
+    <div class="det-body" id="tarefas-concluidas-lista"></div>
   </details>
 </section>
 
@@ -1827,14 +1874,18 @@ function _comXLSX(cb){
 function trocarAbaSemRender(aba){
   document.getElementById('tab-pedidos').style.display  = aba === 'pedidos'  ? '' : 'none';
   document.getElementById('tab-analises').style.display = aba === 'analises' ? 'block' : 'none';
+  document.getElementById('tab-tarefas').style.display  = aba === 'tarefas' ? 'block' : 'none';
 }
 function trocarAba(aba){
   if (aba === 'analises') esconderBotaoVoltar();
   document.getElementById('tab-pedidos').style.display  = aba === 'pedidos'  ? '' : 'none';
   document.getElementById('tab-analises').style.display = aba === 'analises' ? 'block' : 'none';
+  document.getElementById('tab-tarefas').style.display  = aba === 'tarefas' ? 'block' : 'none';
   document.getElementById('btn-tab-pedidos').classList.toggle('ativa', aba === 'pedidos');
   document.getElementById('btn-tab-analises').classList.toggle('ativa', aba === 'analises');
+  document.getElementById('btn-tab-tarefas').classList.toggle('ativa', aba === 'tarefas');
   if (aba === 'analises') renderAnalises();
+  if (aba === 'tarefas') renderTarefas();
 }
 
 function _followupsVencidos(cart){
@@ -2020,7 +2071,127 @@ function irParaCliente(cliente){
   }
 }
 
+// ══════════════════════════════════════════════════════════════════════
+// ABA TAREFAS — checklist de demandas da semana com prazo/follow-up
+// Guardada só no navegador (localStorage), sobrevive a toda atualização
+// do dashboard (o .bat só regera Pedidos/Análises; Tarefas é só sua).
+// ══════════════════════════════════════════════════════════════════════
+const TF_KEY = 'dash_tarefas_v1';
+
+function getTarefas(){
+  try{ return JSON.parse(localStorage.getItem(TF_KEY) || '[]'); }catch(e){ return []; }
+}
+function saveTarefas(lista){
+  try{ localStorage.setItem(TF_KEY, JSON.stringify(lista)); }catch(e){}
+}
+function _hojeISO(){
+  const d = new Date();
+  return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+}
+function _statusPrazo(prazo, concluida){
+  if (concluida || !prazo) return '';
+  const hoje = _hojeISO();
+  if (prazo < hoje) return 'atrasada';
+  if (prazo === hoje) return 'hoje';
+  return '';
+}
+function _fmtPrazo(prazo){
+  if (!prazo) return '';
+  const [y,m,d] = prazo.split('-');
+  return d+'/'+m+'/'+y;
+}
+
+function adicionarTarefa(){
+  const txtEl = document.getElementById('tf-novo-texto');
+  const prazoEl = document.getElementById('tf-novo-prazo');
+  const texto = txtEl.value.trim();
+  if (!texto) { txtEl.focus(); return; }
+  const lista = getTarefas();
+  lista.push({
+    id: 'tf'+Date.now()+Math.floor(Math.random()*1000),
+    texto: texto,
+    prazo: prazoEl.value || '',
+    concluida: false,
+    criadaEm: _hojeISO(),
+  });
+  saveTarefas(lista);
+  txtEl.value = ''; prazoEl.value = '';
+  txtEl.focus();
+  renderTarefas();
+}
+function toggleTarefa(id){
+  const lista = getTarefas();
+  const t = lista.find(x=>x.id===id);
+  if (t) t.concluida = !t.concluida;
+  saveTarefas(lista);
+  renderTarefas();
+}
+function excluirTarefa(id){
+  saveTarefas(getTarefas().filter(x=>x.id!==id));
+  renderTarefas();
+}
+
+function _tarefaHtml(t){
+  const status = _statusPrazo(t.prazo, t.concluida);
+  const classes = ['tf-item'];
+  if (t.concluida) classes.push('concluida');
+  else if (status) classes.push(status);
+  let prazoHtml = '';
+  if (t.prazo){
+    const rotulo = status==='atrasada' ? 'Atrasada — prazo era '+_fmtPrazo(t.prazo)
+                 : status==='hoje' ? 'Prazo é hoje ('+_fmtPrazo(t.prazo)+')'
+                 : 'Prazo: '+_fmtPrazo(t.prazo);
+    prazoHtml = '<div class="tf-prazo '+status+'">\uD83D\uDCC5 '+rotulo+'</div>';
+  }
+  return '<div class="'+classes.join(' ')+'">'+
+    '<button class="tf-check" onclick="toggleTarefa(\''+t.id+'\')" title="Marcar como concluída">'+(t.concluida?'\u2713':'')+'</button>'+
+    '<div class="tf-corpo">'+
+      '<div class="tf-texto">'+escTxt(t.texto)+'</div>'+
+      prazoHtml+
+    '</div>'+
+    '<button class="tf-del" onclick="excluirTarefa(\''+t.id+'\')" title="Excluir">\u2715</button>'+
+  '</div>';
+}
+
+function renderTarefas(){
+  const todas = getTarefas();
+  const pendentes = todas.filter(t=>!t.concluida)
+    .sort((a,b)=> (a.prazo||'9999-99-99').localeCompare(b.prazo||'9999-99-99'));
+  const concluidas = todas.filter(t=>t.concluida).sort((a,b)=> (b.prazo||'').localeCompare(a.prazo||''));
+
+  const hoje = _hojeISO();
+  const em7dias = new Date(Date.now()+7*86400000);
+  const em7ISO = em7dias.getFullYear()+'-'+String(em7dias.getMonth()+1).padStart(2,'0')+'-'+String(em7dias.getDate()).padStart(2,'0');
+  const nAtrasadas = pendentes.filter(t=>t.prazo && t.prazo<hoje).length;
+  const nHoje = pendentes.filter(t=>t.prazo===hoje).length;
+  const nSemana = pendentes.filter(t=>t.prazo && t.prazo>=hoje && t.prazo<=em7ISO).length;
+
+  document.getElementById('tarefas-resumo').innerHTML =
+    '<div class="tf-kpi k-atrasada"><div class="num">'+nAtrasadas+'</div><div class="rotulo">Atrasadas</div></div>'+
+    '<div class="tf-kpi k-hoje"><div class="num">'+nHoje+'</div><div class="rotulo">Prazo hoje</div></div>'+
+    '<div class="tf-kpi k-semana"><div class="num">'+nSemana+'</div><div class="rotulo">Nos próximos 7 dias</div></div>'+
+    '<div class="tf-kpi"><div class="num">'+pendentes.length+'</div><div class="rotulo">Pendentes no total</div></div>';
+
+  document.getElementById('tarefas-lista').innerHTML = pendentes.length
+    ? pendentes.map(_tarefaHtml).join('')
+    : '<div class="tf-vazio">\u2714 Nenhuma tarefa pendente. Bom trabalho!</div>';
+
+  document.getElementById('cnt-tarefas-concluidas').textContent = concluidas.length;
+  document.getElementById('tarefas-concluidas-lista').innerHTML = concluidas.length
+    ? concluidas.map(_tarefaHtml).join('')
+    : '<div style="color:var(--subtle);padding:8px 0;font-size:12.5px">Nenhuma tarefa concluída ainda.</div>';
+
+  const badge = document.getElementById('badge-tarefas');
+  const urgentes = nAtrasadas + nHoje;
+  badge.textContent = pendentes.length;
+  badge.style.display = pendentes.length ? '' : 'none';
+  badge.style.background = urgentes > 0 ? 'var(--err)' : 'var(--subtle)';
+}
+
+document.addEventListener('DOMContentLoaded', renderTarefas);
+
 document.addEventListener('DOMContentLoaded', function(){ atualizarLogoEmpresa(comp); });
+
 document.addEventListener('DOMContentLoaded', renderAnalises);
 document.addEventListener('DOMContentLoaded', function(){
   // Se o usuário apagar/editar a busca manualmente, o botão de voltar some
