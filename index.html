@@ -309,7 +309,7 @@ table.cart-tabela{width:100%;border-collapse:collapse;font-size:13px}
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css"/>
 </head>
 <body>
-<div id="lub" style="position:fixed;top:0;left:0;right:0;z-index:9999;background:#1a1a18;color:#fff;display:flex;align-items:center;justify-content:space-between;padding:7px 20px;font-family:DM Sans,sans-serif;font-size:12px;box-shadow:0 2px 8px rgba(0,0,0,.3)"><span>&#128338;&nbsp;Última atualização: <b style="color:#E1F5EE">13/07/2026 às 18:34 UTC</b></span><button onclick="document.getElementById('lub').remove();document.body.style.paddingTop='0'" style="background:none;border:none;color:#aaa;cursor:pointer;font-size:18px;line-height:1;padding:0">&#x2715;</button></div><style>body{padding-top:38px!important}</style>
+<div id="lub" style="position:fixed;top:0;left:0;right:0;z-index:9999;background:#1a1a18;color:#fff;display:flex;align-items:center;justify-content:space-between;padding:7px 20px;font-family:DM Sans,sans-serif;font-size:12px;box-shadow:0 2px 8px rgba(0,0,0,.3)"><span>&#128338;&nbsp;Última atualização: <b style="color:#E1F5EE">14/07/2026 às 12:19 UTC</b></span><button onclick="document.getElementById('lub').remove();document.body.style.paddingTop='0'" style="background:none;border:none;color:#aaa;cursor:pointer;font-size:18px;line-height:1;padding:0">&#x2715;</button></div><style>body{padding-top:38px!important}</style>
 
 <div class="shell">
 
@@ -327,7 +327,6 @@ table.cart-tabela{width:100%;border-collapse:collapse;font-size:13px}
     <button class="exp-btn" onclick="exportDividas()" title="Salva os registros de divida em um arquivo. Coloque-o na pasta dados para que fiquem disponíveis em todos os dispositivos.">&#8595; Exportar Dividas</button>
     <button class="exp-btn" onclick="showMap()" title="Mapa de clientes por região">&#127759; Mapa</button>
   <button class="exp-btn" onclick="exportLocs()" title="Salva localizações dos clientes">↓ Exportar Localizações</button>
-    <button class="exp-btn" onclick="showEvoGeral()" title="Evolução geral da carteira">&#128200; Evolução Geral</button>
   <button class="exp-btn" onclick="exportMsgTimers()" title="Salva os timers de mensagem em um arquivo. Coloque-o na pasta dados para que fiquem disponíveis em todos os dispositivos.">&#8595; Exportar Timers</button>
   </div>
   <div class="nav-row2">
@@ -348,6 +347,7 @@ table.cart-tabela{width:100%;border-collapse:collapse;font-size:13px}
 <nav class="abas-nav">
   <button id="btn-tab-pedidos" class="ativa" onclick="trocarAba('pedidos')">Pedidos</button>
   <button id="btn-tab-analises" onclick="trocarAba('analises')">Análises <span class="badge-acoes" id="badge-acoes" style="display:none">0</span></button>
+  <button id="btn-tab-evolucao" onclick="trocarAba('evolucao')">&#128200; Evolução</button>
   <button id="btn-tab-tarefas" onclick="trocarAba('tarefas')">Tarefas <span class="badge-acoes" id="badge-tarefas" style="display:none">0</span></button>
 </nav>
 
@@ -436,6 +436,10 @@ table.cart-tabela{width:100%;border-collapse:collapse;font-size:13px}
 </section>
 
 <!-- ABA TAREFAS -->
+<section id="tab-evolucao" style="display:none">
+  <div id="evo-page"></div>
+</section>
+
 <section id="tab-tarefas">
   <div class="tarefas-add">
     <input type="text" id="tf-novo-texto" placeholder="Nova tarefa ou demanda…" onkeydown="if(event.key==='Enter')adicionarTarefa()">
@@ -494,7 +498,7 @@ const CONTACTS = {"ibrac::MC DA SILVA":{"date":"2026-06-09","note":"orçamento e
 const DEBTS = {};
 const MSG_TIMERS = {};
 const LOCATIONS = {};
-const CARTEIRA = {"gerado_em":"2026-07-13","ibrac":{"resumo":{"total":28,"ativos":22,"risco":2,"inativos":4,"arquivados":5,"positivacao_pct":78.6,"curva":{"A":8,"B":5,"C":15}},"clientes":[{"cliente":"CHARQUE SUPREMA","cliente_id":"charque-suprema","curva":"A","status":"ativo","arquivado":false,"ciclo_dias":17.5,"ciclo_proprio":true,"dias_sem_comprar":0,"ultima_compra":"2026-07-13","faturamento_12m":704475.0,"produtos_criticos":[{"produto":"CURA JERKED BEEF # 9604 (6X4)","cod":"010020138","gap_meses":4},{"produto":"CLEAR SKIN - (20L)","cod":"010080001","gap_meses":3}],"produtos_inativos":[{"produto":"AROMA DE CARNE # CH 200 (25X1)","cod":"010060082","gap_meses":10}]},{"cliente":"BRITO & SANTOS","cliente_id":"brito---santos","curva":"A","status":"ativo","arquivado":false,"ciclo_dias":16.0,"ciclo_proprio":true,"dias_sem_comprar":3,"ultima_compra":"2026-07-10","faturamento_12m":357919.2,"produtos_criticos":[],"produtos_inativos":[]},{"cliente":"LAREDO","cliente_id":"laredo","curva":"A","status":"ativo","arquivado":false,"ciclo_dias":30.0,"ciclo_proprio":true,"dias_sem_comprar":26,"ultima_compra":"2026-06-17","faturamento_12m":312759.4,"produtos_criticos":[],"produtos_inativos":[{"produto":"GLOBAL P/ LING. FRANGO LF # 440 / A 1% (20 KG)","cod":"050020416","gap_meses":6},{"produto":"GLOBAL P/ CARNE INJETADO CIB # 101 (20 KG)","cod":"059990104","gap_meses":6}]},{"cliente":"CORTE 84","cliente_id":"corte-84","curva":"A","status":"inativo","arquivado":false,"ciclo_dias":15,"ciclo_proprio":true,"dias_sem_comprar":126,"ultima_compra":"2026-03-09","faturamento_12m":281597.0,"produtos_criticos":[{"produto":"ACORDINI # 701 EXTRA - (25KG)","cod":"010010004","gap_meses":4}],"produtos_inativos":[{"produto":"COLAGENO HIDROLISADO","cod":"119990002","gap_meses":12},{"produto":"PROTEINA TEXT DE SOJA GRANULADA EXTEND 1-3MM","cod":"090020028","gap_meses":11},{"produto":"CORANTE ALIMENTICIO CWS # 1850 (3X5)","cod":"030020032","gap_meses":8},{"produto":"PROTEINA TEXT. DE SOJA NATURAL GRANULADA","cod":"090020003","gap_meses":6},{"produto":"CORANTE ALIMENTICIO CWS # 1850 (5x4)","cod":"030020023","gap_meses":5},{"produto":"IBRACOR LF # 600 (25X1)","cod":"010030078","gap_meses":5},{"produto":"CALDO DE CARNE # 1618 (25 KG)","cod":"010060043","gap_meses":5}]},{"cliente":"SUINOS JUCURUTU","cliente_id":"suinos-jucurutu","curva":"A","status":"ativo","arquivado":false,"ciclo_dias":15,"ciclo_proprio":true,"dias_sem_comprar":12,"ultima_compra":"2026-07-01","faturamento_12m":253722.1,"produtos_criticos":[{"produto":"AROMA DE FUMAÇA EUROSMOKE # LIGHT 1971 (5L)","cod":"070020050","gap_meses":4},{"produto":"PROTEINA FUNCIONAL DE","cod":"090030038","gap_meses":3}],"produtos_inativos":[{"produto":"BACSTERIL LAC # 600 ( 25 KG )","cod":"010070024","gap_meses":6},{"produto":"PASTA DE PIMENTA CALABRESA # 25/30 (BALDE DE 20","cod":"029990032","gap_meses":5}]},{"cliente":"DUBOI","cliente_id":"duboi","curva":"A","status":"inativo","arquivado":false,"ciclo_dias":15,"ciclo_proprio":true,"dias_sem_comprar":221,"ultima_compra":"2025-12-04","faturamento_12m":228967.6,"produtos_criticos":[],"produtos_inativos":[{"produto":"CORANTE VEGETAL DE URUCUM CVU # 900 (20 KG)","cod":"030010057","gap_meses":17},{"produto":"CURA IBRAC # 792 (25X0,800)","cod":"010020064","gap_meses":9},{"produto":"IBRATEINA IBR C 6 M S/C","cod":"060020065","gap_meses":8},{"produto":"CORANTE ALIMENTICIO CWS # 1200 - (5L)","cod":"030030011","gap_meses":7},{"produto":"BACSTERIL # 103 - (25KG)","cod":"010070001","gap_meses":7},{"produto":"REGRAX RUBRO SV E # 1930","cod":"040020062","gap_meses":7},{"produto":"GLOBAL P/ SALSICHA SV # 240 (10X2)","cod":"050060064","gap_meses":7}]},{"cliente":"FREEZER CARNES E LATICINIOS","cliente_id":"freezer-carnes-e-laticinios","curva":"A","status":"ativo","arquivado":false,"ciclo_dias":54.0,"ciclo_proprio":true,"dias_sem_comprar":59,"ultima_compra":"2026-05-15","faturamento_12m":228266.0,"produtos_criticos":[],"produtos_inativos":[]},{"cliente":"MC DA SILVA","cliente_id":"mc-da-silva","curva":"A","status":"ativo","arquivado":false,"ciclo_dias":117.0,"ciclo_proprio":true,"dias_sem_comprar":139,"ultima_compra":"2026-02-24","faturamento_12m":205673.0,"produtos_criticos":[],"produtos_inativos":[{"produto":"GLOBAL P/ PRODUTOS CARNEOS# CM 01 (15X1,010)","cod":"059990138","gap_meses":5}]},{"cliente":"POLE","cliente_id":"pole","curva":"B","status":"ativo","arquivado":false,"ciclo_dias":15,"ciclo_proprio":true,"dias_sem_comprar":0,"ultima_compra":"2026-08-06","faturamento_12m":187565.43,"produtos_criticos":[],"produtos_inativos":[{"produto":"Sal de Cura 792","cod":"0001200262","gap_meses":24},{"produto":"Compacto Lanche Bovino","cod":"0001200014","gap_meses":22},{"produto":"Antioxidante#1670","cod":"0001200240","gap_meses":18},{"produto":"CondimentoFrangoCIF100","cod":"0001200241","gap_meses":18},{"produto":"Mixparacobertura#1004","cod":"0001200238","gap_meses":18},{"produto":"Mix de Especiarias #7525","cod":"0001200628","gap_meses":10}]},{"cliente":"GPX","cliente_id":"gpx","curva":"B","status":"ativo","arquivado":false,"ciclo_dias":22.0,"ciclo_proprio":true,"dias_sem_comprar":3,"ultima_compra":"2026-07-10","faturamento_12m":175830.12,"produtos_criticos":[{"produto":"AROMA DE FUMAÇA EUROSMOKE # LIGHT 1971 (20 L)","cod":"070020051","gap_meses":4},{"produto":"CORANTE VEGETAL DE URUCUM CVU # 900 (20 KG)","cod":"030010057","gap_meses":4},{"produto":"AROMA NAT. DE CARNE GRELHADA AWG # 430 (20 KG )","cod":"010060033","gap_meses":4}],"produtos_inativos":[{"produto":"CORANTE ALIMENTICIO CARAMELO # 302 - (25KG)","cod":"030030008","gap_meses":7},{"produto":"COND. GLOBAL P/ BACON E BARRIGA SFM # 888 -","cod":"050070023","gap_meses":7},{"produto":"CONDIMENTO GLOBAL PARA","cod":"050060085","gap_meses":6}]},{"cliente":"DESDEMONA - FRICARNE","cliente_id":"desdemona---fricarne","curva":"B","status":"ativo","arquivado":false,"ciclo_dias":16.0,"ciclo_proprio":true,"dias_sem_comprar":5,"ultima_compra":"2026-07-08","faturamento_12m":144792.36,"produtos_criticos":[],"produtos_inativos":[{"produto":"ACORDINI # 701 EXTRA","cod":"010010070","gap_meses":6}]},{"cliente":"RAIMUNDO","cliente_id":"raimundo","curva":"B","status":"risco","arquivado":false,"ciclo_dias":111.0,"ciclo_proprio":true,"dias_sem_comprar":196,"ultima_compra":"2025-12-29","faturamento_12m":99241.5,"produtos_criticos":[],"produtos_inativos":[{"produto":"CORANTE ALIMENTICIO CWS # 1850 (3X5)","cod":"030020032","gap_meses":10},{"produto":"IBRACOR LF # 604 - (25KG)","cod":"010030017","gap_meses":10},{"produto":"MIX INJEÇÃO JERKED BEEF","cod":"059990129","gap_meses":10},{"produto":"PROTEINA TEXT. DE SOJA NATURAL GRANULADA","cod":"090020003","gap_meses":7}]},{"cliente":"A SERTANEJA","cliente_id":"a-sertaneja","curva":"B","status":"ativo","arquivado":false,"ciclo_dias":91.5,"ciclo_proprio":true,"dias_sem_comprar":110,"ultima_compra":"2026-03-25","faturamento_12m":55778.0,"produtos_criticos":[{"produto":"REGRAX RUBRO SV ES - (20 L)","cod":"040020076","gap_meses":4},{"produto":"CORANTE ALIMENTICIO CWS # 1200 - (5L)","cod":"030030011","gap_meses":4}],"produtos_inativos":[]},{"cliente":"M & S DISTRIBUIDORA","cliente_id":"m---s-distribuidora","curva":"C","status":"ativo","arquivado":false,"ciclo_dias":45.0,"ciclo_proprio":true,"dias_sem_comprar":6,"ultima_compra":"2026-07-07","faturamento_12m":54698.53,"produtos_criticos":[],"produtos_inativos":[]},{"cliente":"Z N CARNES","cliente_id":"z-n-carnes","curva":"C","status":"ativo","arquivado":false,"ciclo_dias":27.5,"ciclo_proprio":true,"dias_sem_comprar":34,"ultima_compra":"2026-06-09","faturamento_12m":28791.45,"produtos_criticos":[{"produto":"CORANTE ALIMENTICIO CWS # 1200 - (5L)","cod":"030030011","gap_meses":4}],"produtos_inativos":[{"produto":"PROTEINA TEXT DE SOJA GRANULADA EXTEND 1-3MM","cod":"090020028","gap_meses":5}]},{"cliente":"VC MIRANDA","cliente_id":"vc-miranda","curva":"C","status":"ativo","arquivado":false,"ciclo_dias":21.0,"ciclo_proprio":true,"dias_sem_comprar":6,"ultima_compra":"2026-07-07","faturamento_12m":20550.0,"produtos_criticos":[],"produtos_inativos":[{"produto":"IBRATEINA CM # 2502 - (4X5)","cod":"060010026","gap_meses":12}]},{"cliente":"MONFORTE INDUSTRIA","cliente_id":"monforte-industria","curva":"C","status":"ativo","arquivado":false,"ciclo_dias":120,"ciclo_proprio":true,"dias_sem_comprar":76,"ultima_compra":"2026-04-28","faturamento_12m":14100.4,"produtos_criticos":[{"produto":"CURA JERKED BEEF # 9604 (20 KG)","cod":"010020155","gap_meses":3},{"produto":"GLOBAL P/ CHARQUE CRGG # 250 (25KG)","cod":"059990134","gap_meses":3}],"produtos_inativos":[]},{"cliente":"MONTE ALEGRE","cliente_id":"monte-alegre","curva":"C","status":"ativo","arquivado":false,"ciclo_dias":120,"ciclo_proprio":true,"dias_sem_comprar":26,"ultima_compra":"2026-06-17","faturamento_12m":12306.8,"produtos_criticos":[],"produtos_inativos":[]},{"cliente":"DICARNES JOSE WELLINGTON","cliente_id":"dicarnes-jose-wellington","curva":"C","status":"ativo","arquivado":false,"ciclo_dias":73.0,"ciclo_proprio":true,"dias_sem_comprar":5,"ultima_compra":"2026-07-08","faturamento_12m":8602.11,"produtos_criticos":[{"produto":"CLEAR SKIN - (20L)","cod":"010080001","gap_meses":3}],"produtos_inativos":[]},{"cliente":"RENATO CARNES","cliente_id":"renato-carnes","curva":"C","status":"ativo","arquivado":false,"ciclo_dias":43.0,"ciclo_proprio":true,"dias_sem_comprar":21,"ultima_compra":"2026-06-22","faturamento_12m":8212.8,"produtos_criticos":[],"produtos_inativos":[{"produto":"CURA IBRAC # 792 (25X0,800)","cod":"010020064","gap_meses":12},{"produto":"COND. GLOBAL P/ LING TOSCANA GKT (25X1,010)","cod":"050020245","gap_meses":10},{"produto":"ACORDINI # 701 EXTRA (80X0,250)","cod":"010010070","gap_meses":10}]},{"cliente":"BOI & CIA / ARATURI","cliente_id":"boi---cia---araturi","curva":"C","status":"ativo","arquivado":false,"ciclo_dias":118.0,"ciclo_proprio":true,"dias_sem_comprar":53,"ultima_compra":"2026-05-21","faturamento_12m":7739.9,"produtos_criticos":[],"produtos_inativos":[{"produto":"ACORDINI # 701 EXTRA - (25KG)","cod":"010010004","gap_meses":10},{"produto":"COND. GLOBAL P/ LING TOSCANA GKT (25X1,010)","cod":"050020245","gap_meses":6},{"produto":"EXTEND + # 7000 (10X1)","cod":"090030084","gap_meses":6}]},{"cliente":"SO TILAPIAS","cliente_id":"so-tilapias","curva":"C","status":"ativo","arquivado":false,"ciclo_dias":120,"ciclo_proprio":true,"dias_sem_comprar":23,"ultima_compra":"2026-06-20","faturamento_12m":6673.7,"produtos_criticos":[],"produtos_inativos":[]},{"cliente":"BEZERRAO DA CARNE","cliente_id":"bezerrao-da-carne","curva":"C","status":"inativo","arquivado":false,"ciclo_dias":91.0,"ciclo_proprio":true,"dias_sem_comprar":328,"ultima_compra":"2025-08-19","faturamento_12m":4830.0,"produtos_criticos":[],"produtos_inativos":[{"produto":"PROTEINA TEXT DE SOJA GRANULADA EXTEND 1-3MM","cod":"090020028","gap_meses":11}]},{"cliente":"BOI DE CURRAL","cliente_id":"boi-de-curral","curva":"C","status":"ativo","arquivado":false,"ciclo_dias":119.5,"ciclo_proprio":true,"dias_sem_comprar":89,"ultima_compra":"2026-04-15","faturamento_12m":3376.5,"produtos_criticos":[{"produto":"COND PREP. SABOR COSTELA # 265 (25 KG)","cod":"029990077","gap_meses":3},{"produto":"PROTEINA TEXT. DE SOJA NATURAL GRANULADA 1-3mm","cod":"090020003","gap_meses":3}],"produtos_inativos":[]},{"cliente":"PAJEU","cliente_id":"pajeu","curva":"C","status":"inativo","arquivado":false,"ciclo_dias":45.0,"ciclo_proprio":false,"dias_sem_comprar":179,"ultima_compra":"2026-01-15","faturamento_12m":1987.6,"produtos_criticos":[],"produtos_inativos":[{"produto":"IBRACOR # 501 - (20KG)","cod":"010030005","gap_meses":6},{"produto":"CURA IBRAC - III - (20KG)","cod":"010020005","gap_meses":6},{"produto":"CLEAR SKIN - (20L)","cod":"010080001","gap_meses":6}]},{"cliente":"IDEAL ALIMENTOS","cliente_id":"ideal-alimentos","curva":"C","status":"risco","arquivado":false,"ciclo_dias":45.0,"ciclo_proprio":false,"dias_sem_comprar":61,"ultima_compra":"2026-05-13","faturamento_12m":1521.5,"produtos_criticos":[],"produtos_inativos":[]},{"cliente":"LA CARNE","cliente_id":"la-carne","curva":"C","status":"ativo","arquivado":false,"ciclo_dias":120,"ciclo_proprio":true,"dias_sem_comprar":28,"ultima_compra":"2026-06-15","faturamento_12m":1434.4,"produtos_criticos":[],"produtos_inativos":[]},{"cliente":"BODEGA DO PAO","cliente_id":"bodega-do-pao","curva":"C","status":"inativo","arquivado":true,"ciclo_dias":45.0,"ciclo_proprio":false,"dias_sem_comprar":537,"ultima_compra":"2025-01-22","faturamento_12m":0.0,"produtos_criticos":[],"produtos_inativos":[]},{"cliente":"DORGAN EMBUTIDOS E","cliente_id":"dorgan-embutidos-e","curva":"C","status":"inativo","arquivado":true,"ciclo_dias":15,"ciclo_proprio":true,"dias_sem_comprar":509,"ultima_compra":"2025-02-19","faturamento_12m":0.0,"produtos_criticos":[],"produtos_inativos":[{"produto":"PROTEINA TEXT. DE SOJA NATURAL GRANULADA 1-3mm","cod":"090020003","gap_meses":17}]},{"cliente":"FRIGORIFICO SANTO ANDRE","cliente_id":"frigorifico-santo-andre","curva":"C","status":"inativo","arquivado":true,"ciclo_dias":45.0,"ciclo_proprio":false,"dias_sem_comprar":537,"ultima_compra":"2025-01-22","faturamento_12m":0.0,"produtos_criticos":[],"produtos_inativos":[]},{"cliente":"FUZZARO","cliente_id":"fuzzaro","curva":"C","status":"inativo","arquivado":true,"ciclo_dias":45.0,"ciclo_proprio":false,"dias_sem_comprar":770,"ultima_compra":"2024-06-03","faturamento_12m":0.0,"produtos_criticos":[],"produtos_inativos":[]},{"cliente":"MAURICEA-BA","cliente_id":"mauricea-ba","curva":"C","status":"ativo","arquivado":false,"ciclo_dias":45.0,"ciclo_proprio":false,"dias_sem_comprar":31,"ultima_compra":"2026-06-12","faturamento_12m":0.0,"produtos_criticos":[],"produtos_inativos":[]},{"cliente":"PITOMBEIRA ALIMENTOS","cliente_id":"pitombeira-alimentos","curva":"C","status":"inativo","arquivado":true,"ciclo_dias":45.0,"ciclo_proprio":false,"dias_sem_comprar":462,"ultima_compra":"2025-04-07","faturamento_12m":0.0,"produtos_criticos":[],"produtos_inativos":[]}],"painel_acao":[{"cliente":"CORTE 84","cliente_id":"corte-84","curva":"A","status":"inativo","dias_sem_comprar":126,"ciclo_dias":15,"produtos_criticos":[{"produto":"ACORDINI # 701 EXTRA - (25KG)","cod":"010010004","gap_meses":4}],"score":13.5,"motivo":"sem comprar há 126 dias (ciclo ~15d); cliente curva A — prioridade máxima; 1 produto(s) parado(s) há 3+ meses","acao_sugerida":"Visitar/ligar — reativação"},{"cliente":"DUBOI","cliente_id":"duboi","curva":"A","status":"inativo","dias_sem_comprar":221,"ciclo_dias":15,"produtos_criticos":[],"score":12.0,"motivo":"sem comprar há 221 dias (ciclo ~15d); cliente curva A — prioridade máxima","acao_sugerida":"Visitar/ligar — reativação"},{"cliente":"RAIMUNDO","cliente_id":"raimundo","curva":"B","status":"risco","dias_sem_comprar":196,"ciclo_dias":111.0,"produtos_criticos":[],"score":6.0,"motivo":"passou do ciclo de recompra (196d parado, ciclo ~111d)","acao_sugerida":"Contato preventivo esta semana"},{"cliente":"SUINOS JUCURUTU","cliente_id":"suinos-jucurutu","curva":"A","status":"ativo","dias_sem_comprar":12,"ciclo_dias":15,"produtos_criticos":[{"produto":"AROMA DE FUMAÇA EUROSMOKE # LIGHT 1971 (5L)","cod":"070020050","gap_meses":4},{"produto":"PROTEINA FUNCIONAL DE","cod":"090030038","gap_meses":3}],"score":4.5,"motivo":"cliente curva A — prioridade máxima; 2 produto(s) parado(s) há 3+ meses","acao_sugerida":"Ofertar produtos parados no próximo contato"},{"cliente":"CHARQUE SUPREMA","cliente_id":"charque-suprema","curva":"A","status":"ativo","dias_sem_comprar":0,"ciclo_dias":17.5,"produtos_criticos":[{"produto":"CURA JERKED BEEF # 9604 (6X4)","cod":"010020138","gap_meses":4},{"produto":"CLEAR SKIN - (20L)","cod":"010080001","gap_meses":3}],"score":4.5,"motivo":"cliente curva A — prioridade máxima; 2 produto(s) parado(s) há 3+ meses","acao_sugerida":"Ofertar produtos parados no próximo contato"},{"cliente":"BEZERRAO DA CARNE","cliente_id":"bezerrao-da-carne","curva":"C","status":"inativo","dias_sem_comprar":328,"ciclo_dias":91.0,"produtos_criticos":[],"score":4.0,"motivo":"sem comprar há 328 dias (ciclo ~91d)","acao_sugerida":"Visitar/ligar — reativação"},{"cliente":"PAJEU","cliente_id":"pajeu","curva":"C","status":"inativo","dias_sem_comprar":179,"ciclo_dias":45.0,"produtos_criticos":[],"score":4.0,"motivo":"sem comprar há 179 dias (ciclo ~45d)","acao_sugerida":"Visitar/ligar — reativação"},{"cliente":"A SERTANEJA","cliente_id":"a-sertaneja","curva":"B","status":"ativo","dias_sem_comprar":110,"ciclo_dias":91.5,"produtos_criticos":[{"produto":"REGRAX RUBRO SV ES - (20 L)","cod":"040020076","gap_meses":4},{"produto":"CORANTE ALIMENTICIO CWS # 1200 - (5L)","cod":"030030011","gap_meses":4}],"score":3.5,"motivo":"2 produto(s) parado(s) há 3+ meses","acao_sugerida":"Ofertar produtos parados no próximo contato"},{"cliente":"GPX","cliente_id":"gpx","curva":"B","status":"ativo","dias_sem_comprar":3,"ciclo_dias":22.0,"produtos_criticos":[{"produto":"AROMA DE FUMAÇA EUROSMOKE # LIGHT 1971 (20 L)","cod":"070020051","gap_meses":4},{"produto":"CORANTE VEGETAL DE URUCUM CVU # 900 (20 KG)","cod":"030010057","gap_meses":4},{"produto":"AROMA NAT. DE CARNE GRELHADA AWG # 430 (20 KG )","cod":"010060033","gap_meses":4}],"score":3.5,"motivo":"3 produto(s) parado(s) há 3+ meses","acao_sugerida":"Ofertar produtos parados no próximo contato"},{"cliente":"IDEAL ALIMENTOS","cliente_id":"ideal-alimentos","curva":"C","status":"risco","dias_sem_comprar":61,"ciclo_dias":45.0,"produtos_criticos":[],"score":3.0,"motivo":"passou do ciclo de recompra (61d parado, ciclo ~45d)","acao_sugerida":"Contato preventivo esta semana"},{"cliente":"BOI DE CURRAL","cliente_id":"boi-de-curral","curva":"C","status":"ativo","dias_sem_comprar":89,"ciclo_dias":119.5,"produtos_criticos":[{"produto":"COND PREP. SABOR COSTELA # 265 (25 KG)","cod":"029990077","gap_meses":3},{"produto":"PROTEINA TEXT. DE SOJA NATURAL GRANULADA 1-3mm","cod":"090020003","gap_meses":3}],"score":2.5,"motivo":"2 produto(s) parado(s) há 3+ meses","acao_sugerida":"Ofertar produtos parados no próximo contato"},{"cliente":"MONFORTE INDUSTRIA","cliente_id":"monforte-industria","curva":"C","status":"ativo","dias_sem_comprar":76,"ciclo_dias":120,"produtos_criticos":[{"produto":"CURA JERKED BEEF # 9604 (20 KG)","cod":"010020155","gap_meses":3},{"produto":"GLOBAL P/ CHARQUE CRGG # 250 (25KG)","cod":"059990134","gap_meses":3}],"score":2.5,"motivo":"2 produto(s) parado(s) há 3+ meses","acao_sugerida":"Ofertar produtos parados no próximo contato"},{"cliente":"Z N CARNES","cliente_id":"z-n-carnes","curva":"C","status":"ativo","dias_sem_comprar":34,"ciclo_dias":27.5,"produtos_criticos":[{"produto":"CORANTE ALIMENTICIO CWS # 1200 - (5L)","cod":"030030011","gap_meses":4}],"score":2.5,"motivo":"1 produto(s) parado(s) há 3+ meses","acao_sugerida":"Ofertar produtos parados no próximo contato"},{"cliente":"DICARNES JOSE WELLINGTON","cliente_id":"dicarnes-jose-wellington","curva":"C","status":"ativo","dias_sem_comprar":5,"ciclo_dias":73.0,"produtos_criticos":[{"produto":"CLEAR SKIN - (20L)","cod":"010080001","gap_meses":3}],"score":2.5,"motivo":"1 produto(s) parado(s) há 3+ meses","acao_sugerida":"Ofertar produtos parados no próximo contato"}]},"vh":{"resumo":{"total":23,"ativos":12,"risco":3,"inativos":8,"arquivados":0,"positivacao_pct":52.2,"curva":{"A":6,"B":7,"C":10}},"clientes":[{"cliente":"POLE","cliente_id":"pole","curva":"A","status":"ativo","arquivado":false,"ciclo_dias":15,"ciclo_proprio":true,"dias_sem_comprar":0,"ultima_compra":"2026-09-30","faturamento_12m":614083.0,"produtos_criticos":[],"produtos_inativos":[]},{"cliente":"DUBOI","cliente_id":"duboi","curva":"A","status":"ativo","arquivado":false,"ciclo_dias":15,"ciclo_proprio":true,"dias_sem_comprar":0,"ultima_compra":"2026-07-29","faturamento_12m":311546.0,"produtos_criticos":[],"produtos_inativos":[]},{"cliente":"BOI & CIA / ARATURI","cliente_id":"boi---cia---araturi","curva":"A","status":"ativo","arquivado":false,"ciclo_dias":55.0,"ciclo_proprio":true,"dias_sem_comprar":5,"ultima_compra":"2026-07-08","faturamento_12m":212356.7,"produtos_criticos":[],"produtos_inativos":[]},{"cliente":"JUCURUTU","cliente_id":"jucurutu","curva":"A","status":"ativo","arquivado":false,"ciclo_dias":16.0,"ciclo_proprio":true,"dias_sem_comprar":12,"ultima_compra":"2026-07-01","faturamento_12m":161637.42,"produtos_criticos":[],"produtos_inativos":[]},{"cliente":"AVIGRO","cliente_id":"avigro","curva":"A","status":"ativo","arquivado":false,"ciclo_dias":35.0,"ciclo_proprio":true,"dias_sem_comprar":0,"ultima_compra":"2026-07-15","faturamento_12m":139740.0,"produtos_criticos":[],"produtos_inativos":[]},{"cliente":"RL ALIMENTOS","cliente_id":"rl-alimentos","curva":"A","status":"ativo","arquivado":false,"ciclo_dias":112.5,"ciclo_proprio":true,"dias_sem_comprar":46,"ultima_compra":"2026-05-28","faturamento_12m":106000.0,"produtos_criticos":[],"produtos_inativos":[]},{"cliente":"COOPAG","cliente_id":"coopag","curva":"B","status":"risco","arquivado":false,"ciclo_dias":49.0,"ciclo_proprio":true,"dias_sem_comprar":89,"ultima_compra":"2026-04-15","faturamento_12m":95116.5,"produtos_criticos":[{"produto":"TRIPA SUINA 42/44 - LONGA - 90 METROS","cod":"000211690","gap_meses":3},{"produto":"TRIPA 32/34 90 11 PTS - LONGA - 90 METROS","cod":"000189936","gap_meses":3}],"produtos_inativos":[]},{"cliente":"FIPEL","cliente_id":"fipel","curva":"B","status":"ativo","arquivado":false,"ciclo_dias":15,"ciclo_proprio":true,"dias_sem_comprar":12,"ultima_compra":"2026-07-01","faturamento_12m":69084.6,"produtos_criticos":[],"produtos_inativos":[{"produto":"TRIPA COLÁGENO CARAMELO CALIBRE 22","cod":"000220453","gap_meses":8},{"produto":"TRIPA COLÁGENO CARAMELO CALIBRE 24","cod":"000183606","gap_meses":8}]},{"cliente":"JEC TILAPIAS","cliente_id":"jec-tilapias","curva":"B","status":"risco","arquivado":false,"ciclo_dias":45.0,"ciclo_proprio":false,"dias_sem_comprar":75,"ultima_compra":"2026-04-29","faturamento_12m":49150.8,"produtos_criticos":[{"produto":"TRIPA SUÍNA 28/32 SUPER LONGA","cod":"000222873","gap_meses":3}],"produtos_inativos":[]},{"cliente":"WS / SABOR ARDENTE","cliente_id":"ws---sabor-ardente","curva":"B","status":"ativo","arquivado":false,"ciclo_dias":91.0,"ciclo_proprio":true,"dias_sem_comprar":68,"ultima_compra":"2026-05-06","faturamento_12m":42195.42,"produtos_criticos":[],"produtos_inativos":[]},{"cliente":"DICARNES","cliente_id":"dicarnes","curva":"B","status":"ativo","arquivado":false,"ciclo_dias":45.0,"ciclo_proprio":false,"dias_sem_comprar":3,"ultima_compra":"2026-07-10","faturamento_12m":41718.6,"produtos_criticos":[],"produtos_inativos":[]},{"cliente":"MONFORTE","cliente_id":"monforte","curva":"B","status":"inativo","arquivado":false,"ciclo_dias":45.0,"ciclo_proprio":false,"dias_sem_comprar":138,"ultima_compra":"2026-02-25","faturamento_12m":39690.0,"produtos_criticos":[],"produtos_inativos":[{"produto":"TRIPA SUÍNA SUPER LONGA 90 METROS","cod":"000209220","gap_meses":5}]},{"cliente":"AVIGRAN","cliente_id":"avigran","curva":"B","status":"ativo","arquivado":false,"ciclo_dias":66.5,"ciclo_proprio":true,"dias_sem_comprar":17,"ultima_compra":"2026-06-26","faturamento_12m":32400.0,"produtos_criticos":[],"produtos_inativos":[]},{"cliente":"ZN CARNES","cliente_id":"zn-carnes","curva":"C","status":"inativo","arquivado":false,"ciclo_dias":15,"ciclo_proprio":true,"dias_sem_comprar":215,"ultima_compra":"2025-12-10","faturamento_12m":31400.0,"produtos_criticos":[],"produtos_inativos":[{"produto":"TRIPA SUINA 34/38 11 FIOS LONGA 90 METROS","cod":"000220074","gap_meses":7}]},{"cliente":"JA MARTINS","cliente_id":"ja-martins","curva":"C","status":"inativo","arquivado":false,"ciclo_dias":45.0,"ciclo_proprio":false,"dias_sem_comprar":145,"ultima_compra":"2026-02-18","faturamento_12m":22998.42,"produtos_criticos":[],"produtos_inativos":[]},{"cliente":"AGROMINA","cliente_id":"agromina","curva":"C","status":"inativo","arquivado":false,"ciclo_dias":45.0,"ciclo_proprio":false,"dias_sem_comprar":302,"ultima_compra":"2025-09-14","faturamento_12m":16830.0,"produtos_criticos":[],"produtos_inativos":[]},{"cliente":"LAREDO","cliente_id":"laredo","curva":"C","status":"inativo","arquivado":false,"ciclo_dias":45.0,"ciclo_proprio":false,"dias_sem_comprar":208,"ultima_compra":"2025-12-17","faturamento_12m":16800.0,"produtos_criticos":[],"produtos_inativos":[]},{"cliente":"FRIG. MODERNO","cliente_id":"frig--moderno","curva":"C","status":"ativo","arquivado":false,"ciclo_dias":81.5,"ciclo_proprio":true,"dias_sem_comprar":66,"ultima_compra":"2026-05-08","faturamento_12m":10432.8,"produtos_criticos":[],"produtos_inativos":[{"produto":"TRIPA DE COLAGENO 22 PARA FRESCAIS","cod":"000183339","gap_meses":5}]},{"cliente":"CARNES BECKMANN","cliente_id":"carnes-beckmann","curva":"C","status":"risco","arquivado":false,"ciclo_dias":45.0,"ciclo_proprio":false,"dias_sem_comprar":108,"ultima_compra":"2026-03-27","faturamento_12m":5373.72,"produtos_criticos":[],"produtos_inativos":[]},{"cliente":"SO FILE ATAC","cliente_id":"so-file-atac","curva":"C","status":"inativo","arquivado":false,"ciclo_dias":45.0,"ciclo_proprio":false,"dias_sem_comprar":130,"ultima_compra":"2026-03-05","faturamento_12m":3531.42,"produtos_criticos":[],"produtos_inativos":[]},{"cliente":"CORDEIRO","cliente_id":"cordeiro","curva":"C","status":"inativo","arquivado":false,"ciclo_dias":45.0,"ciclo_proprio":false,"dias_sem_comprar":130,"ultima_compra":"2026-03-05","faturamento_12m":3477.6,"produtos_criticos":[],"produtos_inativos":[]},{"cliente":"M & E COM","cliente_id":"m---e-com","curva":"C","status":"ativo","arquivado":false,"ciclo_dias":45.0,"ciclo_proprio":false,"dias_sem_comprar":5,"ultima_compra":"2026-07-08","faturamento_12m":3477.6,"produtos_criticos":[],"produtos_inativos":[]},{"cliente":"NOTARO","cliente_id":"notaro","curva":"C","status":"inativo","arquivado":false,"ciclo_dias":45.0,"ciclo_proprio":false,"dias_sem_comprar":262,"ultima_compra":"2025-10-24","faturamento_12m":0.0,"produtos_criticos":[],"produtos_inativos":[]}],"painel_acao":[{"cliente":"MONFORTE","cliente_id":"monforte","curva":"B","status":"inativo","dias_sem_comprar":138,"ciclo_dias":45.0,"produtos_criticos":[],"score":8.0,"motivo":"sem comprar há 138 dias (ciclo ~45d)","acao_sugerida":"Visitar/ligar — reativação"},{"cliente":"COOPAG","cliente_id":"coopag","curva":"B","status":"risco","dias_sem_comprar":89,"ciclo_dias":49.0,"produtos_criticos":[{"produto":"TRIPA SUINA 42/44 - LONGA - 90 METROS","cod":"000211690","gap_meses":3},{"produto":"TRIPA 32/34 90 11 PTS - LONGA - 90 METROS","cod":"000189936","gap_meses":3}],"score":7.5,"motivo":"passou do ciclo de recompra (89d parado, ciclo ~49d); 2 produto(s) parado(s) há 3+ meses","acao_sugerida":"Contato preventivo esta semana"},{"cliente":"JEC TILAPIAS","cliente_id":"jec-tilapias","curva":"B","status":"risco","dias_sem_comprar":75,"ciclo_dias":45.0,"produtos_criticos":[{"produto":"TRIPA SUÍNA 28/32 SUPER LONGA","cod":"000222873","gap_meses":3}],"score":7.5,"motivo":"passou do ciclo de recompra (75d parado, ciclo ~45d); 1 produto(s) parado(s) há 3+ meses","acao_sugerida":"Contato preventivo esta semana"},{"cliente":"AGROMINA","cliente_id":"agromina","curva":"C","status":"inativo","dias_sem_comprar":302,"ciclo_dias":45.0,"produtos_criticos":[],"score":4.0,"motivo":"sem comprar há 302 dias (ciclo ~45d)","acao_sugerida":"Visitar/ligar — reativação"},{"cliente":"NOTARO","cliente_id":"notaro","curva":"C","status":"inativo","dias_sem_comprar":262,"ciclo_dias":45.0,"produtos_criticos":[],"score":4.0,"motivo":"sem comprar há 262 dias (ciclo ~45d)","acao_sugerida":"Visitar/ligar — reativação"},{"cliente":"ZN CARNES","cliente_id":"zn-carnes","curva":"C","status":"inativo","dias_sem_comprar":215,"ciclo_dias":15,"produtos_criticos":[],"score":4.0,"motivo":"sem comprar há 215 dias (ciclo ~15d)","acao_sugerida":"Visitar/ligar — reativação"},{"cliente":"LAREDO","cliente_id":"laredo","curva":"C","status":"inativo","dias_sem_comprar":208,"ciclo_dias":45.0,"produtos_criticos":[],"score":4.0,"motivo":"sem comprar há 208 dias (ciclo ~45d)","acao_sugerida":"Visitar/ligar — reativação"},{"cliente":"JA MARTINS","cliente_id":"ja-martins","curva":"C","status":"inativo","dias_sem_comprar":145,"ciclo_dias":45.0,"produtos_criticos":[],"score":4.0,"motivo":"sem comprar há 145 dias (ciclo ~45d)","acao_sugerida":"Visitar/ligar — reativação"},{"cliente":"SO FILE ATAC","cliente_id":"so-file-atac","curva":"C","status":"inativo","dias_sem_comprar":130,"ciclo_dias":45.0,"produtos_criticos":[],"score":4.0,"motivo":"sem comprar há 130 dias (ciclo ~45d)","acao_sugerida":"Visitar/ligar — reativação"},{"cliente":"CORDEIRO","cliente_id":"cordeiro","curva":"C","status":"inativo","dias_sem_comprar":130,"ciclo_dias":45.0,"produtos_criticos":[],"score":4.0,"motivo":"sem comprar há 130 dias (ciclo ~45d)","acao_sugerida":"Visitar/ligar — reativação"},{"cliente":"CARNES BECKMANN","cliente_id":"carnes-beckmann","curva":"C","status":"risco","dias_sem_comprar":108,"ciclo_dias":45.0,"produtos_criticos":[],"score":3.0,"motivo":"passou do ciclo de recompra (108d parado, ciclo ~45d)","acao_sugerida":"Contato preventivo esta semana"}]}};
+const CARTEIRA = {"gerado_em":"2026-07-14","ibrac":{"resumo":{"total":28,"ativos":21,"risco":3,"inativos":4,"arquivados":5,"positivacao_pct":75.0,"curva":{"A":8,"B":5,"C":15}},"clientes":[{"cliente":"CHARQUE SUPREMA","cliente_id":"charque-suprema","curva":"A","status":"ativo","arquivado":false,"ciclo_dias":17.5,"ciclo_proprio":true,"dias_sem_comprar":1,"ultima_compra":"2026-07-13","faturamento_12m":704475.0,"produtos_criticos":[{"produto":"CURA JERKED BEEF # 9604 (6X4)","cod":"010020138","gap_meses":4},{"produto":"CLEAR SKIN - (20L)","cod":"010080001","gap_meses":3}],"produtos_inativos":[{"produto":"AROMA DE CARNE # CH 200 (25X1)","cod":"010060082","gap_meses":10}]},{"cliente":"BRITO & SANTOS","cliente_id":"brito---santos","curva":"A","status":"ativo","arquivado":false,"ciclo_dias":16.0,"ciclo_proprio":true,"dias_sem_comprar":4,"ultima_compra":"2026-07-10","faturamento_12m":357919.2,"produtos_criticos":[],"produtos_inativos":[]},{"cliente":"LAREDO","cliente_id":"laredo","curva":"A","status":"ativo","arquivado":false,"ciclo_dias":30.0,"ciclo_proprio":true,"dias_sem_comprar":27,"ultima_compra":"2026-06-17","faturamento_12m":312759.4,"produtos_criticos":[],"produtos_inativos":[{"produto":"GLOBAL P/ LING. FRANGO LF # 440 / A 1% (20 KG)","cod":"050020416","gap_meses":6},{"produto":"GLOBAL P/ CARNE INJETADO CIB # 101 (20 KG)","cod":"059990104","gap_meses":6}]},{"cliente":"CORTE 84","cliente_id":"corte-84","curva":"A","status":"inativo","arquivado":false,"ciclo_dias":15,"ciclo_proprio":true,"dias_sem_comprar":127,"ultima_compra":"2026-03-09","faturamento_12m":281597.0,"produtos_criticos":[{"produto":"ACORDINI # 701 EXTRA - (25KG)","cod":"010010004","gap_meses":4}],"produtos_inativos":[{"produto":"COLAGENO HIDROLISADO","cod":"119990002","gap_meses":12},{"produto":"PROTEINA TEXT DE SOJA GRANULADA EXTEND 1-3MM","cod":"090020028","gap_meses":11},{"produto":"CORANTE ALIMENTICIO CWS # 1850 (3X5)","cod":"030020032","gap_meses":8},{"produto":"PROTEINA TEXT. DE SOJA NATURAL GRANULADA","cod":"090020003","gap_meses":6},{"produto":"CORANTE ALIMENTICIO CWS # 1850 (5x4)","cod":"030020023","gap_meses":5},{"produto":"IBRACOR LF # 600 (25X1)","cod":"010030078","gap_meses":5},{"produto":"CALDO DE CARNE # 1618 (25 KG)","cod":"010060043","gap_meses":5}]},{"cliente":"SUINOS JUCURUTU","cliente_id":"suinos-jucurutu","curva":"A","status":"ativo","arquivado":false,"ciclo_dias":15,"ciclo_proprio":true,"dias_sem_comprar":13,"ultima_compra":"2026-07-01","faturamento_12m":253722.1,"produtos_criticos":[{"produto":"AROMA DE FUMAÇA EUROSMOKE # LIGHT 1971 (5L)","cod":"070020050","gap_meses":4},{"produto":"PROTEINA FUNCIONAL DE","cod":"090030038","gap_meses":3}],"produtos_inativos":[{"produto":"BACSTERIL LAC # 600 ( 25 KG )","cod":"010070024","gap_meses":6},{"produto":"PASTA DE PIMENTA CALABRESA # 25/30 (BALDE DE 20","cod":"029990032","gap_meses":5}]},{"cliente":"DUBOI","cliente_id":"duboi","curva":"A","status":"inativo","arquivado":false,"ciclo_dias":15,"ciclo_proprio":true,"dias_sem_comprar":222,"ultima_compra":"2025-12-04","faturamento_12m":228967.6,"produtos_criticos":[],"produtos_inativos":[{"produto":"CORANTE VEGETAL DE URUCUM CVU # 900 (20 KG)","cod":"030010057","gap_meses":17},{"produto":"CURA IBRAC # 792 (25X0,800)","cod":"010020064","gap_meses":9},{"produto":"IBRATEINA IBR C 6 M S/C","cod":"060020065","gap_meses":8},{"produto":"CORANTE ALIMENTICIO CWS # 1200 - (5L)","cod":"030030011","gap_meses":7},{"produto":"BACSTERIL # 103 - (25KG)","cod":"010070001","gap_meses":7},{"produto":"REGRAX RUBRO SV E # 1930","cod":"040020062","gap_meses":7},{"produto":"GLOBAL P/ SALSICHA SV # 240 (10X2)","cod":"050060064","gap_meses":7}]},{"cliente":"FREEZER CARNES E LATICINIOS","cliente_id":"freezer-carnes-e-laticinios","curva":"A","status":"ativo","arquivado":false,"ciclo_dias":54.0,"ciclo_proprio":true,"dias_sem_comprar":60,"ultima_compra":"2026-05-15","faturamento_12m":228266.0,"produtos_criticos":[],"produtos_inativos":[]},{"cliente":"MC DA SILVA","cliente_id":"mc-da-silva","curva":"A","status":"ativo","arquivado":false,"ciclo_dias":117.0,"ciclo_proprio":true,"dias_sem_comprar":140,"ultima_compra":"2026-02-24","faturamento_12m":205673.0,"produtos_criticos":[],"produtos_inativos":[{"produto":"GLOBAL P/ PRODUTOS CARNEOS# CM 01 (15X1,010)","cod":"059990138","gap_meses":5}]},{"cliente":"POLE","cliente_id":"pole","curva":"B","status":"ativo","arquivado":false,"ciclo_dias":15,"ciclo_proprio":true,"dias_sem_comprar":0,"ultima_compra":"2026-08-06","faturamento_12m":187565.43,"produtos_criticos":[],"produtos_inativos":[{"produto":"Sal de Cura 792","cod":"0001200262","gap_meses":24},{"produto":"Compacto Lanche Bovino","cod":"0001200014","gap_meses":22},{"produto":"Antioxidante#1670","cod":"0001200240","gap_meses":18},{"produto":"CondimentoFrangoCIF100","cod":"0001200241","gap_meses":18},{"produto":"Mixparacobertura#1004","cod":"0001200238","gap_meses":18},{"produto":"Mix de Especiarias #7525","cod":"0001200628","gap_meses":10}]},{"cliente":"GPX","cliente_id":"gpx","curva":"B","status":"ativo","arquivado":false,"ciclo_dias":22.0,"ciclo_proprio":true,"dias_sem_comprar":4,"ultima_compra":"2026-07-10","faturamento_12m":175830.12,"produtos_criticos":[{"produto":"AROMA DE FUMAÇA EUROSMOKE # LIGHT 1971 (20 L)","cod":"070020051","gap_meses":4},{"produto":"CORANTE VEGETAL DE URUCUM CVU # 900 (20 KG)","cod":"030010057","gap_meses":4},{"produto":"AROMA NAT. DE CARNE GRELHADA AWG # 430 (20 KG )","cod":"010060033","gap_meses":4}],"produtos_inativos":[{"produto":"CORANTE ALIMENTICIO CARAMELO # 302 - (25KG)","cod":"030030008","gap_meses":7},{"produto":"COND. GLOBAL P/ BACON E BARRIGA SFM # 888 -","cod":"050070023","gap_meses":7},{"produto":"CONDIMENTO GLOBAL PARA","cod":"050060085","gap_meses":6}]},{"cliente":"DESDEMONA - FRICARNE","cliente_id":"desdemona---fricarne","curva":"B","status":"ativo","arquivado":false,"ciclo_dias":16.0,"ciclo_proprio":true,"dias_sem_comprar":6,"ultima_compra":"2026-07-08","faturamento_12m":144792.36,"produtos_criticos":[],"produtos_inativos":[{"produto":"ACORDINI # 701 EXTRA","cod":"010010070","gap_meses":6}]},{"cliente":"RAIMUNDO","cliente_id":"raimundo","curva":"B","status":"risco","arquivado":false,"ciclo_dias":111.0,"ciclo_proprio":true,"dias_sem_comprar":197,"ultima_compra":"2025-12-29","faturamento_12m":99241.5,"produtos_criticos":[],"produtos_inativos":[{"produto":"CORANTE ALIMENTICIO CWS # 1850 (3X5)","cod":"030020032","gap_meses":10},{"produto":"IBRACOR LF # 604 - (25KG)","cod":"010030017","gap_meses":10},{"produto":"MIX INJEÇÃO JERKED BEEF","cod":"059990129","gap_meses":10},{"produto":"PROTEINA TEXT. DE SOJA NATURAL GRANULADA","cod":"090020003","gap_meses":7}]},{"cliente":"A SERTANEJA","cliente_id":"a-sertaneja","curva":"B","status":"ativo","arquivado":false,"ciclo_dias":91.5,"ciclo_proprio":true,"dias_sem_comprar":111,"ultima_compra":"2026-03-25","faturamento_12m":55778.0,"produtos_criticos":[{"produto":"REGRAX RUBRO SV ES - (20 L)","cod":"040020076","gap_meses":4},{"produto":"CORANTE ALIMENTICIO CWS # 1200 - (5L)","cod":"030030011","gap_meses":4}],"produtos_inativos":[]},{"cliente":"M & S DISTRIBUIDORA","cliente_id":"m---s-distribuidora","curva":"C","status":"ativo","arquivado":false,"ciclo_dias":45.0,"ciclo_proprio":true,"dias_sem_comprar":7,"ultima_compra":"2026-07-07","faturamento_12m":54698.53,"produtos_criticos":[],"produtos_inativos":[]},{"cliente":"Z N CARNES","cliente_id":"z-n-carnes","curva":"C","status":"risco","arquivado":false,"ciclo_dias":27.5,"ciclo_proprio":true,"dias_sem_comprar":35,"ultima_compra":"2026-06-09","faturamento_12m":28791.45,"produtos_criticos":[{"produto":"CORANTE ALIMENTICIO CWS # 1200 - (5L)","cod":"030030011","gap_meses":4}],"produtos_inativos":[{"produto":"PROTEINA TEXT DE SOJA GRANULADA EXTEND 1-3MM","cod":"090020028","gap_meses":5}]},{"cliente":"VC MIRANDA","cliente_id":"vc-miranda","curva":"C","status":"ativo","arquivado":false,"ciclo_dias":21.0,"ciclo_proprio":true,"dias_sem_comprar":7,"ultima_compra":"2026-07-07","faturamento_12m":20550.0,"produtos_criticos":[],"produtos_inativos":[{"produto":"IBRATEINA CM # 2502 - (4X5)","cod":"060010026","gap_meses":12}]},{"cliente":"MONFORTE INDUSTRIA","cliente_id":"monforte-industria","curva":"C","status":"ativo","arquivado":false,"ciclo_dias":120,"ciclo_proprio":true,"dias_sem_comprar":77,"ultima_compra":"2026-04-28","faturamento_12m":14100.4,"produtos_criticos":[{"produto":"CURA JERKED BEEF # 9604 (20 KG)","cod":"010020155","gap_meses":3},{"produto":"GLOBAL P/ CHARQUE CRGG # 250 (25KG)","cod":"059990134","gap_meses":3}],"produtos_inativos":[]},{"cliente":"MONTE ALEGRE","cliente_id":"monte-alegre","curva":"C","status":"ativo","arquivado":false,"ciclo_dias":120,"ciclo_proprio":true,"dias_sem_comprar":27,"ultima_compra":"2026-06-17","faturamento_12m":12306.8,"produtos_criticos":[],"produtos_inativos":[]},{"cliente":"DICARNES JOSE WELLINGTON","cliente_id":"dicarnes-jose-wellington","curva":"C","status":"ativo","arquivado":false,"ciclo_dias":73.0,"ciclo_proprio":true,"dias_sem_comprar":6,"ultima_compra":"2026-07-08","faturamento_12m":8602.11,"produtos_criticos":[{"produto":"CLEAR SKIN - (20L)","cod":"010080001","gap_meses":3}],"produtos_inativos":[]},{"cliente":"RENATO CARNES","cliente_id":"renato-carnes","curva":"C","status":"ativo","arquivado":false,"ciclo_dias":43.0,"ciclo_proprio":true,"dias_sem_comprar":22,"ultima_compra":"2026-06-22","faturamento_12m":8212.8,"produtos_criticos":[],"produtos_inativos":[{"produto":"CURA IBRAC # 792 (25X0,800)","cod":"010020064","gap_meses":12},{"produto":"COND. GLOBAL P/ LING TOSCANA GKT (25X1,010)","cod":"050020245","gap_meses":10},{"produto":"ACORDINI # 701 EXTRA (80X0,250)","cod":"010010070","gap_meses":10}]},{"cliente":"BOI & CIA / ARATURI","cliente_id":"boi---cia---araturi","curva":"C","status":"ativo","arquivado":false,"ciclo_dias":118.0,"ciclo_proprio":true,"dias_sem_comprar":54,"ultima_compra":"2026-05-21","faturamento_12m":7739.9,"produtos_criticos":[],"produtos_inativos":[{"produto":"ACORDINI # 701 EXTRA - (25KG)","cod":"010010004","gap_meses":10},{"produto":"COND. GLOBAL P/ LING TOSCANA GKT (25X1,010)","cod":"050020245","gap_meses":6},{"produto":"EXTEND + # 7000 (10X1)","cod":"090030084","gap_meses":6}]},{"cliente":"SO TILAPIAS","cliente_id":"so-tilapias","curva":"C","status":"ativo","arquivado":false,"ciclo_dias":120,"ciclo_proprio":true,"dias_sem_comprar":24,"ultima_compra":"2026-06-20","faturamento_12m":6673.7,"produtos_criticos":[],"produtos_inativos":[]},{"cliente":"BEZERRAO DA CARNE","cliente_id":"bezerrao-da-carne","curva":"C","status":"inativo","arquivado":false,"ciclo_dias":91.0,"ciclo_proprio":true,"dias_sem_comprar":329,"ultima_compra":"2025-08-19","faturamento_12m":4830.0,"produtos_criticos":[],"produtos_inativos":[{"produto":"PROTEINA TEXT DE SOJA GRANULADA EXTEND 1-3MM","cod":"090020028","gap_meses":11}]},{"cliente":"BOI DE CURRAL","cliente_id":"boi-de-curral","curva":"C","status":"ativo","arquivado":false,"ciclo_dias":119.5,"ciclo_proprio":true,"dias_sem_comprar":90,"ultima_compra":"2026-04-15","faturamento_12m":3376.5,"produtos_criticos":[{"produto":"COND PREP. SABOR COSTELA # 265 (25 KG)","cod":"029990077","gap_meses":3},{"produto":"PROTEINA TEXT. DE SOJA NATURAL GRANULADA 1-3mm","cod":"090020003","gap_meses":3}],"produtos_inativos":[]},{"cliente":"PAJEU","cliente_id":"pajeu","curva":"C","status":"inativo","arquivado":false,"ciclo_dias":45.0,"ciclo_proprio":false,"dias_sem_comprar":180,"ultima_compra":"2026-01-15","faturamento_12m":1987.6,"produtos_criticos":[],"produtos_inativos":[{"produto":"IBRACOR # 501 - (20KG)","cod":"010030005","gap_meses":6},{"produto":"CURA IBRAC - III - (20KG)","cod":"010020005","gap_meses":6},{"produto":"CLEAR SKIN - (20L)","cod":"010080001","gap_meses":6}]},{"cliente":"IDEAL ALIMENTOS","cliente_id":"ideal-alimentos","curva":"C","status":"risco","arquivado":false,"ciclo_dias":45.0,"ciclo_proprio":false,"dias_sem_comprar":62,"ultima_compra":"2026-05-13","faturamento_12m":1521.5,"produtos_criticos":[],"produtos_inativos":[]},{"cliente":"LA CARNE","cliente_id":"la-carne","curva":"C","status":"ativo","arquivado":false,"ciclo_dias":120,"ciclo_proprio":true,"dias_sem_comprar":29,"ultima_compra":"2026-06-15","faturamento_12m":1434.4,"produtos_criticos":[],"produtos_inativos":[]},{"cliente":"BODEGA DO PAO","cliente_id":"bodega-do-pao","curva":"C","status":"inativo","arquivado":true,"ciclo_dias":45.0,"ciclo_proprio":false,"dias_sem_comprar":538,"ultima_compra":"2025-01-22","faturamento_12m":0.0,"produtos_criticos":[],"produtos_inativos":[]},{"cliente":"DORGAN EMBUTIDOS E","cliente_id":"dorgan-embutidos-e","curva":"C","status":"inativo","arquivado":true,"ciclo_dias":15,"ciclo_proprio":true,"dias_sem_comprar":510,"ultima_compra":"2025-02-19","faturamento_12m":0.0,"produtos_criticos":[],"produtos_inativos":[{"produto":"PROTEINA TEXT. DE SOJA NATURAL GRANULADA 1-3mm","cod":"090020003","gap_meses":17}]},{"cliente":"FRIGORIFICO SANTO ANDRE","cliente_id":"frigorifico-santo-andre","curva":"C","status":"inativo","arquivado":true,"ciclo_dias":45.0,"ciclo_proprio":false,"dias_sem_comprar":538,"ultima_compra":"2025-01-22","faturamento_12m":0.0,"produtos_criticos":[],"produtos_inativos":[]},{"cliente":"FUZZARO","cliente_id":"fuzzaro","curva":"C","status":"inativo","arquivado":true,"ciclo_dias":45.0,"ciclo_proprio":false,"dias_sem_comprar":771,"ultima_compra":"2024-06-03","faturamento_12m":0.0,"produtos_criticos":[],"produtos_inativos":[]},{"cliente":"MAURICEA-BA","cliente_id":"mauricea-ba","curva":"C","status":"ativo","arquivado":false,"ciclo_dias":45.0,"ciclo_proprio":false,"dias_sem_comprar":32,"ultima_compra":"2026-06-12","faturamento_12m":0.0,"produtos_criticos":[],"produtos_inativos":[]},{"cliente":"PITOMBEIRA ALIMENTOS","cliente_id":"pitombeira-alimentos","curva":"C","status":"inativo","arquivado":true,"ciclo_dias":45.0,"ciclo_proprio":false,"dias_sem_comprar":463,"ultima_compra":"2025-04-07","faturamento_12m":0.0,"produtos_criticos":[],"produtos_inativos":[]}],"painel_acao":[{"cliente":"CORTE 84","cliente_id":"corte-84","curva":"A","status":"inativo","dias_sem_comprar":127,"ciclo_dias":15,"produtos_criticos":[{"produto":"ACORDINI # 701 EXTRA - (25KG)","cod":"010010004","gap_meses":4}],"score":13.5,"motivo":"sem comprar há 127 dias (ciclo ~15d); cliente curva A — prioridade máxima; 1 produto(s) parado(s) há 3+ meses","acao_sugerida":"Visitar/ligar — reativação"},{"cliente":"DUBOI","cliente_id":"duboi","curva":"A","status":"inativo","dias_sem_comprar":222,"ciclo_dias":15,"produtos_criticos":[],"score":12.0,"motivo":"sem comprar há 222 dias (ciclo ~15d); cliente curva A — prioridade máxima","acao_sugerida":"Visitar/ligar — reativação"},{"cliente":"RAIMUNDO","cliente_id":"raimundo","curva":"B","status":"risco","dias_sem_comprar":197,"ciclo_dias":111.0,"produtos_criticos":[],"score":6.0,"motivo":"passou do ciclo de recompra (197d parado, ciclo ~111d)","acao_sugerida":"Contato preventivo esta semana"},{"cliente":"Z N CARNES","cliente_id":"z-n-carnes","curva":"C","status":"risco","dias_sem_comprar":35,"ciclo_dias":27.5,"produtos_criticos":[{"produto":"CORANTE ALIMENTICIO CWS # 1200 - (5L)","cod":"030030011","gap_meses":4}],"score":4.5,"motivo":"passou do ciclo de recompra (35d parado, ciclo ~28d); 1 produto(s) parado(s) há 3+ meses","acao_sugerida":"Contato preventivo esta semana"},{"cliente":"SUINOS JUCURUTU","cliente_id":"suinos-jucurutu","curva":"A","status":"ativo","dias_sem_comprar":13,"ciclo_dias":15,"produtos_criticos":[{"produto":"AROMA DE FUMAÇA EUROSMOKE # LIGHT 1971 (5L)","cod":"070020050","gap_meses":4},{"produto":"PROTEINA FUNCIONAL DE","cod":"090030038","gap_meses":3}],"score":4.5,"motivo":"cliente curva A — prioridade máxima; 2 produto(s) parado(s) há 3+ meses","acao_sugerida":"Ofertar produtos parados no próximo contato"},{"cliente":"CHARQUE SUPREMA","cliente_id":"charque-suprema","curva":"A","status":"ativo","dias_sem_comprar":1,"ciclo_dias":17.5,"produtos_criticos":[{"produto":"CURA JERKED BEEF # 9604 (6X4)","cod":"010020138","gap_meses":4},{"produto":"CLEAR SKIN - (20L)","cod":"010080001","gap_meses":3}],"score":4.5,"motivo":"cliente curva A — prioridade máxima; 2 produto(s) parado(s) há 3+ meses","acao_sugerida":"Ofertar produtos parados no próximo contato"},{"cliente":"BEZERRAO DA CARNE","cliente_id":"bezerrao-da-carne","curva":"C","status":"inativo","dias_sem_comprar":329,"ciclo_dias":91.0,"produtos_criticos":[],"score":4.0,"motivo":"sem comprar há 329 dias (ciclo ~91d)","acao_sugerida":"Visitar/ligar — reativação"},{"cliente":"PAJEU","cliente_id":"pajeu","curva":"C","status":"inativo","dias_sem_comprar":180,"ciclo_dias":45.0,"produtos_criticos":[],"score":4.0,"motivo":"sem comprar há 180 dias (ciclo ~45d)","acao_sugerida":"Visitar/ligar — reativação"},{"cliente":"A SERTANEJA","cliente_id":"a-sertaneja","curva":"B","status":"ativo","dias_sem_comprar":111,"ciclo_dias":91.5,"produtos_criticos":[{"produto":"REGRAX RUBRO SV ES - (20 L)","cod":"040020076","gap_meses":4},{"produto":"CORANTE ALIMENTICIO CWS # 1200 - (5L)","cod":"030030011","gap_meses":4}],"score":3.5,"motivo":"2 produto(s) parado(s) há 3+ meses","acao_sugerida":"Ofertar produtos parados no próximo contato"},{"cliente":"GPX","cliente_id":"gpx","curva":"B","status":"ativo","dias_sem_comprar":4,"ciclo_dias":22.0,"produtos_criticos":[{"produto":"AROMA DE FUMAÇA EUROSMOKE # LIGHT 1971 (20 L)","cod":"070020051","gap_meses":4},{"produto":"CORANTE VEGETAL DE URUCUM CVU # 900 (20 KG)","cod":"030010057","gap_meses":4},{"produto":"AROMA NAT. DE CARNE GRELHADA AWG # 430 (20 KG )","cod":"010060033","gap_meses":4}],"score":3.5,"motivo":"3 produto(s) parado(s) há 3+ meses","acao_sugerida":"Ofertar produtos parados no próximo contato"},{"cliente":"IDEAL ALIMENTOS","cliente_id":"ideal-alimentos","curva":"C","status":"risco","dias_sem_comprar":62,"ciclo_dias":45.0,"produtos_criticos":[],"score":3.0,"motivo":"passou do ciclo de recompra (62d parado, ciclo ~45d)","acao_sugerida":"Contato preventivo esta semana"},{"cliente":"BOI DE CURRAL","cliente_id":"boi-de-curral","curva":"C","status":"ativo","dias_sem_comprar":90,"ciclo_dias":119.5,"produtos_criticos":[{"produto":"COND PREP. SABOR COSTELA # 265 (25 KG)","cod":"029990077","gap_meses":3},{"produto":"PROTEINA TEXT. DE SOJA NATURAL GRANULADA 1-3mm","cod":"090020003","gap_meses":3}],"score":2.5,"motivo":"2 produto(s) parado(s) há 3+ meses","acao_sugerida":"Ofertar produtos parados no próximo contato"},{"cliente":"MONFORTE INDUSTRIA","cliente_id":"monforte-industria","curva":"C","status":"ativo","dias_sem_comprar":77,"ciclo_dias":120,"produtos_criticos":[{"produto":"CURA JERKED BEEF # 9604 (20 KG)","cod":"010020155","gap_meses":3},{"produto":"GLOBAL P/ CHARQUE CRGG # 250 (25KG)","cod":"059990134","gap_meses":3}],"score":2.5,"motivo":"2 produto(s) parado(s) há 3+ meses","acao_sugerida":"Ofertar produtos parados no próximo contato"},{"cliente":"DICARNES JOSE WELLINGTON","cliente_id":"dicarnes-jose-wellington","curva":"C","status":"ativo","dias_sem_comprar":6,"ciclo_dias":73.0,"produtos_criticos":[{"produto":"CLEAR SKIN - (20L)","cod":"010080001","gap_meses":3}],"score":2.5,"motivo":"1 produto(s) parado(s) há 3+ meses","acao_sugerida":"Ofertar produtos parados no próximo contato"}]},"vh":{"resumo":{"total":23,"ativos":12,"risco":3,"inativos":8,"arquivados":0,"positivacao_pct":52.2,"curva":{"A":6,"B":7,"C":10}},"clientes":[{"cliente":"POLE","cliente_id":"pole","curva":"A","status":"ativo","arquivado":false,"ciclo_dias":15,"ciclo_proprio":true,"dias_sem_comprar":0,"ultima_compra":"2026-09-30","faturamento_12m":614083.0,"produtos_criticos":[],"produtos_inativos":[]},{"cliente":"DUBOI","cliente_id":"duboi","curva":"A","status":"ativo","arquivado":false,"ciclo_dias":15,"ciclo_proprio":true,"dias_sem_comprar":0,"ultima_compra":"2026-07-29","faturamento_12m":311546.0,"produtos_criticos":[],"produtos_inativos":[]},{"cliente":"BOI & CIA / ARATURI","cliente_id":"boi---cia---araturi","curva":"A","status":"ativo","arquivado":false,"ciclo_dias":55.0,"ciclo_proprio":true,"dias_sem_comprar":6,"ultima_compra":"2026-07-08","faturamento_12m":212356.7,"produtos_criticos":[],"produtos_inativos":[]},{"cliente":"JUCURUTU","cliente_id":"jucurutu","curva":"A","status":"ativo","arquivado":false,"ciclo_dias":16.0,"ciclo_proprio":true,"dias_sem_comprar":13,"ultima_compra":"2026-07-01","faturamento_12m":161637.42,"produtos_criticos":[],"produtos_inativos":[]},{"cliente":"AVIGRO","cliente_id":"avigro","curva":"A","status":"ativo","arquivado":false,"ciclo_dias":35.0,"ciclo_proprio":true,"dias_sem_comprar":0,"ultima_compra":"2026-07-15","faturamento_12m":139740.0,"produtos_criticos":[],"produtos_inativos":[]},{"cliente":"RL ALIMENTOS","cliente_id":"rl-alimentos","curva":"A","status":"ativo","arquivado":false,"ciclo_dias":112.5,"ciclo_proprio":true,"dias_sem_comprar":47,"ultima_compra":"2026-05-28","faturamento_12m":106000.0,"produtos_criticos":[],"produtos_inativos":[]},{"cliente":"COOPAG","cliente_id":"coopag","curva":"B","status":"risco","arquivado":false,"ciclo_dias":49.0,"ciclo_proprio":true,"dias_sem_comprar":90,"ultima_compra":"2026-04-15","faturamento_12m":95116.5,"produtos_criticos":[{"produto":"TRIPA SUINA 42/44 - LONGA - 90 METROS","cod":"000211690","gap_meses":3},{"produto":"TRIPA 32/34 90 11 PTS - LONGA - 90 METROS","cod":"000189936","gap_meses":3}],"produtos_inativos":[]},{"cliente":"FIPEL","cliente_id":"fipel","curva":"B","status":"ativo","arquivado":false,"ciclo_dias":15,"ciclo_proprio":true,"dias_sem_comprar":13,"ultima_compra":"2026-07-01","faturamento_12m":69084.6,"produtos_criticos":[],"produtos_inativos":[{"produto":"TRIPA COLÁGENO CARAMELO CALIBRE 22","cod":"000220453","gap_meses":8},{"produto":"TRIPA COLÁGENO CARAMELO CALIBRE 24","cod":"000183606","gap_meses":8}]},{"cliente":"JEC TILAPIAS","cliente_id":"jec-tilapias","curva":"B","status":"risco","arquivado":false,"ciclo_dias":45.0,"ciclo_proprio":false,"dias_sem_comprar":76,"ultima_compra":"2026-04-29","faturamento_12m":49150.8,"produtos_criticos":[{"produto":"TRIPA SUÍNA 28/32 SUPER LONGA","cod":"000222873","gap_meses":3}],"produtos_inativos":[]},{"cliente":"WS / SABOR ARDENTE","cliente_id":"ws---sabor-ardente","curva":"B","status":"ativo","arquivado":false,"ciclo_dias":91.0,"ciclo_proprio":true,"dias_sem_comprar":69,"ultima_compra":"2026-05-06","faturamento_12m":42195.42,"produtos_criticos":[],"produtos_inativos":[]},{"cliente":"DICARNES","cliente_id":"dicarnes","curva":"B","status":"ativo","arquivado":false,"ciclo_dias":45.0,"ciclo_proprio":false,"dias_sem_comprar":4,"ultima_compra":"2026-07-10","faturamento_12m":41718.6,"produtos_criticos":[],"produtos_inativos":[]},{"cliente":"MONFORTE","cliente_id":"monforte","curva":"B","status":"inativo","arquivado":false,"ciclo_dias":45.0,"ciclo_proprio":false,"dias_sem_comprar":139,"ultima_compra":"2026-02-25","faturamento_12m":39690.0,"produtos_criticos":[],"produtos_inativos":[{"produto":"TRIPA SUÍNA SUPER LONGA 90 METROS","cod":"000209220","gap_meses":5}]},{"cliente":"AVIGRAN","cliente_id":"avigran","curva":"B","status":"ativo","arquivado":false,"ciclo_dias":66.5,"ciclo_proprio":true,"dias_sem_comprar":18,"ultima_compra":"2026-06-26","faturamento_12m":32400.0,"produtos_criticos":[],"produtos_inativos":[]},{"cliente":"ZN CARNES","cliente_id":"zn-carnes","curva":"C","status":"inativo","arquivado":false,"ciclo_dias":15,"ciclo_proprio":true,"dias_sem_comprar":216,"ultima_compra":"2025-12-10","faturamento_12m":31400.0,"produtos_criticos":[],"produtos_inativos":[{"produto":"TRIPA SUINA 34/38 11 FIOS LONGA 90 METROS","cod":"000220074","gap_meses":7}]},{"cliente":"JA MARTINS","cliente_id":"ja-martins","curva":"C","status":"inativo","arquivado":false,"ciclo_dias":45.0,"ciclo_proprio":false,"dias_sem_comprar":146,"ultima_compra":"2026-02-18","faturamento_12m":22998.42,"produtos_criticos":[],"produtos_inativos":[]},{"cliente":"AGROMINA","cliente_id":"agromina","curva":"C","status":"inativo","arquivado":false,"ciclo_dias":45.0,"ciclo_proprio":false,"dias_sem_comprar":303,"ultima_compra":"2025-09-14","faturamento_12m":16830.0,"produtos_criticos":[],"produtos_inativos":[]},{"cliente":"LAREDO","cliente_id":"laredo","curva":"C","status":"inativo","arquivado":false,"ciclo_dias":45.0,"ciclo_proprio":false,"dias_sem_comprar":209,"ultima_compra":"2025-12-17","faturamento_12m":16800.0,"produtos_criticos":[],"produtos_inativos":[]},{"cliente":"FRIG. MODERNO","cliente_id":"frig--moderno","curva":"C","status":"ativo","arquivado":false,"ciclo_dias":81.5,"ciclo_proprio":true,"dias_sem_comprar":67,"ultima_compra":"2026-05-08","faturamento_12m":10432.8,"produtos_criticos":[],"produtos_inativos":[{"produto":"TRIPA DE COLAGENO 22 PARA FRESCAIS","cod":"000183339","gap_meses":5}]},{"cliente":"CARNES BECKMANN","cliente_id":"carnes-beckmann","curva":"C","status":"risco","arquivado":false,"ciclo_dias":45.0,"ciclo_proprio":false,"dias_sem_comprar":109,"ultima_compra":"2026-03-27","faturamento_12m":5373.72,"produtos_criticos":[],"produtos_inativos":[]},{"cliente":"SO FILE ATAC","cliente_id":"so-file-atac","curva":"C","status":"inativo","arquivado":false,"ciclo_dias":45.0,"ciclo_proprio":false,"dias_sem_comprar":131,"ultima_compra":"2026-03-05","faturamento_12m":3531.42,"produtos_criticos":[],"produtos_inativos":[]},{"cliente":"CORDEIRO","cliente_id":"cordeiro","curva":"C","status":"inativo","arquivado":false,"ciclo_dias":45.0,"ciclo_proprio":false,"dias_sem_comprar":131,"ultima_compra":"2026-03-05","faturamento_12m":3477.6,"produtos_criticos":[],"produtos_inativos":[]},{"cliente":"M & E COM","cliente_id":"m---e-com","curva":"C","status":"ativo","arquivado":false,"ciclo_dias":45.0,"ciclo_proprio":false,"dias_sem_comprar":6,"ultima_compra":"2026-07-08","faturamento_12m":3477.6,"produtos_criticos":[],"produtos_inativos":[]},{"cliente":"NOTARO","cliente_id":"notaro","curva":"C","status":"inativo","arquivado":false,"ciclo_dias":45.0,"ciclo_proprio":false,"dias_sem_comprar":263,"ultima_compra":"2025-10-24","faturamento_12m":0.0,"produtos_criticos":[],"produtos_inativos":[]}],"painel_acao":[{"cliente":"MONFORTE","cliente_id":"monforte","curva":"B","status":"inativo","dias_sem_comprar":139,"ciclo_dias":45.0,"produtos_criticos":[],"score":8.0,"motivo":"sem comprar há 139 dias (ciclo ~45d)","acao_sugerida":"Visitar/ligar — reativação"},{"cliente":"COOPAG","cliente_id":"coopag","curva":"B","status":"risco","dias_sem_comprar":90,"ciclo_dias":49.0,"produtos_criticos":[{"produto":"TRIPA SUINA 42/44 - LONGA - 90 METROS","cod":"000211690","gap_meses":3},{"produto":"TRIPA 32/34 90 11 PTS - LONGA - 90 METROS","cod":"000189936","gap_meses":3}],"score":7.5,"motivo":"passou do ciclo de recompra (90d parado, ciclo ~49d); 2 produto(s) parado(s) há 3+ meses","acao_sugerida":"Contato preventivo esta semana"},{"cliente":"JEC TILAPIAS","cliente_id":"jec-tilapias","curva":"B","status":"risco","dias_sem_comprar":76,"ciclo_dias":45.0,"produtos_criticos":[{"produto":"TRIPA SUÍNA 28/32 SUPER LONGA","cod":"000222873","gap_meses":3}],"score":7.5,"motivo":"passou do ciclo de recompra (76d parado, ciclo ~45d); 1 produto(s) parado(s) há 3+ meses","acao_sugerida":"Contato preventivo esta semana"},{"cliente":"AGROMINA","cliente_id":"agromina","curva":"C","status":"inativo","dias_sem_comprar":303,"ciclo_dias":45.0,"produtos_criticos":[],"score":4.0,"motivo":"sem comprar há 303 dias (ciclo ~45d)","acao_sugerida":"Visitar/ligar — reativação"},{"cliente":"NOTARO","cliente_id":"notaro","curva":"C","status":"inativo","dias_sem_comprar":263,"ciclo_dias":45.0,"produtos_criticos":[],"score":4.0,"motivo":"sem comprar há 263 dias (ciclo ~45d)","acao_sugerida":"Visitar/ligar — reativação"},{"cliente":"ZN CARNES","cliente_id":"zn-carnes","curva":"C","status":"inativo","dias_sem_comprar":216,"ciclo_dias":15,"produtos_criticos":[],"score":4.0,"motivo":"sem comprar há 216 dias (ciclo ~15d)","acao_sugerida":"Visitar/ligar — reativação"},{"cliente":"LAREDO","cliente_id":"laredo","curva":"C","status":"inativo","dias_sem_comprar":209,"ciclo_dias":45.0,"produtos_criticos":[],"score":4.0,"motivo":"sem comprar há 209 dias (ciclo ~45d)","acao_sugerida":"Visitar/ligar — reativação"},{"cliente":"JA MARTINS","cliente_id":"ja-martins","curva":"C","status":"inativo","dias_sem_comprar":146,"ciclo_dias":45.0,"produtos_criticos":[],"score":4.0,"motivo":"sem comprar há 146 dias (ciclo ~45d)","acao_sugerida":"Visitar/ligar — reativação"},{"cliente":"SO FILE ATAC","cliente_id":"so-file-atac","curva":"C","status":"inativo","dias_sem_comprar":131,"ciclo_dias":45.0,"produtos_criticos":[],"score":4.0,"motivo":"sem comprar há 131 dias (ciclo ~45d)","acao_sugerida":"Visitar/ligar — reativação"},{"cliente":"CORDEIRO","cliente_id":"cordeiro","curva":"C","status":"inativo","dias_sem_comprar":131,"ciclo_dias":45.0,"produtos_criticos":[],"score":4.0,"motivo":"sem comprar há 131 dias (ciclo ~45d)","acao_sugerida":"Visitar/ligar — reativação"},{"cliente":"CARNES BECKMANN","cliente_id":"carnes-beckmann","curva":"C","status":"risco","dias_sem_comprar":109,"ciclo_dias":45.0,"produtos_criticos":[],"score":3.0,"motivo":"passou do ciclo de recompra (109d parado, ciclo ~45d)","acao_sugerida":"Contato preventivo esta semana"}]}};
 const MN = {'01':'Jan','02':'Fev','03':'Mar','04':'Abr','05':'Mai','06':'Jun','07':'Jul','08':'Ago','09':'Set','10':'Out','11':'Nov','12':'Dez'};
 const COMP_CLASS = {ibrac:'si', vh:'sv'};
 
@@ -524,6 +528,8 @@ function setComp(c){
   atualizarLogoEmpresa(c);
   buildMonthBtns();
   if (typeof renderAnalises === 'function') renderAnalises();
+  const _tabEvo = document.getElementById('tab-evolucao');
+  if (_tabEvo && _tabEvo.style.display !== 'none' && typeof renderEvolucaoPage === 'function') renderEvolucaoPage();
 }
 
 function buildMonthBtns(){
@@ -1296,7 +1302,6 @@ function render(){
         '<div class="tab-row">'+
           '<button class="t-btn si" data-tab="mes-'+id+'" onclick="switchTab(this,\''+id+'\')">M\u00eas atual</button>'+
           '<button class="t-btn" data-tab="hist-'+id+'" onclick="switchTab(this,\''+id+'\')">Hist\u00f3rico</button>'+
-          '<button class="t-btn" data-tab="evo-'+id+'" onclick="switchTab(this,\''+id+'\')">&#128200; Evolu\u00e7\u00e3o</button>'+
           '<button class="t-btn" data-tab="anal-'+id+'" onclick="switchTab(this,\''+id+'\')">An\u00e1lise</button>'+
           '<button class="t-btn" data-tab="ct-'+id+'" onclick="switchTab(this,\''+id+'\')">&#9742; Contato</button>'+
           '<button class="t-btn" data-tab="dv-'+id+'" onclick="switchTab(this,\''+id+'\')">&#9888; Divida</button>'+
@@ -1304,7 +1309,6 @@ function render(){
         '</div>'+
         '<div class="tab-pane open" id="mes-'+id+'"><table><thead><tr><th>Data</th><th>Produtos</th><th style="text-align:right">Valor</th></tr></thead><tbody>'+pedRows+'</tbody></table></div>'+
         '<div class="tab-pane" id="hist-'+id+'" data-cl="'+esc(cl)+'"></div>'+
-        '<div class="tab-pane" id="evo-'+id+'" data-cl="'+esc(cl)+'"></div>'+
         '<div class="tab-pane" id="anal-'+id+'" data-cl="'+esc(cl)+'"></div>'+
         '<div class="tab-pane" id="ct-'+id+'" data-cl="'+esc(cl)+'"></div>'+
         '<div class="tab-pane" id="dv-'+id+'" data-cl="'+esc(cl)+'"></div>'+
@@ -1325,8 +1329,6 @@ function toggleCard(id){
   if(!wasOpen){
     const hp=document.getElementById('hist-'+id);
     if(hp && !hp.dataset.built){ hp.innerHTML=buildHistory(hp.dataset.cl||id.replace(/_/g,' ')); hp.dataset.built=1; }
-    const ep=document.getElementById('evo-'+id);
-    if(ep && !ep.dataset.built){ ep.innerHTML=buildEvolucao(ep.dataset.cl||id.replace(/_/g,' ')); ep.dataset.built=1; }
     const ap=document.getElementById('anal-'+id);
     if(ap && !ap.dataset.built){ ap.innerHTML=buildAnalysis(ap.dataset.cl||id.replace(/_/g,' ')); ap.dataset.built=1; }
     const cp=document.getElementById('ct-'+id);
@@ -1349,7 +1351,6 @@ function switchTab(btn, id){
     const cl=pane.dataset.cl;
     if(!cl) return;
     if(tabId.startsWith('hist-')) { pane.innerHTML=buildHistory(cl); pane.dataset.built=1; }
-    else if(tabId.startsWith('evo-')) { pane.innerHTML=buildEvolucao(cl); pane.dataset.built=1; }
     else if(tabId.startsWith('anal-')) { pane.innerHTML=buildAnalysis(cl); pane.dataset.built=1; }
     else if(tabId.startsWith('ct-')) { pane.innerHTML=buildCtPane(cl); pane.dataset.built=1; }
     else if(tabId.startsWith('dv-')) { pane.innerHTML=buildDvPane(cl); pane.dataset.built=1; }
@@ -1615,15 +1616,335 @@ function hideEvoTipG(chartId){
   if(tip) tip.style.display='none';
 }
 
-// ── Evolução Geral ────────────────────────────────────────────────────────
-function showEvoGeral(){
-  const empLabel = comp==='ibrac'?'Ibrac Condimentos':'VH Devro';
-  document.getElementById('evo-geral-modal').style.display='block';
-  document.getElementById('evo-geral-title').textContent='📈 Evolução Geral — '+empLabel;
-  renderEvoGeral();
-}
-function closeEvoGeral(){ document.getElementById('evo-geral-modal').style.display='none'; }
+// ── Aba 📈 Evolução (página dedicada) ─────────────────────────────────────
+let evoPeriodo = 'ano';        // 'ano' = ano atual, 'ano-1' = ano anterior, 'tudo'
+let evoProdMode = 'fat';       // 'fat' (R$) ou 'qtd'
+let evoClienteSel = '';        // cliente selecionado na evolução individual
 
+function showEvoGeral(){ trocarAba('evolucao'); }   // compatibilidade
+
+function _evoPedidos(){
+  // Lista achatada de pedidos {cl, m, tot, prods[]} da empresa atual
+  const out=[];
+  Object.entries(DATA[comp]||{}).forEach(([cl,orders])=>{
+    orders.forEach(o=>{ if(o.t==='P'&&o.m&&o.tot>0) out.push({cl,m:o.m,tot:o.tot,p:o.p||[]}); });
+  });
+  return out;
+}
+function _evoFiltraPeriodo(peds){
+  const curYear=new Date().getFullYear();
+  if(evoPeriodo==='ano')   return peds.filter(o=>o.m.startsWith(String(curYear)));
+  if(evoPeriodo==='ano-1') return peds.filter(o=>o.m.startsWith(String(curYear-1)));
+  return peds;
+}
+function _evoPeriodoLabel(){
+  const curYear=new Date().getFullYear();
+  return evoPeriodo==='ano'?String(curYear):(evoPeriodo==='ano-1'?String(curYear-1):'Todo o histórico');
+}
+function setEvoPeriodo(p){ evoPeriodo=p; renderEvoRankings(); renderEvoAvancado(); }
+function setEvoProdMode(m){ evoProdMode=m; renderEvoRankings(); }
+
+// ── Análises para apresentação (YoY, Waterfall, Pareto, Heatmap) ──────────
+function renderEvoAvancado(){
+  const el=document.getElementById('evo-avancado');
+  if(!el) return;
+  const clr = comp==='ibrac'?'#0F6E56':'#185FA5';
+  const curYear=new Date().getFullYear();
+  const prevYear=curYear-1;
+  const allPeds=_evoPedidos();
+  const peds=_evoFiltraPeriodo(allPeds);
+
+  // ═══ 1. Comparativo YoY mensal (barras agrupadas) ═══
+  const fatByYM={};
+  allPeds.forEach(o=>{ fatByYM[o.m]=(fatByYM[o.m]||0)+o.tot; });
+  const mk=(y,m)=>y+'-'+(m<10?'0':'')+m;
+  const fatPrev=[],fatCur=[];
+  for(let m=1;m<=12;m++){ fatPrev.push(fatByYM[mk(prevYear,m)]||0); fatCur.push(fatByYM[mk(curYear,m)]||0); }
+  const curMonth=new Date().getMonth()+1;
+  const ytdPrev=fatPrev.slice(0,curMonth).reduce((s,v)=>s+v,0);
+  const ytdCur =fatCur.slice(0,curMonth).reduce((s,v)=>s+v,0);
+  const ytdDelta=ytdPrev?((ytdCur-ytdPrev)/ytdPrev*100):null;
+
+  function fmtK(v){ if(v>=1000000) return 'R$'+(v/1000000).toFixed(1).replace('.',',')+'M'; if(v>=1000) return 'R$'+Math.round(v/1000)+'k'; return v>0?'R$'+Math.round(v):''; }
+
+  function yoyChart(){
+    const maxV=Math.max(...fatPrev,...fatCur,1);
+    const groupW=58,barW=24,gap=14,svgH=130,padTop=26,padBot=32,padL=4;
+    const totalW=12*(groupW+gap)-gap+padL+8, totalH=svgH+padTop+padBot;
+    let s='';
+    for(let i=0;i<12;i++){
+      const x=padL+i*(groupW+gap);
+      const hP=Math.max(fatPrev[i]>0?3:0,Math.round(fatPrev[i]/maxV*svgH));
+      const hC=Math.max(fatCur[i]>0?3:0,Math.round(fatCur[i]/maxV*svgH));
+      const d=fatPrev[i]>0&&fatCur[i]>0?((fatCur[i]-fatPrev[i])/fatPrev[i]*100):null;
+      const mm=(i+1<10?'0':'')+(i+1);
+      s+='<g>'
+        +'<rect x="'+x+'" y="'+(padTop+svgH-hP)+'" width="'+barW+'" height="'+hP+'" rx="3" fill="#B7BFC6" data-tip="'+(MN[mm]||mm)+'/'+prevYear+': '+fmt(fatPrev[i])+'" onmouseover="showEvoTipG(event,this,\'g-yoy\')" onmouseout="hideEvoTipG(\'g-yoy\')" style="cursor:pointer"/>'
+        +'<rect x="'+(x+barW+4)+'" y="'+(padTop+svgH-hC)+'" width="'+barW+'" height="'+hC+'" rx="3" fill="'+clr+'" opacity=".9" data-tip="'+(MN[mm]||mm)+'/'+curYear+': '+fmt(fatCur[i])+(d!==null?' ('+(d>0?'+':'')+d.toFixed(1)+'%)':'')+'" onmouseover="showEvoTipG(event,this,\'g-yoy\')" onmouseout="hideEvoTipG(\'g-yoy\')" style="cursor:pointer"/>'
+        +(d!==null?'<text x="'+(x+groupW/2)+'" y="'+(padTop+svgH-Math.max(hP,hC)-7)+'" text-anchor="middle" style="font-size:9px;font-weight:700;font-family:var(--mono);fill:'+(d>=0?'var(--ok)':'var(--err)')+'">'+(d>0?'▲':'▼')+Math.abs(d).toFixed(0)+'%</text>':'')
+        +'<text class="evo-bar-label" x="'+(x+groupW/2)+'" y="'+(padTop+svgH+14)+'" text-anchor="middle">'+(MN[mm]||mm)+'</text>'
+      +'</g>';
+    }
+    return '<div class="evo-chart-wrap" style="position:relative"><div class="evo-tooltip" id="evo-tip-g-yoy"></div>'
+      +'<svg width="'+totalW+'" height="'+totalH+'" viewBox="0 0 '+totalW+' '+totalH+'" style="display:block;min-width:'+totalW+'px;overflow:visible">'+s+'</svg></div>'
+      +'<div style="display:flex;gap:16px;font-size:11px;color:var(--subtle);margin-top:6px;align-items:center;flex-wrap:wrap">'
+      +'<span><span style="display:inline-block;width:10px;height:10px;background:#B7BFC6;border-radius:2px;margin-right:4px"></span>'+prevYear+'</span>'
+      +'<span><span style="display:inline-block;width:10px;height:10px;background:'+clr+';border-radius:2px;margin-right:4px"></span>'+curYear+'</span>'
+      +(ytdDelta!==null?'<span style="font-weight:700;color:'+(ytdDelta>=0?'var(--ok)':'var(--err)')+'">Acumulado Jan–'+(MN[(curMonth<10?'0':'')+curMonth]||curMonth)+': '+(ytdDelta>0?'+':'')+ytdDelta.toFixed(1)+'% vs '+prevYear+'</span>':'')
+      +'</div>';
+  }
+
+  // ═══ 2. Waterfall: variação YoY por cliente (acumulado até o mês atual, nos 2 anos) ═══
+  function waterfallChart(){
+    const pv={},cv={};
+    const mmax=(curMonth<10?'0':'')+curMonth;
+    allPeds.forEach(o=>{
+      const [y,mm]=o.m.split('-');
+      if(mm>mmax) return;                       // compara período igual: Jan–mês atual
+      if(y===String(prevYear)) pv[o.cl]=(pv[o.cl]||0)+o.tot;
+      else if(y===String(curYear)) cv[o.cl]=(cv[o.cl]||0)+o.tot;
+    });
+    const totP=Object.values(pv).reduce((s,v)=>s+v,0);
+    const totC=Object.values(cv).reduce((s,v)=>s+v,0);
+    if(!totP&&!totC) return '<div style="padding:14px;font-size:13px;color:var(--subtle)">Sem dados suficientes para comparar '+prevYear+' e '+curYear+'.</div>';
+    const cls=new Set([...Object.keys(pv),...Object.keys(cv)]);
+    let diffs=[...cls].map(c=>({n:c,d:(cv[c]||0)-(pv[c]||0)})).filter(o=>Math.abs(o.d)>0.5)
+      .sort((a,b)=>Math.abs(b.d)-Math.abs(a.d));
+    const top=diffs.slice(0,7);
+    const resto=diffs.slice(7).reduce((s,o)=>s+o.d,0);
+    if(Math.abs(resto)>0.5) top.push({n:'Demais clientes',d:resto});
+    // Ordena: aumentos primeiro, depois quedas (leitura de ponte)
+    top.sort((a,b)=>b.d-a.d);
+
+    const perLbl=m=>'Jan\u2013'+(MN[(curMonth<10?'0':'')+curMonth]||curMonth);
+    const steps=[{n:perLbl()+' '+prevYear,v:totP,type:'base'}];
+    top.forEach(o=>steps.push({n:o.n,v:o.d,type:o.d>=0?'up':'dn'}));
+    steps.push({n:perLbl()+' '+curYear,v:totC,type:'base'});
+
+    let cum=0; const pos=steps.map(st=>{
+      if(st.type==='base'){ const p={y0:0,y1:st.v}; cum=st.v; return p; }
+      const p={y0:cum,y1:cum+st.v}; cum+=st.v; return p;
+    });
+    const maxV=Math.max(...pos.map(p=>Math.max(p.y0,p.y1)),1);
+    const n=steps.length,barW=Math.max(40,Math.min(72,Math.floor(880/n)-10)),gap=12;
+    const svgH=150,padTop=24,padBot=44,padL=4;
+    const totalW=n*(barW+gap)-gap+padL+8, totalH=svgH+padTop+padBot;
+    const y=v=>padTop+svgH-Math.round(v/maxV*svgH);
+    let s='';
+    steps.forEach((st,i)=>{
+      const x=padL+i*(barW+gap);
+      const yTop=y(Math.max(pos[i].y0,pos[i].y1)), yBot=y(Math.min(pos[i].y0,pos[i].y1));
+      const h=Math.max(2,yBot-yTop);
+      const fill=st.type==='base'?clr:(st.type==='up'?'var(--ok)':'var(--err)');
+      const lbl=st.type==='base'?fmtK(st.v):(st.v>0?'+':'−')+fmtK(Math.abs(st.v)).replace('R$','R$');
+      const nome=st.n.length>11?st.n.slice(0,10)+'…':st.n;
+      s+='<g>'
+        +(i>0?'<line x1="'+(x-gap)+'" y1="'+y(pos[i-1].y1)+'" x2="'+x+'" y2="'+y(pos[i-1].y1)+'" stroke="var(--border)" stroke-dasharray="3,3"/>':'')
+        +'<rect x="'+x+'" y="'+yTop+'" width="'+barW+'" height="'+h+'" rx="3" fill="'+fill+'" opacity="'+(st.type==='base'?'.9':'.8')+'"'
+        +' data-tip="'+st.n.replace(/"/g,'&quot;')+': '+(st.type==='base'?fmt(st.v):(st.v>0?'+':'')+fmt(st.v))+'"'
+        +' onmouseover="showEvoTipG(event,this,\'g-wf\')" onmouseout="hideEvoTipG(\'g-wf\')" style="cursor:pointer"/>'
+        +'<text x="'+(x+barW/2)+'" y="'+(yTop-5)+'" text-anchor="middle" style="font-size:9px;font-weight:700;font-family:var(--mono);fill:'+(st.type==='base'?clr:(st.type==='up'?'var(--ok)':'var(--err)'))+'">'+lbl+'</text>'
+        +'<text class="evo-bar-label" x="'+(x+barW/2)+'" y="'+(padTop+svgH+13)+'" text-anchor="middle" transform="rotate(0)">'+nome+'</text>'
+      +'</g>';
+    });
+    return '<div class="evo-chart-wrap" style="position:relative"><div class="evo-tooltip" id="evo-tip-g-wf"></div>'
+      +'<svg width="'+totalW+'" height="'+totalH+'" viewBox="0 0 '+totalW+' '+totalH+'" style="display:block;min-width:'+totalW+'px;overflow:visible">'+s+'</svg></div>'
+      +'<div style="font-size:11px;color:var(--subtle);margin-top:4px">Compara o mesmo per\u00edodo (Jan at\u00e9 o m\u00eas atual) nos dois anos: verde puxou pra cima, vermelho pra baixo. Passe o mouse para o valor exato.</div>';
+  }
+
+  // ═══ 3. Curva de Pareto (80/20) ═══
+  function paretoChart(){
+    const porCl={};
+    peds.forEach(o=>{ porCl[o.cl]=(porCl[o.cl]||0)+o.tot; });
+    const rows=Object.entries(porCl).sort((a,b)=>b[1]-a[1]);
+    if(!rows.length) return '<div style="padding:14px;font-size:13px;color:var(--subtle)">Sem dados no período.</div>';
+    const total=rows.reduce((s,r)=>s+r[1],0);
+    const top=rows.slice(0,15);
+    const maxV=top[0][1];
+    let acum=0; const acums=top.map(r=>{ acum+=r[1]; return acum/total*100; });
+    // Nº de clientes p/ chegar a 80%
+    let c80=0,a=0; for(const r of rows){ a+=r[1]; c80++; if(a/total>=0.8) break; }
+
+    const n=top.length,barW=Math.max(34,Math.min(56,Math.floor(880/n)-8)),gap=10;
+    const svgH=150,padTop=24,padBot=46,padL=4,padR=8;
+    const totalW=n*(barW+gap)-gap+padL+padR, totalH=svgH+padTop+padBot;
+    const yBar=v=>padTop+svgH-Math.round(v/maxV*svgH);
+    const yPct=p=>padTop+svgH-Math.round(p/100*svgH);
+    let s='<line x1="'+padL+'" y1="'+yPct(80)+'" x2="'+(totalW-padR)+'" y2="'+yPct(80)+'" stroke="var(--err)" stroke-dasharray="4,4" opacity=".55"/>'
+      +'<text x="'+(totalW-padR)+'" y="'+(yPct(80)-4)+'" text-anchor="end" style="font-size:9px;fill:var(--err);font-family:var(--mono)">80%</text>';
+    let line='';
+    top.forEach((r,i)=>{
+      const x=padL+i*(barW+gap), h=Math.max(3,padTop+svgH-yBar(r[1]));
+      const cx=x+barW/2, cy=yPct(acums[i]);
+      const nome=r[0].length>9?r[0].slice(0,8)+'…':r[0];
+      s+='<rect x="'+x+'" y="'+yBar(r[1])+'" width="'+barW+'" height="'+h+'" rx="3" fill="'+clr+'" opacity=".85"'
+        +' data-tip="'+r[0].replace(/"/g,'&quot;')+': '+fmt(r[1])+' · acumulado '+acums[i].toFixed(1)+'%"'
+        +' onmouseover="showEvoTipG(event,this,\'g-par\')" onmouseout="hideEvoTipG(\'g-par\')" style="cursor:pointer"/>'
+        +'<text class="evo-bar-label" x="'+cx+'" y="'+(padTop+svgH+13)+'" text-anchor="middle">'+nome+'</text>'
+        +'<text x="'+cx+'" y="'+(padTop+svgH+24)+'" text-anchor="middle" style="font-size:8.5px;fill:var(--subtle);font-family:var(--mono)">'+acums[i].toFixed(0)+'%</text>';
+      line+=(i===0?'M':'L')+cx+' '+cy+' ';
+      s+='<circle cx="'+cx+'" cy="'+cy+'" r="3" fill="#D97706"/>';
+    });
+    s='<path d="'+line+'" fill="none" stroke="#D97706" stroke-width="2" opacity=".9"/>'+s;
+    return '<div class="evo-chart-wrap" style="position:relative"><div class="evo-tooltip" id="evo-tip-g-par"></div>'
+      +'<svg width="'+totalW+'" height="'+totalH+'" viewBox="0 0 '+totalW+' '+totalH+'" style="display:block;min-width:'+totalW+'px;overflow:visible">'+s+'</svg></div>'
+      +'<div style="font-size:11px;color:var(--subtle);margin-top:4px"><b style="color:var(--text)">'+c80+' cliente'+(c80>1?'s':'')+'</b> concentra'+(c80>1?'m':'')+' 80% do faturamento de '+rows.length+' no período ('+_evoPeriodoLabel().toLowerCase()+'). Linha laranja = % acumulado.</div>';
+  }
+
+  // ═══ 4. Heatmap cliente × mês ═══
+  function heatmapChart(){
+    // Meses do período: ano selecionado, ou últimos 12 meses com dados no "Tudo"
+    let mos=[];
+    if(evoPeriodo==='tudo'){
+      const all=[...new Set(allPeds.map(o=>o.m))].sort();
+      mos=all.slice(-12);
+    } else {
+      const yr=evoPeriodo==='ano'?curYear:prevYear;
+      for(let m=1;m<=12;m++) mos.push(mk(yr,m));
+    }
+    const porCl={};
+    peds.forEach(o=>{ porCl[o.cl]=(porCl[o.cl]||0)+o.tot; });
+    const topCls=Object.entries(porCl).sort((a,b)=>b[1]-a[1]).slice(0,12).map(r=>r[0]);
+    if(!topCls.length) return '<div style="padding:14px;font-size:13px;color:var(--subtle)">Sem dados no período.</div>';
+    const cell={};
+    allPeds.forEach(o=>{ const k=o.cl+'|'+o.m; cell[k]=(cell[k]||0)+o.tot; });
+    let maxC=1;
+    topCls.forEach(c=>mos.forEach(m=>{ maxC=Math.max(maxC,cell[c+'|'+m]||0); }));
+
+    const rgb=comp==='ibrac'?'15,110,86':'24,95,165';
+    let h='<div style="overflow-x:auto"><table style="border-collapse:separate;border-spacing:3px;font-size:11px">';
+    h+='<tr><td></td>'+mos.map(m=>{ const [y,mm]=m.split('-'); return '<td style="text-align:center;color:var(--subtle);font-size:10px;padding:0 2px;white-space:nowrap">'+(MN[mm]||mm)+(mm==='01'||m===mos[0]?'<br><span style="opacity:.6">'+y+'</span>':'')+'</td>'; }).join('')+'</tr>';
+    topCls.forEach(c=>{
+      const nome=c.length>18?c.slice(0,17)+'…':c;
+      h+='<tr><td style="font-weight:600;color:var(--text);white-space:nowrap;padding-right:6px;max-width:170px;overflow:hidden;text-overflow:ellipsis" title="'+c.replace(/"/g,'&quot;')+'">'+nome+'</td>';
+      mos.forEach(m=>{
+        const v=cell[c+'|'+m]||0;
+        const op=v>0?(0.15+0.85*Math.sqrt(v/maxC)).toFixed(2):0;
+        const [y,mm]=m.split('-');
+        h+='<td title="'+c.replace(/"/g,'&quot;')+' — '+(MN[mm]||mm)+'/'+y+': '+(v>0?fmt(v):'sem pedido')+'"'
+          +' style="width:34px;height:26px;border-radius:5px;background:'+(v>0?'rgba('+rgb+','+op+')':'var(--bg)')+';border:1px solid var(--border);cursor:default"></td>';
+      });
+      h+='</tr>';
+    });
+    h+='</table></div>'
+      +'<div style="font-size:11px;color:var(--subtle);margin-top:6px">Intensidade = faturamento no mês. Células vazias = meses sem pedido (oportunidade de contato). Passe o mouse para o valor.</div>';
+    return h;
+  }
+
+  el.innerHTML=
+    '<div style="font-size:13px;font-weight:700;color:var(--text);margin:24px 0 16px;padding-bottom:8px;border-bottom:1px solid var(--border)">&#128202; Análises para apresentação</div>'
+    +'<div class="evo-section"><div class="evo-title">Comparativo ano a ano — faturamento mensal '+prevYear+' vs '+curYear+'</div>'+yoyChart()+'</div>'
+    +'<div class="evo-section"><div class="evo-title">Ponte de crescimento (waterfall) — quem puxou o resultado '+prevYear+' → '+curYear+'</div>'+waterfallChart()+'</div>'
+    +'<div class="evo-section"><div class="evo-title">Curva de Pareto — concentração de faturamento por cliente ('+_evoPeriodoLabel()+')</div>'+paretoChart()+'</div>'
+    +'<div class="evo-section"><div class="evo-title">Mapa de calor — recorrência de compra por cliente ('+_evoPeriodoLabel()+')</div>'+heatmapChart()+'</div>';
+}
+
+// Barras horizontais (ranking) em HTML
+function _hBarChart(rows, color, fmtFn){
+  if(!rows.length) return '<div style="padding:14px;font-size:13px;color:var(--subtle)">Sem dados no período.</div>';
+  const maxV=Math.max(...rows.map(r=>r.v),1);
+  const total=rows.reduce((s,r)=>s+r.v,0);
+  return '<div style="display:flex;flex-direction:column;gap:7px">'+rows.map(r=>{
+    const pct=(r.v/maxV*100).toFixed(1);
+    const share=r.share!==undefined?r.share:(total?(r.v/total*100):0);
+    return '<div style="display:grid;grid-template-columns:minmax(120px,220px) 1fr 120px;gap:10px;align-items:center;font-size:12px">'
+      +'<div style="font-weight:600;color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="'+r.n.replace(/"/g,'&quot;')+'">'+r.n+'</div>'
+      +'<div style="background:var(--bg);border:1px solid var(--border);border-radius:6px;height:20px;overflow:hidden"><div style="width:'+pct+'%;height:100%;background:'+color+';opacity:.85;border-radius:5px;min-width:3px"></div></div>'
+      +'<div class="mono" style="text-align:right;white-space:nowrap;color:var(--text)">'+fmtFn(r.v)+' <span style="color:var(--subtle);font-size:10.5px">('+share.toFixed(1)+'%)</span></div>'
+    +'</div>';
+  }).join('')+'</div>';
+}
+
+function renderEvoRankings(){
+  const el=document.getElementById('evo-rankings');
+  if(!el) return;
+  const clr = comp==='ibrac'?'#0F6E56':'#185FA5';
+  const peds=_evoFiltraPeriodo(_evoPedidos());
+
+  // Top clientes por faturamento
+  const porCl={};
+  peds.forEach(o=>{ porCl[o.cl]=(porCl[o.cl]||0)+o.tot; });
+  const totCl=Object.values(porCl).reduce((s,v)=>s+v,0);
+  const topCl=Object.entries(porCl).sort((a,b)=>b[1]-a[1]).slice(0,10)
+    .map(([n,v])=>({n,v,share:totCl?v/totCl*100:0}));
+
+  // Top produtos (valor ou quantidade)
+  const porProd={};
+  peds.forEach(o=>o.p.forEach(p=>{
+    if(!p.n) return;
+    if(!porProd[p.n]) porProd[p.n]={fat:0,qtd:0};
+    porProd[p.n].fat+=(p.v||0);
+    porProd[p.n].qtd+=(p.q||0);
+  }));
+  const key=evoProdMode;
+  const totProd=Object.values(porProd).reduce((s,v)=>s+v[key],0);
+  const topProd=Object.entries(porProd).sort((a,b)=>b[1][key]-a[1][key]).slice(0,10)
+    .map(([n,v])=>({n,v:v[key],share:totProd?v[key]/totProd*100:0}));
+
+  const perBtn=p=>'<button class="f-btn'+(evoPeriodo===p?' on':'')+'" onclick="setEvoPeriodo(\''+p+'\')">'
+    +(p==='ano'?new Date().getFullYear():(p==='ano-1'?new Date().getFullYear()-1:'Tudo'))+'</button>';
+  const modBtn=(m,l)=>'<button class="f-btn'+(evoProdMode===m?' on':'')+'" onclick="setEvoProdMode(\''+m+'\')">'+l+'</button>';
+
+  el.innerHTML=
+    '<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin:24px 0 16px;padding-bottom:8px;border-bottom:1px solid var(--border)">'
+      +'<span style="font-size:13px;font-weight:700;color:var(--text)">&#127942; Rankings — '+_evoPeriodoLabel()+'</span>'
+      +'<div style="flex:1"></div>'
+      +perBtn('ano')+perBtn('ano-1')+perBtn('tudo')
+    +'</div>'
+    +'<div class="evo-section">'
+      +'<div class="evo-title">Top 10 clientes por faturamento (R$)</div>'
+      +_hBarChart(topCl,clr,v=>fmt(v))
+    +'</div>'
+    +'<div class="evo-section">'
+      +'<div style="display:flex;align-items:center;gap:8px;margin-bottom:10px">'
+        +'<div class="evo-title" style="margin:0">Top 10 produtos</div>'
+        +'<div style="flex:1"></div>'+modBtn('fat','R$')+modBtn('qtd','Quantidade')
+      +'</div>'
+      +_hBarChart(topProd,clr,evoProdMode==='fat'?(v=>fmt(v)):(v=>v.toLocaleString('pt-BR')+' un'))
+    +'</div>';
+}
+
+function renderEvoCliente(){
+  const el=document.getElementById('evo-cliente-chart');
+  if(!el) return;
+  el.innerHTML = evoClienteSel ? buildEvolucao(evoClienteSel)
+    : '<div style="padding:14px;font-size:13px;color:var(--subtle)">Selecione um cliente para ver a evolução individual.</div>';
+}
+function setEvoCliente(cl){ evoClienteSel=cl; renderEvoCliente(); }
+
+function renderEvolucaoPage(){
+  const page=document.getElementById('evo-page');
+  if(!page) return;
+  const empLabel = comp==='ibrac'?'Ibrac Condimentos':'VH Devro';
+  const cor = comp==='ibrac'?'var(--ibrac)':'var(--vh)';
+  document.getElementById('tab-evolucao').style.setProperty('--cor-primaria',cor);
+
+  // Clientes com pedido, ordenados por faturamento total (para o seletor)
+  const totais={};
+  _evoPedidos().forEach(o=>{ totais[o.cl]=(totais[o.cl]||0)+o.tot; });
+  const clientes=Object.keys(totais).sort((a,b)=>totais[b]-totais[a]);
+  if(evoClienteSel && !clientes.includes(evoClienteSel)) evoClienteSel='';
+  const opts='<option value="">— selecione —</option>'
+    +clientes.map(c=>'<option value="'+c.replace(/"/g,'&quot;')+'"'+(c===evoClienteSel?' selected':'')+'>'+c+'</option>').join('');
+
+  page.innerHTML=
+    '<h2 style="margin:4px 0 16px;font-size:18px;font-weight:700">&#128200; Evolução — '+empLabel+'</h2>'
+    +'<div id="evo-emp"></div>'
+    +'<div id="evo-avancado"></div>'
+    +'<div id="evo-rankings"></div>'
+    +'<div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:24px 0 12px;padding-bottom:8px;border-bottom:1px solid var(--border)">'
+      +'<span style="font-size:13px;font-weight:700;color:var(--text)">&#128100; Evolução por cliente</span>'
+      +'<select onchange="setEvoCliente(this.value)" style="font:500 12.5px var(--font);padding:6px 10px;border:1px solid var(--border);border-radius:8px;background:var(--card);color:var(--text);max-width:340px">'+opts+'</select>'
+    +'</div>'
+    +'<div id="evo-cliente-chart"></div>';
+
+  renderEvoGeral();
+  renderEvoAvancado();
+  renderEvoRankings();
+  renderEvoCliente();
+}
+
+// ── Evolução geral da empresa (KPIs + gráficos mensais/anuais) ────────────
 function renderEvoGeral(){
   const empLabel = comp==='ibrac'?'Ibrac Condimentos':'VH Devro';
   const clr      = comp==='ibrac'?'#0F6E56':'#185FA5';
@@ -1642,7 +1963,7 @@ function renderEvoGeral(){
   });
 
   if(!Object.keys(moStats).length){
-    document.getElementById('evo-geral-body').innerHTML='<p style="padding:20px;color:var(--subtle)">Sem dados para '+empLabel+'.</p>';
+    document.getElementById('evo-emp').innerHTML='<p style="padding:20px;color:var(--subtle)">Sem dados para '+empLabel+'.</p>';
     return;
   }
 
@@ -1758,7 +2079,7 @@ function renderEvoGeral(){
       +svgBar(anoLabels.map(String),anoCls,v=>v?v+'':'',clr,'g-cls-ano')
     +'</div>';
 
-  document.getElementById('evo-geral-body').innerHTML=html;
+  document.getElementById('evo-emp').innerHTML=html;
 }
 
 // ── Init ─────────────────────────────────────────────────────────────────
@@ -1771,7 +2092,7 @@ buildMonthBtns();
     <div class="footer-block"><h4>Navegacao</h4><p>Alterne entre <b>Ibrac</b> e <b>VH Devro</b> no topo. Selecione o <b>Ano</b> e clique no <b>Mes</b> desejado.</p></div>
     <div class="footer-block"><h4>Filtros</h4><p><b>Todos</b> — ordena: com pedido, com orcamento no mes, com contato, sem pedido.<br><b>Sem pedido</b> — clientes sem contato recente aparecem primeiro.<br><b>Com divida</b> — mostra apenas clientes sinalizados com divida em aberto.</p></div>
     <div class="footer-block"><h4>Abas do cliente</h4><p><b>Mes atual</b> — pedidos com todos os produtos.<br><b>Historico</b> — por ano e mes, expansivel.<br><b>Analise</b> — produtos parados com m\u00e9dia hist\u00f3rica. Cinza = n\u00e3o pediu esse m\u00eas. Laranja = 2+ meses. Vermelho = 4+ meses.<br><b>Contato</b> — registre quando contatou o cliente.<br><b>Divida</b> — sinalize clientes com divida em aberto (pedidos bloqueados); o card fica destacado em vermelho.</p></div>
-    <div class="footer-block"><h4>Sinalizacoes</h4><p><span class="crit-badge crit-r" style="display:inline">&#9888; Cr\u00edtico</span> produto(s) de peso parado(s) ha 4+ meses, vale retomar contato.<br><span class="crit-badge crit-a" style="display:inline">&#9888; Aten\u00e7\u00e3o</span> produto(s) frequente(s) parado(s) ha 2+ meses.<br>Badge verde: pediu. Laranja: cotacao pendente. Vermelho: sem pedido.</p></div>
+    <div class="footer-block"><h4>Sinalizacoes</h4><p><span class="crit-badge crit-r" style="display:inline">&#9888; Cr&iacute;tico</span> produto(s) de peso parado(s) ha 4+ meses, vale retomar contato.<br><span class="crit-badge crit-a" style="display:inline">&#9888; Aten&ccedil;&atilde;o</span> produto(s) frequente(s) parado(s) ha 2+ meses.<br>Badge verde: pediu. Laranja: cotacao pendente. Vermelho: sem pedido.</p></div>
     <div class="footer-block"><h4>Comissao</h4><p><b>Ibrac</b>: 10% do valor total.<br><b>VH Devro</b>: taxa por produto (2%, 5% ou 7%).</p></div>
     <div class="footer-block"><h4>Dados</h4><p><b>Ibrac</b>: PDFs Jan/22 a Jun/26.<br><b>VH Devro</b>: XLSM Jan/25 a Jun/26 + cotacoes Gujao e Avigran.<br>Periodo de referencia: Jun/26.</p></div>
   </div>
@@ -1809,16 +2130,7 @@ buildMonthBtns();
     </div>
   </div>
 </div>
-<!-- ── Evolução Geral Modal ────────────────────────────────────────────── -->
-<div id="evo-geral-modal" style="display:none;position:fixed;inset:0;z-index:9000;background:var(--bg);overflow-y:auto">
-  <div style="display:flex;align-items:center;justify-content:space-between;padding:12px 18px;border-bottom:1px solid var(--border);position:sticky;top:0;background:var(--bg);z-index:10">
-    <h2 id="evo-geral-title" style="margin:0;font-size:18px;font-weight:700">&#128200; Evolução Geral da Carteira</h2>
-    <button onclick="closeEvoGeral()" style="background:none;border:1px solid var(--border);border-radius:8px;padding:5px 14px;cursor:pointer;font-size:13px;font-family:var(--font)">✕ Fechar</button>
-  </div>
-  <div id="evo-geral-body" style="padding:20px;max-width:1100px;margin:0 auto">
-    <div style="padding:20px;color:var(--subtle);font-size:13px">Carregando...</div>
-  </div>
-</div>
+<!-- ── Evolução Geral migrada para a aba 📈 Evolução ───────────────────── -->
 
 <script>
 /* ===== ABA ANALISES: positivacao + curva ABC + painel de acao ===== */
@@ -1878,17 +2190,21 @@ function _comXLSX(cb){
 function trocarAbaSemRender(aba){
   document.getElementById('tab-pedidos').style.display  = aba === 'pedidos'  ? '' : 'none';
   document.getElementById('tab-analises').style.display = aba === 'analises' ? 'block' : 'none';
+  document.getElementById('tab-evolucao').style.display = aba === 'evolucao' ? 'block' : 'none';
   document.getElementById('tab-tarefas').style.display  = aba === 'tarefas' ? 'block' : 'none';
 }
 function trocarAba(aba){
   if (aba === 'analises') esconderBotaoVoltar();
   document.getElementById('tab-pedidos').style.display  = aba === 'pedidos'  ? '' : 'none';
   document.getElementById('tab-analises').style.display = aba === 'analises' ? 'block' : 'none';
+  document.getElementById('tab-evolucao').style.display = aba === 'evolucao' ? 'block' : 'none';
   document.getElementById('tab-tarefas').style.display  = aba === 'tarefas' ? 'block' : 'none';
   document.getElementById('btn-tab-pedidos').classList.toggle('ativa', aba === 'pedidos');
   document.getElementById('btn-tab-analises').classList.toggle('ativa', aba === 'analises');
+  document.getElementById('btn-tab-evolucao').classList.toggle('ativa', aba === 'evolucao');
   document.getElementById('btn-tab-tarefas').classList.toggle('ativa', aba === 'tarefas');
   if (aba === 'analises') renderAnalises();
+  if (aba === 'evolucao') renderEvolucaoPage();
   if (aba === 'tarefas') renderTarefas();
 }
 
