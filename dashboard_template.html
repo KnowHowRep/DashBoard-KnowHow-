@@ -305,6 +305,76 @@ table.cart-tabela{width:100%;border-collapse:collapse;font-size:13px}
 .logo-vh-chip{background:#000;border-radius:8px;padding:5px 10px;display:none;align-items:center;vertical-align:middle;margin-right:2px}
 .logo-vh-chip.ativo{display:inline-flex}
 .logo-vh-chip img{height:22px;width:auto;display:block}
+
+/* ===== ABA AMOSTRAS — prospeccao de amostras e contratipagens ===== */
+#tab-amostras{display:none}
+.am-topo{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:14px}
+.am-busca{flex:1;min-width:190px;padding:10px 14px;border:1px solid var(--border);border-radius:10px;font:13px var(--font);background:var(--surface);color:var(--text);outline:none}
+.am-busca:focus{border-color:#888}
+.am-btn{padding:10px 18px;border:none;border-radius:10px;background:var(--cor-primaria,var(--ibrac));color:#fff;font:600 13px var(--font);cursor:pointer;white-space:nowrap}
+.am-btn:hover{filter:brightness(1.08)}
+.am-btn-sec{padding:9px 14px;border:1px solid var(--border);border-radius:10px;background:transparent;color:var(--muted);font:12px var(--font);cursor:pointer;white-space:nowrap}
+.am-btn-sec:hover{background:var(--bg)}
+.am-btn-sec.on{background:var(--text);color:#fff;border-color:var(--text)}
+
+.am-kpis{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:16px}
+.am-kpi{flex:1;min-width:132px;padding:13px 15px;border-radius:var(--radius);background:var(--surface);border:1px solid var(--border);border-left:5px solid var(--subtle)}
+.am-kpi .num{font-size:24px;font-weight:600;font-family:var(--mono)}
+.am-kpi .rotulo{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;margin-top:2px}
+.am-kpi .dica{font-size:10.5px;color:var(--subtle);margin-top:3px}
+.am-kpi.k-andamento{border-left-color:var(--vh)}
+.am-kpi.k-cobrar{border-left-color:var(--err)}
+.am-kpi.k-ganhas{border-left-color:var(--ok)}
+.am-kpi.k-conv{border-left-color:var(--cor-primaria,var(--ibrac))}
+
+.am-funil{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:16px}
+.am-etapa{display:flex;align-items:center;gap:7px;padding:7px 13px;border-radius:24px;border:1px solid var(--border);background:var(--surface);cursor:pointer;font:12px var(--font);color:var(--muted);transition:.12s;user-select:none}
+.am-etapa:hover{background:var(--bg)}
+.am-etapa.on{border-width:2px;font-weight:700;color:var(--text)}
+.am-etapa .pt{width:9px;height:9px;border-radius:50%;flex-shrink:0}
+.am-etapa .qt{font-family:var(--mono);font-weight:700}
+
+.am-card{background:var(--surface);border:1px solid var(--border);border-left:5px solid var(--subtle);border-radius:var(--radius);padding:13px 15px;margin-bottom:9px}
+.am-card.alerta{border-left-color:var(--warn);background:var(--warn-bg)}
+.am-card.critico{border-left-color:var(--err);background:var(--err-bg)}
+.am-card.fechada{opacity:.75}
+.am-l1{display:flex;align-items:flex-start;gap:9px;flex-wrap:wrap}
+.am-cliente{font-size:14.5px;font-weight:600;flex:1;min-width:140px;line-height:1.3}
+.am-chip{font-size:10px;font-weight:700;padding:2px 8px;border-radius:10px;white-space:nowrap}
+.am-chip.e-ibrac{background:var(--ibrac-bg);color:var(--ibrac-t)}
+.am-chip.e-vh{background:var(--vh-bg);color:var(--vh-t)}
+.am-chip.t-contra{background:#EDE4F7;color:#5B3A8C}
+.am-chip.t-amostra{background:var(--bg);color:var(--muted);border:1px solid var(--border)}
+.am-produto{font-size:13px;color:var(--muted);margin-top:5px}
+.am-produto b{color:var(--text);font-weight:600}
+.am-meta{font-size:11.5px;color:var(--muted);margin-top:7px;display:flex;gap:14px;flex-wrap:wrap}
+.am-meta .aviso{color:var(--err);font-weight:700}
+.am-meta .atencao{color:var(--warn);font-weight:600}
+.am-obs{font-size:12.5px;color:var(--muted);margin-top:8px;padding-left:10px;border-left:2px solid var(--border);white-space:pre-wrap}
+.am-sel{padding:6px 10px;border:1px solid var(--border);border-radius:20px;font:600 11.5px var(--font);background:var(--surface);color:var(--text);cursor:pointer;outline:none;max-width:150px}
+.am-acoes{display:flex;gap:4px;margin-top:9px}
+.am-ac{border:none;background:none;color:var(--subtle);cursor:pointer;font:11.5px var(--font);padding:3px 8px;border-radius:6px}
+.am-ac:hover{background:rgba(0,0,0,.06);color:var(--text)}
+.am-ac.del:hover{color:var(--err)}
+.am-vazio{text-align:center;color:var(--subtle);padding:34px;font-size:13px;background:var(--surface);border:1px dashed var(--border);border-radius:var(--radius)}
+
+.am-kanban{display:flex;gap:10px;overflow-x:auto;padding-bottom:10px}
+.am-col{flex:0 0 252px;background:var(--bg);border:1px solid var(--border);border-radius:var(--radius);padding:10px}
+.am-col h4{font-size:11.5px;text-transform:uppercase;letter-spacing:.05em;margin-bottom:9px;display:flex;align-items:center;gap:6px;color:var(--muted);font-weight:700}
+.am-col h4 .qt{margin-left:auto;font-family:var(--mono);color:var(--text)}
+.am-col .am-card{padding:10px 12px;margin-bottom:7px}
+.am-col .am-cliente{font-size:12.5px;min-width:0}
+.am-col-vazia{font-size:11.5px;color:var(--subtle);text-align:center;padding:14px 0}
+
+.mf select{width:100%;padding:8px 10px;border:1px solid var(--border);border-radius:10px;font:13px var(--font);background:var(--surface);color:var(--text);outline:none}
+.mf-linha{display:flex;gap:10px}
+.mf-linha .mf{flex:1;min-width:0}
+
+@media(max-width:640px){
+  .am-kpi{min-width:calc(50% - 5px)}
+  .am-col{flex:0 0 82vw}
+  .am-sel{max-width:120px}
+}
 </style>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css"/>
 </head>
@@ -347,6 +417,7 @@ table.cart-tabela{width:100%;border-collapse:collapse;font-size:13px}
   <button id="btn-tab-analises" onclick="trocarAba('analises')">Análises <span class="badge-acoes" id="badge-acoes" style="display:none">0</span></button>
   <button id="btn-tab-evolucao" onclick="trocarAba('evolucao')">&#128200; Evolução</button>
   <button id="btn-tab-tarefas" onclick="trocarAba('tarefas')">Tarefas <span class="badge-acoes" id="badge-tarefas" style="display:none">0</span></button>
+  <button id="btn-tab-amostras" onclick="trocarAba('amostras')">&#129514; Amostras <span class="badge-acoes" id="badge-amostras" style="display:none">0</span></button>
 </nav>
 
 <div id="tab-pedidos">
@@ -455,6 +526,48 @@ table.cart-tabela{width:100%;border-collapse:collapse;font-size:13px}
   </details>
 </section>
 
+<!-- ABA AMOSTRAS -->
+<section id="tab-amostras">
+  <details class="det-oculto" id="det-guia-amostras" style="margin:0 0 14px">
+    <summary>&#128300; Como usar esta aba</summary>
+    <div class="det-body guia-body">
+      <p><b>A ideia:</b> nenhuma amostra enviada pode ser esquecida. Cada amostra vira um card que caminha pelo funil at&eacute; virar pedido &#8212; ou at&eacute; voc&ecirc; saber por que n&atilde;o virou.</p>
+      <p><b>Status:</b> mude direto no seletor do card. Toda mudan&ccedil;a zera o cron&ocirc;metro de "parada h&aacute;", ent&atilde;o o card sempre mostra h&aacute; quanto tempo aquilo n&atilde;o anda.</p>
+      <p><b>Cobran&ccedil;a autom&aacute;tica:</b> cada etapa tem um prazo razo&aacute;vel de espera. Passou do prazo, o card fica <span style="color:var(--warn);font-weight:600">amarelo</span>; passou do dobro, fica <span style="color:var(--err);font-weight:700">vermelho</span>. O KPI "Cobrar retorno" conta esses.</p>
+      <p><b>Contratipagem:</b> marque o tipo no cadastro para separar amostra de cat&aacute;logo de projeto de c&oacute;pia de produto do concorrente.</p>
+      <p><b>Onde fica salvo:</b> no navegador deste aparelho. O <b>Atualizar Dashboard</b> n&atilde;o apaga nada. Para levar para outro aparelho, use <b>Exportar</b> e depois <b>Importar</b> l&aacute;.</p>
+    </div>
+  </details>
+
+  <div class="am-topo">
+    <input class="am-busca" id="am-busca" placeholder="&#128269; Buscar cliente, produto ou observa&ccedil;&atilde;o..." oninput="renderAmostras()">
+    <select class="am-btn-sec" id="am-emp-filtro" onchange="renderAmostras()" title="Filtrar por empresa">
+      <option value="">Ibrac + VH</option>
+      <option value="ibrac">S&oacute; Ibrac</option>
+      <option value="vh">S&oacute; VH Devro</option>
+    </select>
+    <button class="am-btn-sec on" id="am-v-lista" onclick="setAmostrasView('lista')">&#9776; Lista</button>
+    <button class="am-btn-sec" id="am-v-funil" onclick="setAmostrasView('funil')">&#9638; Funil</button>
+    <button class="am-btn" onclick="abrirAmostra()">+ Nova amostra</button>
+  </div>
+
+  <div class="am-kpis" id="am-kpis"></div>
+  <div class="am-funil" id="am-funil"></div>
+  <div id="am-conteudo"></div>
+
+  <details class="det-oculto" id="det-am-fechadas" style="margin-top:14px">
+    <summary>Finalizadas <span class="det-count" id="cnt-am-fechadas">0</span></summary>
+    <div class="det-body" id="am-fechadas-lista"></div>
+  </details>
+
+  <div style="margin-top:14px;display:flex;gap:8px;flex-wrap:wrap">
+    <button class="am-btn-sec" onclick="exportAmostras()" title="Salva um arquivo de backup com todas as amostras">&#8595; Exportar amostras</button>
+    <button class="am-btn-sec" onclick="document.getElementById('am-import').click()" title="Carrega um backup exportado de outro aparelho">&#8593; Importar backup</button>
+    <input type="file" id="am-import" accept=".json,application/json" style="display:none" onchange="importAmostras(this)">
+  </div>
+</section>
+
+
 
 </div>
 
@@ -485,6 +598,53 @@ table.cart-tabela{width:100%;border-collapse:collapse;font-size:13px}
       <button class="mbtn-cancel" onclick="closeDv()">Cancelar</button>
       <button class="mbtn-clear" onclick="clearDv()">Limpar</button>
       <button class="mbtn-save" onclick="saveDv()">Salvar</button>
+    </div>
+  </div>
+</div>
+
+<!-- AMOSTRA MODAL -->
+<div class="modal-bg" id="am-modal" onclick="if(event.target===this)fecharAmostra()">
+  <div class="modal" style="width:430px">
+    <h3 id="am-modal-titulo">Nova amostra</h3>
+    <div class="msub">Prospec&ccedil;&atilde;o de amostras e contratipagens</div>
+    <div class="mf">
+      <label>Cliente / prospect</label>
+      <input type="text" id="am-f-cliente" list="am-clientes-lista" placeholder="Ex: MASTER BOI" autocomplete="off">
+      <datalist id="am-clientes-lista"></datalist>
+    </div>
+    <div class="mf">
+      <label>Produto / refer&ecirc;ncia</label>
+      <input type="text" id="am-f-produto" placeholder="Ex: Condimento para calabresa">
+    </div>
+    <div class="mf-linha">
+      <div class="mf"><label>Empresa</label>
+        <select id="am-f-empresa">
+          <option value="ibrac">Ibrac Condimentos</option>
+          <option value="vh">VH Devro</option>
+        </select>
+      </div>
+      <div class="mf"><label>Tipo</label>
+        <select id="am-f-tipo">
+          <option value="amostra">Amostra</option>
+          <option value="contratipagem">Contratipagem</option>
+        </select>
+      </div>
+    </div>
+    <div class="mf-linha">
+      <div class="mf"><label>Status</label><select id="am-f-status"></select></div>
+      <div class="mf"><label>Qtd / peso</label><input type="text" id="am-f-qtd" placeholder="Ex: 2 kg"></div>
+    </div>
+    <div class="mf-linha">
+      <div class="mf"><label>Solicitada em</label><input type="date" id="am-f-data"></div>
+      <div class="mf"><label>Retorno previsto</label><input type="date" id="am-f-prazo"></div>
+    </div>
+    <div class="mf">
+      <label>Observa&ccedil;&atilde;o</label>
+      <textarea id="am-f-obs" rows="3" placeholder="Ex: contratipar tempero do concorrente; falar com o Jo&atilde;o do PCP..."></textarea>
+    </div>
+    <div class="mbtns">
+      <button class="mbtn-cancel" onclick="fecharAmostra()">Cancelar</button>
+      <button class="mbtn-save" onclick="salvarAmostra()">Salvar</button>
     </div>
   </div>
 </div>
@@ -526,6 +686,7 @@ function setComp(c){
   atualizarLogoEmpresa(c);
   buildMonthBtns();
   if (typeof renderAnalises === 'function') renderAnalises();
+  if (typeof renderAmostras === 'function') renderAmostras();
   const _tabEvo = document.getElementById('tab-evolucao');
   if (_tabEvo && _tabEvo.style.display !== 'none' && typeof renderEvolucaoPage === 'function') renderEvolucaoPage();
 }
@@ -2190,6 +2351,7 @@ function trocarAbaSemRender(aba){
   document.getElementById('tab-analises').style.display = aba === 'analises' ? 'block' : 'none';
   document.getElementById('tab-evolucao').style.display = aba === 'evolucao' ? 'block' : 'none';
   document.getElementById('tab-tarefas').style.display  = aba === 'tarefas' ? 'block' : 'none';
+  document.getElementById('tab-amostras').style.display = aba === 'amostras' ? 'block' : 'none';
 }
 function trocarAba(aba){
   if (aba === 'analises') esconderBotaoVoltar();
@@ -2197,13 +2359,16 @@ function trocarAba(aba){
   document.getElementById('tab-analises').style.display = aba === 'analises' ? 'block' : 'none';
   document.getElementById('tab-evolucao').style.display = aba === 'evolucao' ? 'block' : 'none';
   document.getElementById('tab-tarefas').style.display  = aba === 'tarefas' ? 'block' : 'none';
+  document.getElementById('tab-amostras').style.display = aba === 'amostras' ? 'block' : 'none';
   document.getElementById('btn-tab-pedidos').classList.toggle('ativa', aba === 'pedidos');
   document.getElementById('btn-tab-analises').classList.toggle('ativa', aba === 'analises');
   document.getElementById('btn-tab-evolucao').classList.toggle('ativa', aba === 'evolucao');
   document.getElementById('btn-tab-tarefas').classList.toggle('ativa', aba === 'tarefas');
+  document.getElementById('btn-tab-amostras').classList.toggle('ativa', aba === 'amostras');
   if (aba === 'analises') renderAnalises();
   if (aba === 'evolucao') renderEvolucaoPage();
   if (aba === 'tarefas') renderTarefas();
+  if (aba === 'amostras') renderAmostras();
 }
 
 function _followupsVencidos(cart){
@@ -2507,6 +2672,370 @@ function renderTarefas(){
 }
 
 document.addEventListener('DOMContentLoaded', renderTarefas);
+
+// ══════════════════════════════════════════════════════════════════════
+// ABA AMOSTRAS — prospeccao de amostras e contratipagens
+// Guardada so no navegador (localStorage). O "Atualizar Dashboard"
+// regenera Pedidos/Analises e NAO apaga nada daqui.
+// Backup/troca de aparelho: botoes Exportar / Importar no fim da aba.
+// ══════════════════════════════════════════════════════════════════════
+const AM_KEY = 'dash_amostras_v1';
+
+// espera = dias razoaveis naquela etapa antes de cobrar retorno
+const AM_ETAPAS = [
+  {k:'solicitada', l:'Solicitada',    c:'#8B7355', ico:'\uD83D\uDCDD', aberta:true,  espera:5},
+  {k:'producao',   l:'Em produ\u00e7\u00e3o', c:'#B07D2B', ico:'\uD83C\uDFED', aberta:true,  espera:10},
+  {k:'enviada',    l:'Enviada',       c:'#185FA5', ico:'\uD83D\uDE9A', aberta:true,  espera:7},
+  {k:'teste',      l:'Em teste',      c:'#6B4E9E', ico:'\uD83E\uDDEA', aberta:true,  espera:15},
+  {k:'aprovada',   l:'Aprovada',      c:'#3B6D11', ico:'\uD83D\uDC4D', aberta:true,  espera:10},
+  {k:'pedido',     l:'Virou pedido',  c:'#0F6E56', ico:'\uD83C\uDFAF', aberta:false, espera:0},
+  {k:'reprovada',  l:'Reprovada',     c:'#A32D2D', ico:'\u2716',       aberta:false, espera:0},
+  {k:'standby',    l:'Sem retorno',   c:'#8A8A8A', ico:'\u23F8',       aberta:false, espera:0}
+];
+const AM_ETAPA = {};
+AM_ETAPAS.forEach(e => { AM_ETAPA[e.k] = e; });
+
+let amFiltro = '';        // status selecionado no funil ('' = todas em aberto)
+let amView   = 'lista';   // 'lista' | 'funil'
+let amEdit   = null;      // id em edicao no modal
+
+function getAmostras(){
+  try{ const v = JSON.parse(localStorage.getItem(AM_KEY) || '[]'); return Array.isArray(v) ? v : []; }
+  catch(e){ return []; }
+}
+function saveAmostras(lista){
+  try{ localStorage.setItem(AM_KEY, JSON.stringify(lista)); }catch(e){}
+}
+function _amEsc(s){ return escTxt(String(s == null ? '' : s)); }
+function _amDias(iso){
+  if (!iso) return 0;
+  const p = String(iso).split('-');
+  if (p.length !== 3) return 0;
+  const d = new Date(Number(p[0]), Number(p[1]) - 1, Number(p[2]));
+  const h = new Date(); h.setHours(0,0,0,0);
+  return Math.max(0, Math.round((h - d) / 86400000));
+}
+function _amFmtData(iso){
+  if (!iso) return '';
+  const p = String(iso).split('-');
+  return p.length === 3 ? p[2] + '/' + p[1] + '/' + p[0] : String(iso);
+}
+// '' | 'alerta' | 'critico' — so vale para etapas em aberto
+function _amAlerta(a){
+  const e = AM_ETAPA[a.status];
+  if (!e || !e.aberta) return '';
+  const dias = _amDias(a.atualizadaEm || a.dataSolicitacao);
+  if (dias > e.espera * 2) return 'critico';
+  if (dias > e.espera)     return 'alerta';
+  return '';
+}
+
+// ── Modal: cadastro / edicao ───────────────────────────────────────────
+function _amPreencherSelects(){
+  const sel = document.getElementById('am-f-status');
+  if (sel && !sel.options.length){
+    sel.innerHTML = AM_ETAPAS.map(e =>
+      '<option value="' + e.k + '">' + e.ico + '  ' + e.l + '</option>').join('');
+  }
+  const dl = document.getElementById('am-clientes-lista');
+  if (dl && !dl.children.length){
+    const nomes = new Set();
+    try{
+      ['ibrac','vh'].forEach(emp => Object.keys((typeof DATA !== 'undefined' && DATA[emp]) || {})
+        .forEach(c => nomes.add(c)));
+    }catch(e){}
+    dl.innerHTML = Array.from(nomes).sort()
+      .map(n => '<option value="' + _amEsc(n) + '"></option>').join('');
+  }
+}
+
+function abrirAmostra(id){
+  _amPreencherSelects();
+  amEdit = id || null;
+  const a = id ? getAmostras().find(x => x.id === id) : null;
+  document.getElementById('am-modal-titulo').textContent = a ? 'Editar amostra' : 'Nova amostra';
+  document.getElementById('am-f-cliente').value = a ? (a.cliente || '') : '';
+  document.getElementById('am-f-produto').value = a ? (a.produto || '') : '';
+  document.getElementById('am-f-empresa').value = a ? (a.empresa || 'ibrac') : (typeof comp !== 'undefined' ? comp : 'ibrac');
+  document.getElementById('am-f-tipo').value    = a ? (a.tipo || 'amostra') : 'amostra';
+  document.getElementById('am-f-status').value  = a ? (a.status || 'solicitada') : 'solicitada';
+  document.getElementById('am-f-qtd').value     = a ? (a.qtd || '') : '';
+  document.getElementById('am-f-data').value    = a ? (a.dataSolicitacao || '') : _hojeISO();
+  document.getElementById('am-f-prazo').value   = a ? (a.prazo || '') : '';
+  document.getElementById('am-f-obs').value     = a ? (a.obs || '') : '';
+  document.getElementById('am-modal').classList.add('open');
+  setTimeout(function(){ document.getElementById('am-f-cliente').focus(); }, 60);
+}
+function fecharAmostra(){
+  document.getElementById('am-modal').classList.remove('open');
+  amEdit = null;
+}
+function salvarAmostra(){
+  const cliente = document.getElementById('am-f-cliente').value.trim();
+  const produto = document.getElementById('am-f-produto').value.trim();
+  if (!cliente){ document.getElementById('am-f-cliente').focus(); return; }
+  const campos = {
+    cliente: cliente,
+    produto: produto,
+    empresa: document.getElementById('am-f-empresa').value,
+    tipo:    document.getElementById('am-f-tipo').value,
+    status:  document.getElementById('am-f-status').value,
+    qtd:     document.getElementById('am-f-qtd').value.trim(),
+    dataSolicitacao: document.getElementById('am-f-data').value || _hojeISO(),
+    prazo:   document.getElementById('am-f-prazo').value || '',
+    obs:     document.getElementById('am-f-obs').value.trim()
+  };
+  const lista = getAmostras();
+  if (amEdit){
+    const a = lista.find(x => x.id === amEdit);
+    if (a){
+      const mudouStatus = a.status !== campos.status;
+      if (mudouStatus){
+        a.historico = a.historico || [];
+        a.historico.push({data:_hojeISO(), de:a.status, para:campos.status});
+      }
+      Object.assign(a, campos);
+      if (mudouStatus) a.atualizadaEm = _hojeISO();
+    }
+  } else {
+    lista.push(Object.assign({
+      id: 'am' + Date.now() + Math.floor(Math.random() * 1000),
+      criadaEm: _hojeISO(),
+      atualizadaEm: _hojeISO(),
+      historico: []
+    }, campos));
+  }
+  saveAmostras(lista);
+  fecharAmostra();
+  renderAmostras();
+}
+function mudarStatusAmostra(id, novo){
+  const lista = getAmostras();
+  const a = lista.find(x => x.id === id);
+  if (!a || a.status === novo) return;
+  a.historico = a.historico || [];
+  a.historico.push({data:_hojeISO(), de:a.status, para:novo});
+  a.status = novo;
+  a.atualizadaEm = _hojeISO();
+  saveAmostras(lista);
+  renderAmostras();
+}
+function cutucarAmostra(id){
+  // Registra que voce cobrou hoje: zera o cronometro sem mudar a etapa
+  const lista = getAmostras();
+  const a = lista.find(x => x.id === id);
+  if (!a) return;
+  a.atualizadaEm = _hojeISO();
+  a.historico = a.historico || [];
+  a.historico.push({data:_hojeISO(), de:a.status, para:a.status, nota:'cobranca registrada'});
+  saveAmostras(lista);
+  renderAmostras();
+}
+function excluirAmostra(id){
+  const a = getAmostras().find(x => x.id === id);
+  const nome = a ? (a.cliente + (a.produto ? ' \u2014 ' + a.produto : '')) : 'esta amostra';
+  if (!confirm('Excluir ' + nome + ' ?')) return;
+  saveAmostras(getAmostras().filter(x => x.id !== id));
+  renderAmostras();
+}
+
+// ── Backup ─────────────────────────────────────────────────────────────
+function exportAmostras(){
+  const blob = new Blob([JSON.stringify(getAmostras(), null, 2)], {type:'application/json'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'amostras.json';
+  a.click();
+  setTimeout(function(){ URL.revokeObjectURL(a.href); }, 1000);
+}
+function importAmostras(input){
+  const f = input.files && input.files[0];
+  if (!f) return;
+  const r = new FileReader();
+  r.onload = function(){
+    try{
+      const novas = JSON.parse(r.result);
+      if (!Array.isArray(novas)) throw new Error('formato');
+      const atuais = getAmostras();
+      const ids = new Set(atuais.map(x => x.id));
+      let add = 0;
+      novas.forEach(function(n){
+        if (n && n.id && !ids.has(n.id)){ atuais.push(n); add++; }
+      });
+      saveAmostras(atuais);
+      renderAmostras();
+      alert(add + ' amostra(s) importada(s). ' + (novas.length - add) + ' j\u00e1 existiam.');
+    }catch(e){
+      alert('Arquivo inv\u00e1lido. Use um amostras.json exportado pelo pr\u00f3prio dashboard.');
+    }
+  };
+  r.readAsText(f);
+  input.value = '';
+}
+
+// ── Filtros e visualizacao ─────────────────────────────────────────────
+function filtrarAmostras(k){
+  amFiltro = (amFiltro === k) ? '' : k;
+  renderAmostras();
+}
+function setAmostrasView(v){
+  amView = v;
+  document.getElementById('am-v-lista').classList.toggle('on', v === 'lista');
+  document.getElementById('am-v-funil').classList.toggle('on', v === 'funil');
+  renderAmostras();
+}
+function _amFiltradas(){
+  const q = (document.getElementById('am-busca').value || '').trim().toLowerCase();
+  const emp = document.getElementById('am-emp-filtro').value;
+  return getAmostras().filter(function(a){
+    if (emp && a.empresa !== emp) return false;
+    if (!q) return true;
+    return ((a.cliente||'') + ' ' + (a.produto||'') + ' ' + (a.obs||'')).toLowerCase().indexOf(q) >= 0;
+  });
+}
+function _amOrdenar(lista){
+  const peso = {critico:2, alerta:1, '':0};
+  return lista.slice().sort(function(x, y){
+    const dx = peso[_amAlerta(x)], dy = peso[_amAlerta(y)];
+    if (dx !== dy) return dy - dx;
+    return _amDias(y.atualizadaEm || y.dataSolicitacao) - _amDias(x.atualizadaEm || x.dataSolicitacao);
+  });
+}
+
+// ── Cards ──────────────────────────────────────────────────────────────
+function _amCardHtml(a, compacto){
+  const e = AM_ETAPA[a.status] || AM_ETAPAS[0];
+  const al = _amAlerta(a);
+  const dias = _amDias(a.atualizadaEm || a.dataSolicitacao);
+  const cls = ['am-card'];
+  if (al) cls.push(al);
+  if (!e.aberta) cls.push('fechada');
+
+  const sel = '<select class="am-sel" title="Mudar etapa" onchange="mudarStatusAmostra(\'' + a.id + '\',this.value)">' +
+    AM_ETAPAS.map(function(x){
+      return '<option value="' + x.k + '"' + (x.k === a.status ? ' selected' : '') + '>' + x.ico + '  ' + x.l + '</option>';
+    }).join('') + '</select>';
+
+  const chipEmp = '<span class="am-chip e-' + (a.empresa === 'vh' ? 'vh' : 'ibrac') + '">' +
+    (a.empresa === 'vh' ? 'VH Devro' : 'Ibrac') + '</span>';
+  const chipTipo = a.tipo === 'contratipagem'
+    ? '<span class="am-chip t-contra">Contratipagem</span>'
+    : '<span class="am-chip t-amostra">Amostra</span>';
+
+  let meta = '';
+  if (e.aberta){
+    const txt = dias === 0 ? 'movimentada hoje' : 'parada h\u00e1 ' + dias + (dias === 1 ? ' dia' : ' dias');
+    const c = al === 'critico' ? 'aviso' : al === 'alerta' ? 'atencao' : '';
+    meta += '<span class="' + c + '">\u23F1 ' + txt + (al ? ' \u2014 cobrar retorno' : '') + '</span>';
+  } else if (a.atualizadaEm){
+    meta += '<span>\u2713 finalizada em ' + _amFmtData(a.atualizadaEm) + '</span>';
+  }
+  if (a.dataSolicitacao) meta += '<span>solicitada em ' + _amFmtData(a.dataSolicitacao) + '</span>';
+  if (a.prazo && e.aberta){
+    const atrasado = a.prazo < _hojeISO();
+    meta += '<span class="' + (atrasado ? 'aviso' : '') + '">\uD83D\uDCC5 retorno previsto ' + _amFmtData(a.prazo) + '</span>';
+  }
+
+  const acoes = compacto ? '' :
+    '<div class="am-acoes">' +
+      (e.aberta ? '<button class="am-ac" onclick="cutucarAmostra(\'' + a.id + '\')" title="Registra que voce cobrou hoje e zera o contador">\u21BB Cobrei hoje</button>' : '') +
+      '<button class="am-ac" onclick="abrirAmostra(\'' + a.id + '\')">\u270E Editar</button>' +
+      '<button class="am-ac del" onclick="excluirAmostra(\'' + a.id + '\')">\u2715 Excluir</button>' +
+    '</div>';
+
+  return '<div class="' + cls.join(' ') + '">' +
+    '<div class="am-l1">' +
+      '<div class="am-cliente">' + _amEsc(a.cliente) + '</div>' +
+      (compacto ? '' : sel) +
+    '</div>' +
+    '<div style="display:flex;gap:5px;flex-wrap:wrap;margin-top:6px">' + chipEmp + chipTipo + '</div>' +
+    (a.produto ? '<div class="am-produto"><b>' + _amEsc(a.produto) + '</b>' + (a.qtd ? ' \u00b7 ' + _amEsc(a.qtd) : '') + '</div>' : '') +
+    (meta ? '<div class="am-meta">' + meta + '</div>' : '') +
+    (a.obs ? '<div class="am-obs">' + _amEsc(a.obs) + '</div>' : '') +
+    (compacto ? '<div style="margin-top:8px">' + sel + '</div>' : '') +
+    acoes +
+  '</div>';
+}
+
+// ── Render ─────────────────────────────────────────────────────────────
+function renderAmostras(){
+  const cor = (typeof comp !== 'undefined' && comp === 'vh') ? 'var(--vh)' : 'var(--ibrac)';
+  const sec = document.getElementById('tab-amostras');
+  if (sec) sec.style.setProperty('--cor-primaria', cor);
+
+  const todas = _amFiltradas();
+  const abertas  = todas.filter(function(a){ const e = AM_ETAPA[a.status]; return e && e.aberta; });
+  const fechadas = todas.filter(function(a){ const e = AM_ETAPA[a.status]; return !e || !e.aberta; });
+  const cobrar   = abertas.filter(function(a){ return _amAlerta(a) !== ''; });
+  const ganhas   = todas.filter(function(a){ return a.status === 'pedido'; });
+  const decididas = todas.filter(function(a){ return a.status === 'pedido' || a.status === 'reprovada' || a.status === 'standby'; });
+  const taxa = decididas.length ? Math.round(ganhas.length * 100 / decididas.length) : 0;
+
+  document.getElementById('am-kpis').innerHTML =
+    '<div class="am-kpi k-andamento"><div class="num">' + abertas.length + '</div>' +
+      '<div class="rotulo">Em andamento</div><div class="dica">amostras vivas no funil</div></div>' +
+    '<div class="am-kpi k-cobrar"><div class="num">' + cobrar.length + '</div>' +
+      '<div class="rotulo">Cobrar retorno</div><div class="dica">passou do prazo da etapa</div></div>' +
+    '<div class="am-kpi k-ganhas"><div class="num">' + ganhas.length + '</div>' +
+      '<div class="rotulo">Viraram pedido</div><div class="dica">amostra que fechou venda</div></div>' +
+    '<div class="am-kpi k-conv"><div class="num">' + taxa + '%</div>' +
+      '<div class="rotulo">Convers\u00e3o</div><div class="dica">' + ganhas.length + ' de ' + decididas.length + ' decididas</div></div>';
+
+  document.getElementById('am-funil').innerHTML = AM_ETAPAS.map(function(e){
+    const n = todas.filter(function(a){ return a.status === e.k; }).length;
+    return '<div class="am-etapa' + (amFiltro === e.k ? ' on' : '') + '" ' +
+      'style="' + (amFiltro === e.k ? 'border-color:' + e.c + ';' : '') + '" ' +
+      'onclick="filtrarAmostras(\'' + e.k + '\')" title="Clique para filtrar">' +
+      '<span class="pt" style="background:' + e.c + '"></span>' + e.l +
+      ' <span class="qt">' + n + '</span></div>';
+  }).join('');
+
+  const alvo = document.getElementById('am-conteudo');
+  const detF = document.getElementById('det-am-fechadas');
+
+  if (amView === 'funil'){
+    detF.style.display = 'none';
+    alvo.innerHTML = '<div class="am-kanban">' + AM_ETAPAS.map(function(e){
+      const its = _amOrdenar(todas.filter(function(a){ return a.status === e.k; }));
+      return '<div class="am-col">' +
+        '<h4><span class="pt" style="width:9px;height:9px;border-radius:50%;background:' + e.c + '"></span>' +
+        e.l + '<span class="qt">' + its.length + '</span></h4>' +
+        (its.length ? its.map(function(a){ return _amCardHtml(a, true); }).join('')
+                    : '<div class="am-col-vazia">vazio</div>') +
+      '</div>';
+    }).join('') + '</div>';
+    return;
+  }
+
+  detF.style.display = amFiltro ? 'none' : '';
+  const lista = _amOrdenar(amFiltro ? todas.filter(function(a){ return a.status === amFiltro; }) : abertas);
+
+  if (!getAmostras().length){
+    alvo.innerHTML = '<div class="am-vazio">Nenhuma amostra cadastrada ainda.<br>' +
+      'Clique em <b>+ Nova amostra</b> para come\u00e7ar a controlar as prospec\u00e7\u00f5es.</div>';
+  } else if (!lista.length){
+    alvo.innerHTML = '<div class="am-vazio">Nada nesta sele\u00e7\u00e3o.' +
+      (amFiltro ? ' <a href="#" onclick="filtrarAmostras(\'' + amFiltro + '\');return false" style="color:inherit">Limpar filtro</a>' : '') + '</div>';
+  } else {
+    alvo.innerHTML = lista.map(function(a){ return _amCardHtml(a, false); }).join('');
+  }
+
+  const fech = _amOrdenar(fechadas);
+  document.getElementById('cnt-am-fechadas').textContent = fech.length;
+  document.getElementById('am-fechadas-lista').innerHTML = fech.length
+    ? fech.map(function(a){ return _amCardHtml(a, false); }).join('')
+    : '<div style="color:var(--subtle);padding:8px 0;font-size:12.5px">Nenhuma amostra finalizada ainda.</div>';
+
+  const badge = document.getElementById('badge-amostras');
+  if (badge){
+    badge.textContent = abertas.length;
+    badge.style.display = abertas.length ? '' : 'none';
+    badge.style.background = cobrar.length > 0 ? 'var(--err)' : 'var(--subtle)';
+  }
+}
+
+document.addEventListener('DOMContentLoaded', renderAmostras);
+
 
 document.addEventListener('DOMContentLoaded', function(){ atualizarLogoEmpresa(comp); });
 
